@@ -1,0 +1,17 @@
+---
+layout: base.njk
+huvudtyp: kompakt
+permalink: /404.html
+noindex: true
+eleventyExcludeFromCollections: true
+eleventyComputed:
+  sidtitel: "Sidan finns inte · {{ site.namn }}"
+  sidbeskrivning: "Adressen leder inte till någon sida i katalogen."
+---
+
+<div class="passage">
+  {% include "ornament.njk" %}
+  <h1 class="passage__rubrik">SIDAN FINNS INTE</h1>
+  <p class="passage__text">Adressen leder inte till någon sida i katalogen. Kanske är den felstavad, eller så har brädan som låg här sålts och tagits bort. Varje bräda är ett unikt exemplar, så sortimentet ändras.</p>
+  <p class="smatext"><a href="/">Till katalogen</a> eller <a href="/bestallning/">beställ efter mått</a></p>
+</div>

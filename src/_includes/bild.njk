@@ -1,0 +1,34 @@
+{#-
+  Ett katalogfoto, i alla format och bredder som finns.
+
+  Ligger i en makro för att markupen annars skulle skrivas tre gånger, på
+  katalogkortet, på brädans hjältebild och på tumnaglarna, och då glöms en av
+  dem varje gång något ändras.
+
+  Webbläsaren väljer första formatet den förstår, alltså avif om den kan och
+  jpeg annars, och sedan den bredd som passar rutan.
+
+  Bredderna och måtten kommer ur filtret foto, som läser dem ur fotot självt.
+  De får inte skrivas som fasta tal här: fotona är beskurna olika och är
+  därför olika breda, och en bredd som inte finns ger en trasig bild så
+  snart webbläsaren väljer just den. Se lib/fotomatt.js.
+-#}
+{% macro bild(fil, alt, sizes, klass, ivrig) %}
+{%- set f = fil | foto -%}
+<picture class="bildyta">
+  {%- if f.avif %}
+  <source type="image/avif"
+          srcset="{{ f.avif }}"
+          sizes="{{ sizes }}">
+  {%- endif %}
+  <img class="foto{% if klass %} {{ klass }}{% endif %}"
+       src="{{ f.reserv }}"
+       {% if f.jpeg %}srcset="{{ f.jpeg }}"
+       sizes="{{ sizes }}"{% endif %}
+       {#- Måtten är originalets, vilket är det som ger rätt proportion och
+           hindrar sidan från att hoppa till när fotot dyker upp. -#}
+       {% if f.bredd %}width="{{ f.bredd }}" height="{{ f.hojd }}"{% endif %}
+       {% if ivrig %}fetchpriority="high"{% else %}loading="lazy"{% endif %} decoding="async"
+       alt="{{ alt }}">
+</picture>
+{% endmacro %}

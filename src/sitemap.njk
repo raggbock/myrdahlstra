@@ -1,0 +1,41 @@
+---
+permalink: /sitemap.xml
+eleventyExcludeFromCollections: true
+---
+{#-
+  Sidkartan räknas fram ur samma källor som sidorna själva, så den kan inte
+  hamna på efterkälken. Brädorna hämtas ur katalogfiltret, alltså samma lista
+  som startsidan visar: en bräda som fallit ur katalogen ska inte ligga kvar
+  här och locka sökmotorn till en sida ingen längre länkar till.
+
+  lastmod räknas ur källfilerna sidan byggs av, inte ur byggtiden. Sätter man
+  byggdatum på allt påstår man att hela sajten ändras varje uppladdning, och
+  då slutar sökmotorn tro på uppgiften.
+
+  Tacksidan och 404 är med flit inte med. De är märkta noindex.
+-#}
+{%- set produktkallor = ['src/brada.njk', 'src/_data/products.json'] -%}
+{%- set sidor = [
+  { adress: '/', vikt: '1.0', kallor: ['src/index.njk', 'src/_data/products.json'] },
+  { adress: '/bestallning/', vikt: '0.9', kallor: ['src/bestallning.njk', 'assets/konfigurator.js'] },
+  { adress: '/andtra/', vikt: '0.7', kallor: ['src/andtra.njk'] },
+  { adress: '/verkstaden/', vikt: '0.6', kallor: ['src/verkstaden.njk'] },
+  { adress: '/villkor/', vikt: '0.3', kallor: ['src/villkor.njk', 'src/_data/site.json'] }
+] -%}
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+{%- for s in sidor %}
+  <url>
+    <loc>{{ site.url }}{{ s.adress }}</loc>
+    <lastmod>{{ s.kallor | andrad }}</lastmod>
+    <priority>{{ s.vikt }}</priority>
+  </url>
+{%- endfor %}
+{%- for p in products | katalog %}
+  <url>
+    <loc>{{ site.url }}/brada/{{ p.slug }}/</loc>
+    <lastmod>{{ produktkallor | andrad }}</lastmod>
+    <priority>{% if p.sald %}0.4{% else %}0.8{% endif %}</priority>
+  </url>
+{%- endfor %}
+</urlset>

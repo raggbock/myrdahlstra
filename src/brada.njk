@@ -1,0 +1,154 @@
+---
+layout: base.njk
+huvudtyp: kompakt
+pagination:
+  data: products
+  size: 1
+  alias: p
+permalink: "/brada/{{ p.slug }}/"
+eleventyComputed:
+  # Titeln syns bara i sökträffen och i webbläsarfliken, och där väger de
+  # första tecknen tyngst. "N:o 1." är fin katalogton på sidan men säger
+  # ingenting för den som söker, så den utelämnas här. Priset däremot höjer
+  # klickfrekvensen, utom på en såld bräda där det bara är missvisande.
+  sidtitel: "{{ p.titel }}{% if not p.sald %}, {{ p.pris | pris }}{% endif %} · {{ site.namn }}"
+  sidbeskrivning: "{{ p.kort }}"
+  # Delas länken till en bräda ska brädans eget foto följa med
+  produktbild: "{{ p.bilder[0] }}"
+  delbildtext: "{{ p.titel }}"
+---
+
+{% from "bild.njk" import bild %}
+<p class="brodsmula"><a href="/">Katalogen</a> &nbsp;/&nbsp; N:o {{ p.nr }}</p>
+
+<div class="produkt">
+
+  <div class="produkt__bilder">
+    <div class="inramad">
+      {%- if p.bilder and p.bilder.length -%}
+        {#- Hjältebilden är det första man ser, alltså sidans LCP. Den laddas
+            ivrigt och med hög prioritet, till skillnad från allt annat foto. -#}
+        {{ bild(p.bilder[0], p.titel + ', sedd rakt uppifrån', '(max-width: 720px) 92vw, (max-width: 1180px) 46vw, 560px', 'produkt__hero', true) }}
+      {%- else -%}
+        <div class="tex tex--stor produkt__hero"><span class="hero-markor">[FOTO: brädan rakt uppifrån]</span></div>
+      {%- endif -%}
+      {%- if p.sald -%}
+        <span class="band-yta"><span class="band band--stor">Såld</span></span>
+      {%- endif -%}
+    </div>
+    {#- Tumnaglar visas nar det finns flera foton. Finns inga foton alls
+        star platshallarna kvar. Med exakt ett foto hoppas raden over, ett
+        riktigt foto med randiga platshallare under ser halvfardigt ut. -#}
+    {%- if p.bilder and p.bilder.length > 1 %}
+    <div class="tumnaglar">
+      {%- for fil in p.bilder.slice(1, 4) %}
+      <div class="tumnagel">{{ bild(fil, p.titel + ', ytterligare bild', '120px') }}</div>
+      {%- endfor %}
+    </div>
+    {%- elif not p.bilder or p.bilder.length == 0 %}
+    <div class="tumnaglar">
+      <div class="tumnagel"><div class="tex tex--vinkel">[VINKEL]</div></div>
+      <div class="tumnagel"><div class="tex tex--kant">[KANT]</div></div>
+      <div class="tumnagel"><div class="tex tex--kok">[I KÖKET]</div></div>
+    </div>
+    {%- endif %}
+  </div>
+
+  <div class="produkt__info">
+    <h1 class="produkt__titel"><span class="nr">N:o {{ p.nr }}.</span> {{ p.titel }}</h1>
+    <p class="produkt__text">{{ p.beskrivning }}</p>
+
+    <dl class="spec">
+      {%- for namn, varde in p.spec %}
+      <div class="leader">
+        <dt>{{ namn }}</dt>
+        <span class="leader__linje"></span>
+        <dd>{{ varde }}</dd>
+      </div>
+      {%- endfor %}
+      <div class="leader leader--pris">
+        <dt class="spec__prisetikett">Pris</dt>
+        <span class="leader__linje"></span>
+        <dd class="spec__pris{% if p.sald %} spec__pris--sald{% endif %}">{{ p.pris | pris }}</dd>
+      </div>
+    </dl>
+
+    {%- if p.sald %}
+    <div class="saldruta">
+      <span class="lapp lapp--ruta">såld</span>
+      Det här exemplaret är sålt. Hör av dig om du vill ha en liknande bräda, eller
+      <a href="/bestallning/">beställ efter mått</a>.
+    </div>
+    {%- else %}
+    {#- En bräda på beställning ligger inte färdig i verkstaden, och då gäller
+        tillverkningstid i stället för leverans inom några dagar. -#}
+    {%- if p.pabestallning %}
+    <p class="hjalptext">Den här görs på beställning, ingen ligger färdig i verkstaden. Tillverkning tar normalt {{ site.leveranstid }}.</p>
+    {%- endif %}
+    <div class="knapp-grupp">
+      <a class="knapp" href="#bestall">Beställ här på hemsidan</a>
+      <p class="smatext">eller mejla <a href="mailto:{{ site.mejl }}?subject={{ ('Beställning: N:o ' + p.nr + '. ' + p.titel) | urlencode }}">{{ site.mejl }}</a></p>
+    </div>
+    {%- endif %}
+
+    <p class="villkor">Betalning med Swish. {{ site.frakt }}</p>
+
+    {#- Skötseln följer ytbehandlingen, inte brädan. En oljad skärbräda vill
+        oljas om, medan en hårdvaxoljad yta varken behöver eller tål det. En
+        post får därför skriva över den gemensamma texten, och en tom sträng
+        tar bort rutan helt för det som inte är en skärbräda. -#}
+    {%- set skotselText = p.skotsel | default(site.skotsel) %}
+    {%- if skotselText %}
+    <div class="skotsel">
+      <h2 class="skotsel__rubrik">SKÖTSEL</h2>
+      <p class="skotsel__text">{{ skotselText }}</p>
+      <span class="lapp lapp--ruta">{{ p.skotselLapp | default(site.skotselLapp) }}</span>
+    </div>
+    {%- endif %}
+  </div>
+</div>
+
+{%- if not p.sald %}
+<section id="bestall" class="uppgifter bestallsektion">
+  {% include "ornament.njk" %}
+  <h2 class="bestallsektion__rubrik">Beställ N:o {{ p.nr }}, {{ p.titel }}</h2>
+  <p class="hjalptext">Skicka en beställning så bekräftar jag per mejl med Swishnummer och leveranstid. Du binder dig inte förrän vi kommit överens.</p>
+  {% set dolda = [
+    { namn: 'Bräda', varde: 'N:o ' + p.nr + '. ' + p.titel },
+    { namn: 'Pris', varde: p.pris | pris }
+  ] %}
+  {% set skickaText = 'Skicka beställning' %}
+  {% set mejlAmne = 'Beställning: N:o ' + p.nr + '. ' + p.titel %}
+  {% include "formular.njk" %}
+</section>
+{%- endif %}
+
+{#- Vidare i katalogen. Interna länkar i brödtexten saknades helt: varje sida
+    hade bara menyns och sidfotens sju länkar. Det hjälper både besökaren som
+    vill se nästa bräda och sökmotorn som försöker förstå vad som hör ihop. -#}
+{%- set andra = products | andraBrador(p.slug, 3) %}
+<section class="passage vidare">
+  {% include "ornament.njk" %}
+  <h2 class="passage__rubrik">VIDARE I KATALOGEN</h2>
+
+  {%- if andra.length %}
+  <ul class="vidarelista">
+    {%- for a in andra %}
+    <li class="leader">
+      <a href="/brada/{{ a.slug }}/"><span class="nr">N:o {{ a.nr }}.</span> {{ a.titel }}</a>
+      <span class="leader__linje"></span>
+      <span class="vidarelista__pris">{{ a.pris | pris }}</span>
+    </li>
+    {%- endfor %}
+  </ul>
+  {%- endif %}
+
+  <p class="passage__text vidare__text">
+    {%- if 'ändträ' in (p.titel | lower) %}
+    Vill du veta varför ändträ är skonsamt mot knivens egg och hur mönstret uppstår, läs <a href="/andtra/">om ändträ</a>.
+    {%- else %}
+    Undrar du hur långträ skiljer sig från ändträ, och när det ena är bättre än det andra? Det står <a href="/andtra/">här</a>.
+    {%- endif %}
+    Passar ingen av brädorna i katalogen kan du <a href="/bestallning/">bygga en egen efter mått</a>, eller <a href="/bestallning/#skriv">skriva några rader</a> om du hellre frågar först.
+  </p>
+</section>

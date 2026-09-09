@@ -1,0 +1,50 @@
+---
+permalink: /_headers
+eleventyExcludeFromCollections: true
+---
+# Cachehuvuden för Cloudflare Pages.
+#
+# Standard är fyra timmar på allt, vilket är onödigt kort här: varje fil under
+# /assets/ byter adress när innehållet byter.
+#
+#   style.css och konfigurator.js har innehållets fingeravtryck i adressen,
+#   /assets/style.css?v=8f3c1a2b, och samma gäller loggan.
+#
+#   Typsnitten är namngivna efter vad de innehåller och ändras aldrig.
+#
+#   Fotona skrivs aldrig över. Verkstadspanelen ger varje uppladdning ett nytt
+#   filnamn, brada-1.jpg, brada-2.jpg, och de skalade varianterna följer med.
+#
+# Ett år med immutable betyder att en återkommande besökare inte ens frågar
+# servern, sidan bara finns där.
+#
+# OBS: byt aldrig ut ett foto genom att skriva över filen med samma namn. Då
+# sitter den gamla bilden kvar i besökarens webbläsare i upp till ett år.
+# Ladda upp på nytt i panelen i stället, så får den ett nytt namn.
+
+/assets/fonts/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/assets/foto/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/assets/style.css
+  Cache-Control: public, max-age=31536000, immutable
+
+/assets/konfigurator.js
+  Cache-Control: public, max-age=31536000, immutable
+
+/assets/logga.png
+  Cache-Control: public, max-age=31536000, immutable
+
+# Ingen catch-all här. Pages tillämpar ALLA regler som matchar och slår ihop
+# dem, den mest specifika vinner inte. En rad för /* skulle alltså klistras
+# på varje tillgång också, med resultatet
+#
+#   public, max-age=31536000, immutable, public, max-age=0, must-revalidate
+#
+# vilket är motsägelsefullt och gör att ettårscachen aldrig gäller.
+#
+# Sidorna behöver ingen egen rad: Pages sätter redan max-age=0,
+# must-revalidate på dem, vilket är precis vad vi vill. Ett ändrat pris eller
+# en såld bräda syns därmed direkt.

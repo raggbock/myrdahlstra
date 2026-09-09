@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ sidtitel }}</title>
+  <meta name="description" content="{{ sidbeskrivning | default(site.beskrivning) }}">
+  {#- Sidor som sätter noindex i sin frontmatter ska inte kunna bli en
+      sökträff. Den som googlar "myrdahls trä" ska landa i katalogen, inte på
+      en kvittosida eller ett felmeddelande. Flaggan sätts av sidan själv,
+      inte gissad ur adressen: Eleventy skriver page.url olika beroende på om
+      permalänken slutar på index.html eller inte, och det är för lätt att
+      tro fel om. -#}
+  {%- if noindex %}
+  <meta name="robots" content="noindex, follow">
+  {%- else %}
+  {#- Samma sajt svarar på myrdahlstra.se, www.myrdahlstra.se,
+      myrdahls-storefront.pages.dev och en egen adress för varje deploy.
+      Utan kanonisk adress ser sökmotorerna fyra kopior av varje sida och
+      väljer själva vilken som får räknas. -#}
+  {%- set kanonisk = site.url + (page.url | replace('index.html', '')) %}
+  <link rel="canonical" href="{{ kanonisk }}">
+  <meta property="og:url" content="{{ kanonisk }}">
+  {%- endif %}
+  <meta property="og:title" content="{{ sidtitel }}">
+  <meta property="og:description" content="{{ sidbeskrivning | default(site.beskrivning) }}">
+  <meta property="og:type" content="{% if produktbild %}product{% else %}website{% endif %}">
+  <meta property="og:locale" content="sv_SE">
+  <meta property="og:site_name" content="{{ site.namn }}">
+  {#- Utan bild blir en delad länk en tom grå ruta i Messenger och Facebook.
+      Produktsidor delar sitt eget foto, övriga sidor delar katalogbilden. -#}
+  {%- set delbild = site.url + '/assets/foto/' + (produktbild | default(site.delbild)) %}
+  <meta property="og:image" content="{{ delbild }}">
+  <meta property="og:image:alt" content="{{ delbildtext | default(site.delbildtext) }}">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="{{ delbild }}">
+  {#- Brödtypsnittet hämtas innan stilmallen hunnit be om det, annars syns
+      sidan först i Georgia och byter sedan. De andra skärningarna får vänta,
+      de används i mindre mängd. -#}
+  <link rel="preload" href="/assets/fonts/ebgaramond-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="{{ '/assets/style.css' | version }}">
+  <link rel="icon" href="{{ '/assets/logga.png' | version }}">
+  {% include "strukturerat.njk" %}
+</head>
+<body>
+  <div class="sida">
+    <div class="ram{% if huvudtyp != 'start' %} ram--inre{% endif %}">
+      {% include "huvud.njk" %}
+      {{ content | safe }}
+      {% include "sidfot.njk" %}
+    </div>
+  </div>
+  {% if konfigurator %}<script src="{{ '/assets/konfigurator.js' | version }}"></script>{% endif %}
+  {#- Cloudflare Web Analytics ligger normalt INTE här.
+
+      För ett Pages-projekt sköts mätningen av Pages egen koppling, som
+      injicerar beaconen i svaret. Zonens Web Analytics-inställning når inte
+      dit, och en egen beacon med en zonbunden site_tag avvisas av
+      insamlaren: den svarar 404, och webbläsaren rapporterar det som ett
+      CORS-fel. Prövat skarpt, noll sidvisningar registrerades.
+
+      Raden nedan finns kvar för det fall sajten en dag flyttar från Pages
+      till något som inte injicerar själv. Fyll då i site.analys. -#}
+  {%- if site.analys %}
+  <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "{{ site.analys }}"}'></script>
+  {%- endif %}
+</body>
+</html>

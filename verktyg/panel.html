@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Verkstadspanelen · Myrdahls Trä</title>
+<style>
+  :root {
+    --papper: #F4EDDD; --black: #2B2118; --guld: #8a5a2c; --rost: #8a3d2c;
+    --kort: #FBF6E9; --dov: #57503F; --linje: #B7A88F;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--papper); color: var(--black);
+    font-family: 'EB Garamond', Georgia, serif; font-size: 16px;
+  }
+  .ram { max-width: 1180px; margin: 0 auto; padding: 24px 20px 60px 20px; }
+  header {
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: 20px; border-bottom: 1px solid var(--black); padding-bottom: 14px; flex-wrap: wrap;
+  }
+  h1 { font-size: 26px; font-weight: 400; margin: 0; }
+  h1 span { font-style: italic; }
+  a { color: var(--black); }
+  .layout { display: grid; grid-template-columns: 340px minmax(0, 1fr); gap: 32px; margin-top: 24px; }
+  @media (max-width: 900px) { .layout { grid-template-columns: minmax(0, 1fr); } }
+
+  .lista { display: flex; flex-direction: column; gap: 8px; }
+  .rad {
+    display: grid; grid-template-columns: 54px minmax(0, 1fr) auto; gap: 8px;
+    align-items: center; background: var(--kort); border: 1px solid var(--linje);
+    padding: 9px 11px; cursor: pointer; text-align: left; font: inherit; color: inherit;
+  }
+  .rad:hover { border-color: var(--black); }
+  .rad[aria-current="true"] { border-color: var(--black); box-shadow: inset 0 0 0 1px var(--black); }
+  .rad .nr { font-style: italic; color: var(--dov); white-space: nowrap; }
+  .rad .titel { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .rad .pris { font-variant-numeric: tabular-nums; }
+  .sald-markering { color: var(--rost); font-size: 13px; font-style: italic; }
+
+  fieldset { border: 1px solid var(--linje); margin: 0 0 18px 0; padding: 16px 18px; background: var(--kort); }
+  legend { font-size: 14px; letter-spacing: 0.18em; color: var(--guld); padding: 0 6px; }
+  label { display: block; font-size: 14px; color: var(--dov); margin-bottom: 4px; }
+  input[type=text], input[type=number], textarea, select {
+    font: inherit; width: 100%; padding: 8px 10px; background: #fff;
+    border: 1px solid var(--linje); color: var(--black);
+  }
+  textarea { min-height: 74px; resize: vertical; }
+  .par { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .tre { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  .falt { margin-bottom: 12px; }
+
+  button {
+    font: inherit; padding: 9px 16px; background: var(--black); color: var(--papper);
+    border: none; cursor: pointer;
+  }
+  button.lag { background: transparent; color: var(--black); border: 1px solid var(--linje); padding: 5px 9px; font-size: 14px; }
+  button.lag:hover { border-color: var(--black); }
+  button.fara { color: var(--rost); }
+  button:disabled { opacity: 0.5; cursor: default; }
+  .knappar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+
+  .specrad { display: grid; grid-template-columns: 200px minmax(0, 1fr) auto; gap: 10px; margin-bottom: 8px; align-items: center; }
+  .bilder { display: flex; gap: 12px; flex-wrap: wrap; }
+  .bild { border: 1px solid var(--linje); padding: 5px; background: #fff; width: 190px; }
+  .bild img { display: block; width: 100%; aspect-ratio: 4/3; object-fit: cover; }
+  .bild .under { display: flex; justify-content: space-between; align-items: flex-start; gap: 6px; margin-top: 5px; font-size: 12px; }
+  .bild .under span { word-break: break-all; line-height: 1.35; }
+  .bild input[type=range] { width: 100%; margin: 6px 0 0 0; }
+  .slappzon { border: 1px dashed var(--linje); padding: 22px; text-align: center; color: var(--dov); font-size: 15px; }
+  .slappzon.over { border-color: var(--black); background: #fff; }
+
+  .meddelande { padding: 12px 16px; margin-bottom: 16px; font-size: 15px; line-height: 1.5; }
+  .fel { border: 1px solid var(--rost); background: #fbeee6; color: var(--rost); }
+  .ok { border: 1px solid var(--guld); background: #f3ead6; color: var(--guld); }
+  .fel ul { margin: 6px 0 0 18px; padding: 0; }
+  pre { white-space: pre-wrap; font-size: 13px; margin: 6px 0 0 0; }
+  .oanvanda { margin-top: 28px; font-size: 14px; color: var(--dov); }
+  .oanvanda code { background: var(--kort); padding: 1px 4px; }
+  .tom { color: var(--dov); font-style: italic; }
+
+  .varningsrad { font-size: 14px; color: var(--rost); margin: -6px 0 12px 0; min-height: 1px; }
+  .kryssrad { display: flex; gap: 8px; align-items: center; font-size: 16px; color: var(--black); margin: 0; }
+  .kryssrad input { width: auto; }
+  .filvalj { text-decoration: underline; cursor: pointer; }
+  .zonhjalp { font-size: 13px; margin-top: 6px; }
+  .mattinfo { font-size: 14px; color: var(--dov); margin: 4px 0 12px 0; }
+  .forsta { font-size: 12px; letter-spacing: 0.1em; color: var(--guld); margin-top: 4px; }
+  .sparrad {
+    position: sticky; bottom: 0; background: var(--papper);
+    border-top: 1px solid var(--black); padding: 14px 0; margin-top: 28px;
+  }
+</style>
+</head>
+<body>
+<div class="ram">
+  <header>
+    <h1><span>Verkstadspanelen.</span> Myrdahls Trä</h1>
+    <div><a href="http://localhost:4321/" target="_blank" rel="noreferrer">Öppna förhandsvisningen</a></div>
+  </header>
+
+  <div id="meddelanden"></div>
+
+  <div class="layout">
+    <div>
+      <div class="knappar" style="margin-bottom: 12px;">
+        <button id="ny">Ny bräda</button>
+      </div>
+      <div class="lista" id="lista"></div>
+      <div class="oanvanda" id="oanvanda"></div>
+    </div>
+    <div id="formularplats"></div>
+  </div>
+  <div class="knappar sparrad">
+    <button id="spara" type="button">Spara och bygg</button>
+    <span style="font-size:14px;color:#57503F">Skriver products.json, behandlar nya foton och bygger om sajten.</span>
+  </div>
+</div>
+<script src="/panel.js"></script>
+</body>
+</html>

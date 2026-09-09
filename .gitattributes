@@ -1,0 +1,8 @@
+# Radbrytningar normaliseras till LF i repot och i arbetskopian,
+# oavsett core.autocrlf pa maskinen.
+* text=auto eol=lf
+
+*.jpg binary
+*.png binary
+*.woff2 binary
+*.avif binary

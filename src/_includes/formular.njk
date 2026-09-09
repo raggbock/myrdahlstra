@@ -1,0 +1,38 @@
+{#
+  Beställningsformulär. Skickar till tjänsten i site.json (formEndpoint).
+  Så länge formEndpoint är tom faller knappen tillbaka på ett förifyllt mejl,
+  så sidan fungerar även innan formuläret är kopplat.
+  Väntar på: dolda (lista med namn och varde), skickaText, mejlAmne
+#}
+{%- if site.formEndpoint %}
+<form class="knapp-grupp" action="{{ site.formEndpoint }}" method="POST">
+  {%- for d in dolda %}
+  <input type="hidden" name="{{ d.namn }}" value="{{ d.varde }}">
+  {%- endfor %}
+  <input type="hidden" name="_subject" value="{{ mejlAmne }}">
+  <input type="text" name="_gotcha" class="dold" tabindex="-1" autocomplete="off" aria-hidden="true">
+  <div class="faltpar">
+    <label class="dold" for="namn">Namn</label>
+    <input type="text" id="namn" name="Namn" placeholder="Namn" autocomplete="name" required>
+    <label class="dold" for="kontakt">Mejl eller telefon</label>
+    <input type="text" id="kontakt" name="Mejl eller telefon" placeholder="Mejl eller telefon" autocomplete="email" required>
+  </div>
+  <label class="dold" for="meddelande">Meddelande</label>
+  <textarea id="meddelande" name="Meddelande" placeholder="Meddelande, till exempel önskad leveranstid eller frågor om brädan"></textarea>
+  <button class="knapp" type="submit">{{ skickaText }}</button>
+</form>
+{%- else %}
+{#
+  ==================================================================
+  Formuläret är inte kopplat än. Lägg in din Formspree-adress i
+  src/_data/site.json, raden "formEndpoint", och bygg om.
+  Fram till dess går knappen till ett förifyllt mejl i stället.
+  ==================================================================
+#}
+{%- set mejlBody = [] %}
+{%- for d in dolda %}{% set mejlBody = (mejlBody.push(d.namn + ': ' + d.varde), mejlBody) %}{% endfor %}
+<div class="knapp-grupp">
+  <a class="knapp" href="mailto:{{ site.mejl }}?subject={{ mejlAmne | urlencode }}&amp;body={{ (mejlBody | join('\n') + '\n\nNamn:\nMejl eller telefon:\nMeddelande:\n') | urlencode }}">{{ skickaText }} per mejl</a>
+  <p class="smatext">Mejlet öppnas förifyllt i ditt mejlprogram. Fungerar det inte, skriv till <a href="mailto:{{ site.mejl }}">{{ site.mejl }}</a>.</p>
+</div>
+{%- endif %}

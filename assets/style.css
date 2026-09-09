@@ -1,0 +1,1550 @@
+/* ==========================================================================
+   Typsnitten
+   Ligger på egen domän i stället för att hämtas från Google. Ett anrop till
+   fonts.googleapis.com blockerar renderingen tills det svarat, och det är en
+   uppkoppling till en annan domän innan besökaren sett en enda bokstav. Nu
+   kommer filerna från samma server som allt annat.
+
+   EB Garamond är en variabel font: samma fil täcker hela viktspannet, så
+   vikt 400 och 500 pekar med flit på samma fil. Vikt 600 hämtades förut men
+   används inte av en enda regel i den här filen.
+
+   Sidan använder bara latin i praktiken, å ä ö ligger där. latin-ext hämtas
+   bara om en bokstav i det spannet dyker upp i texten, tack vare
+   unicode-range, så de tyngre filerna kostar oftast ingenting.
+
+   Båda typsnitten är släppta under SIL Open Font License 1.1, se
+   assets/fonts/LICENS.txt.
+   ========================================================================== */
+
+@font-face {
+  font-family: 'EB Garamond';
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url('/assets/fonts/ebgaramond-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'EB Garamond';
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url('/assets/fonts/ebgaramond-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: 'EB Garamond';
+  font-style: italic;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url('/assets/fonts/ebgaramond-kursiv-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'EB Garamond';
+  font-style: italic;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url('/assets/fonts/ebgaramond-kursiv-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: 'Caveat';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/assets/fonts/caveat-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Caveat';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/assets/fonts/caveat-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* ==========================================================================
+   Myrdahls Trä, katalogen
+   Alla mått, storlekar och färger är hämtade ur referensdesignen i design/.
+   ========================================================================== */
+
+:root {
+  --papper: #F4EDDD;
+  --black: #2B2118;
+  --guld: #8a5a2c;
+  --rost: #8a3d2c;
+  --kort: #FBF6E9;
+  --dov: #57503F;
+
+  --lankstreck: #B79E7F;
+  --oval: #B7A88F;
+
+  --mork-text: #CBBFA9;
+  --mork-finstilt: #9d8f7b;
+  --mork-linje: #4a3c2e;
+  --mork-punkt: #6b5c48;
+  --mork-lank: #C89B62;
+
+  --tra-ljus: #d9c29a;
+  --tra-mellan: #93714e;
+  --tra-mork: #7c5f40;
+  --tra-valnot: #4a3423;
+  --tra-valnot-mork: #3a2919;
+  --tra-djup: #6d5236;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Webbläsarens egen regel för hidden är display: none, men den ligger i
+   grundstilmallen och förlorar mot varje egen display-regel. Ett block som
+   .traplats med display: flex blir alltså kvar på skärmen fast skriptet
+   gömt det. Den här raden gör hidden till vad det utger sig för att vara. */
+[hidden] {
+  display: none !important;
+}
+
+html {
+  background: var(--papper);
+}
+
+body {
+  margin: 0;
+  font-family: 'EB Garamond', Georgia, 'Times New Roman', serif;
+  background: var(--papper);
+  color: var(--black);
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--black);
+  text-decoration: none;
+  border-bottom: 1px solid var(--lankstreck);
+}
+
+a:hover,
+a:focus-visible {
+  color: var(--guld);
+}
+
+img {
+  max-width: 100%;
+}
+
+:focus-visible {
+  outline: 2px solid var(--guld);
+  outline-offset: 2px;
+}
+
+/* Visuellt dold, men kvar för skärmläsare och för formuläret.
+   Reglerna är märkta viktiga med flit: en väljare som input[type='text']
+   har högre specificitet än en klass och skulle annars ge det dolda fältet
+   full bredd. Honungsfällan i beställningsformuläret är absolut placerad,
+   så ett sådant fält lägger sig utanför sidans högerkant och ger vågrät
+   skroll på hela sidan utan att synas. */
+.dold {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: 0 !important;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ---------- Sidan och katalogramen ---------- */
+
+.sida {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 40px 120px;
+}
+
+.ram {
+  border: 1px solid var(--black);
+  outline: 3px double var(--black);
+  outline-offset: 4px;
+  padding: 56px 72px;
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+}
+
+.ram--inre {
+  padding: 48px 72px 56px 72px;
+  gap: 40px;
+}
+
+/* ---------- Ornament ---------- */
+
+.ornament {
+  display: block;
+  width: 340px;
+  max-width: 100%;
+  height: auto;
+}
+
+/* ---------- Huvud, startsidan ---------- */
+
+.huvud {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
+}
+
+.huvud__kicker {
+  font-size: 14px;
+  letter-spacing: 0.4em;
+}
+
+/* Rubriken bär bara loggan, så den ska inte lägga till något eget utrymme.
+   Kolumnen sätter avstånden med gap. */
+.huvud__titel {
+  margin: 0;
+  font-size: 0;
+  line-height: 0;
+}
+
+.huvud__logga {
+  height: 64px;
+  width: auto;
+}
+
+.huvud__tagline {
+  font-size: 17px;
+  font-style: italic;
+  color: var(--dov);
+}
+
+.nav {
+  display: flex;
+  gap: 34px;
+  font-size: 15px;
+  letter-spacing: 0.14em;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.nav a[aria-current] {
+  color: var(--guld);
+}
+
+/* ---------- Huvud, inre sidor ---------- */
+
+.huvud--kompakt {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--black);
+  padding-bottom: 24px;
+  gap: 24px;
+}
+
+.huvud--kompakt .huvud__logga {
+  height: 46px;
+}
+
+.huvud--kompakt .nav {
+  gap: 30px;
+  font-size: 14px;
+}
+
+.brodsmula {
+  font-size: 15px;
+  font-style: italic;
+  color: var(--dov);
+}
+
+/* ---------- Punktlinjer ---------- */
+
+.leader {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.leader__linje {
+  flex-grow: 1;
+  border-bottom: 1px dotted var(--black);
+  min-width: 18px;
+}
+
+/* ---------- Katalogposter ---------- */
+
+.poster {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 56px;
+}
+
+.post {
+  display: flex;
+  gap: 24px;
+}
+
+.post__bildruta {
+  width: 190px;
+  height: 150px;
+  flex-shrink: 0;
+  border: 1px solid var(--black);
+  padding: 5px;
+  position: relative;
+}
+
+.post__innehall {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-grow: 1;
+  min-width: 0;
+}
+
+.post__titel {
+  font-size: 24px;
+  margin: 0;
+  font-weight: 400;
+  line-height: 1.25;
+}
+
+.nr {
+  font-style: italic;
+}
+
+.post__text {
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--dov);
+  margin: 0;
+}
+
+.post__matt {
+  font-size: 14px;
+  letter-spacing: 0.05em;
+  color: var(--dov);
+  margin: -4px 0 0;
+}
+
+.post .leader {
+  margin-top: auto;
+}
+
+.post__lank {
+  font-size: 15px;
+}
+
+.post__pris {
+  font-size: 22px;
+  font-weight: 500;
+}
+
+.post--sald .post__pris {
+  text-decoration: line-through;
+  color: var(--dov);
+  font-weight: 400;
+}
+
+/* ---------- Träplatshållare, ersätts av foto ---------- */
+
+.tex {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+}
+
+.tex--ek {
+  background: repeating-linear-gradient(90deg, var(--tra-mellan) 0 16px, var(--tra-mork) 16px 28px);
+}
+
+.tex--mix {
+  background: repeating-linear-gradient(90deg, var(--tra-mellan) 0 18px, var(--tra-valnot) 18px 30px, var(--tra-ljus) 30px 42px);
+}
+
+.tex--valnot {
+  background: repeating-linear-gradient(90deg, var(--tra-valnot) 0 16px, var(--tra-valnot-mork) 16px 28px);
+}
+
+.tex--bricka {
+  background: repeating-linear-gradient(90deg, var(--tra-ljus) 0 22px, var(--tra-mellan) 22px 38px);
+}
+
+.tex--stor {
+  background: repeating-linear-gradient(93deg, #8a6a48 0 26px, #77593c 26px 44px, var(--tra-mellan) 44px 78px, var(--tra-djup) 78px 96px);
+}
+
+.tex--vinkel {
+  background: repeating-linear-gradient(90deg, var(--tra-mellan) 0 18px, var(--tra-mork) 18px 32px);
+}
+
+.tex--kant {
+  background: repeating-linear-gradient(0deg, var(--tra-mellan) 0 14px, var(--tra-mork) 14px 26px);
+}
+
+.tex--kok {
+  background: var(--tra-djup);
+}
+
+.foto-markor {
+  font-size: 10px;
+  color: var(--papper);
+  padding: 4px;
+}
+
+.foto-markor--mork {
+  color: var(--dov);
+}
+
+/* picture är bara ett omslag runt img, men utan egen storlek får bildens
+   height: 100% ingenting att räkna mot och rutan kollapsar. */
+.bildyta {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.foto {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ---------- Handskrivna lappar ---------- */
+
+.lapp {
+  font-family: 'Caveat', 'Segoe Script', cursive;
+  color: var(--rost);
+  line-height: 1.1;
+}
+
+.lapp--horn {
+  position: absolute;
+  top: -14px;
+  right: -18px;
+  font-size: 21px;
+  transform: rotate(-6deg);
+  background: var(--papper);
+  padding: 0 6px;
+}
+
+.lapp--ruta {
+  position: absolute;
+  top: -14px;
+  right: 16px;
+  font-size: 20px;
+  background: var(--papper);
+  padding: 0 8px;
+  transform: rotate(-2deg);
+}
+
+.lapp--panel {
+  position: absolute;
+  top: -16px;
+  right: 18px;
+  font-size: 21px;
+  background: var(--papper);
+  padding: 0 10px;
+  transform: rotate(-3deg);
+}
+
+/* ---------- Bandet över en såld bräda ---------- */
+
+/* Ytan klipper bandet mot fotot i stället för mot ramen, så att bandet
+   slutar där bilden slutar och pappersmarginalen lämnas orörd. Den kan
+   inte ligga på bildrutan själv: lappen i hörnet sticker ut med flit och
+   skulle klippas bort av samma overflow. */
+.band-yta {
+  position: absolute;
+  inset: 5px;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.band {
+  position: absolute;
+  top: 20px;
+  left: -46px;
+  width: 160px;
+  padding: 3px 0;
+  transform: rotate(-45deg);
+  background: var(--rost);
+  border-top: 1px solid rgba(244, 237, 221, 0.45);
+  border-bottom: 1px solid rgba(244, 237, 221, 0.45);
+  color: var(--papper);
+  font-size: 12px;
+  letter-spacing: 0.22em;
+  /* Spärrningen lägger ett mellanrum efter sista bokstaven. Utan indraget
+     hamnar ordet snett i bandet. */
+  text-indent: 0.22em;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+.inramad .band-yta {
+  inset: 7px;
+}
+
+.band--stor {
+  top: 34px;
+  left: -70px;
+  width: 240px;
+  padding: 6px 0;
+  font-size: 15px;
+}
+
+/* ---------- Mörka kort och paneler ---------- */
+
+.mork {
+  background: var(--black);
+  color: var(--papper);
+}
+
+.mork .leader__linje {
+  border-bottom-color: var(--mork-punkt);
+}
+
+.mork a {
+  color: var(--papper);
+  border-bottom-color: var(--mork-lank);
+}
+
+.mork a:hover,
+.mork a:focus-visible {
+  color: var(--mork-lank);
+}
+
+.kort--mork {
+  display: flex;
+  gap: 24px;
+  padding: 24px 28px;
+  align-items: center;
+}
+
+.kort--mork__innehall {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.kort--mork h2 {
+  font-size: 24px;
+  font-weight: 400;
+  margin: 0;
+  line-height: 1.25;
+}
+
+.kort--mork p {
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--mork-text);
+  margin: 0;
+}
+
+.kort--mork a {
+  align-self: flex-start;
+  font-size: 16px;
+}
+
+/* ---------- Om verkstaden och kontakt ---------- */
+
+.passage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+  padding: 8px 100px 0 100px;
+}
+
+.passage__rubrik {
+  font-size: 15px;
+  letter-spacing: 0.32em;
+  color: var(--guld);
+  margin: 0;
+  font-weight: 400;
+}
+
+.passage__text {
+  font-size: 21px;
+  font-style: italic;
+  line-height: 1.6;
+  color: var(--dov);
+  max-width: 760px;
+  margin: 0;
+}
+
+.signatur {
+  font-family: 'Caveat', 'Segoe Script', cursive;
+  font-size: 26px;
+  color: var(--rost);
+  transform: rotate(-2deg);
+}
+
+.kontaktrader {
+  width: 100%;
+  max-width: 620px;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  font-size: 16.5px;
+  margin: 0;
+}
+
+.kontaktrader .leader {
+  padding: 10px 0;
+}
+
+.kontaktrader dt {
+  color: var(--dov);
+}
+
+.kontaktrader dd {
+  margin: 0;
+}
+
+/* ---------- Sidfot ---------- */
+
+.sidfot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+  border-top: 1px solid var(--black);
+  padding-top: 30px;
+}
+
+.sidfot__rad {
+  font-size: 17px;
+  color: var(--dov);
+  margin: 0;
+}
+
+.sidfot__villkor {
+  font-size: 13px;
+  letter-spacing: 0.2em;
+  color: var(--guld);
+  margin: 0;
+}
+
+/* ---------- Produktsidan ---------- */
+
+.produkt {
+  display: flex;
+  gap: 56px;
+}
+
+.produkt__bilder {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 620px;
+  flex-shrink: 0;
+}
+
+.inramad {
+  border: 1px solid var(--black);
+  padding: 7px;
+  position: relative;
+}
+
+.produkt__hero {
+  height: 460px;
+}
+
+.hero-markor {
+  background: rgba(244, 237, 221, 0.92);
+  color: var(--dov);
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  padding: 7px 12px;
+  margin: 12px;
+}
+
+.tumnaglar {
+  display: flex;
+  gap: 14px;
+}
+
+.tumnagel {
+  border: 1px solid var(--black);
+  padding: 4px;
+  flex-grow: 1;
+  flex-basis: 0;
+  min-width: 0;
+}
+
+.tumnagel .tex {
+  height: 84px;
+  align-items: center;
+  justify-content: center;
+  color: var(--papper);
+  font-size: 11px;
+}
+
+.produkt__info {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  flex-grow: 1;
+  min-width: 0;
+}
+
+.produkt__titel {
+  font-size: 34px;
+  line-height: 1.15;
+  margin: 0;
+  font-weight: 400;
+}
+
+.produkt__text {
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--dov);
+  margin: 0;
+}
+
+.spec {
+  display: flex;
+  flex-direction: column;
+  font-size: 16.5px;
+  margin: 0;
+}
+
+.spec .leader {
+  padding: 11px 0;
+}
+
+.spec dt {
+  color: var(--dov);
+}
+
+.spec dd {
+  margin: 0;
+}
+
+.spec .leader--pris {
+  padding: 14px 0;
+}
+
+.spec__prisetikett {
+  font-size: 19px;
+  color: var(--black);
+}
+
+.spec__pris {
+  font-size: 28px;
+  font-weight: 500;
+}
+
+.knapp {
+  display: block;
+  width: 100%;
+  background: var(--black);
+  color: var(--papper);
+  padding: 17px 0;
+  text-align: center;
+  font-size: 17px;
+  letter-spacing: 0.08em;
+  border: none;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.knapp:hover,
+.knapp:focus-visible {
+  color: var(--papper);
+  background: #3a2d21;
+}
+
+.knapp--ljus {
+  background: var(--papper);
+  color: var(--black);
+  padding: 16px 0;
+  letter-spacing: 0.06em;
+}
+
+.knapp--ljus:hover,
+.knapp--ljus:focus-visible {
+  background: #fffaee;
+  color: var(--black);
+}
+
+.knapp-grupp {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.smatext {
+  font-size: 15px;
+  text-align: center;
+  color: var(--dov);
+  margin: 0;
+}
+
+.villkor {
+  font-size: 14.5px;
+  color: var(--dov);
+  text-align: center;
+  margin: 0;
+}
+
+.skotsel {
+  border: 1px solid var(--black);
+  padding: 18px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: relative;
+}
+
+.skotsel__rubrik {
+  font-size: 14px;
+  letter-spacing: 0.26em;
+  color: var(--guld);
+  margin: 0;
+  font-weight: 400;
+}
+
+.skotsel__text {
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--dov);
+  margin: 0;
+}
+
+.saldruta {
+  border: 1px solid var(--black);
+  padding: 18px 22px;
+  text-align: center;
+  font-size: 16px;
+  color: var(--dov);
+  position: relative;
+}
+
+/* ---------- Konfiguratorn ---------- */
+
+.bestall__intro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.bestall__titel {
+  font-size: 36px;
+  margin: 0;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.bestall__ingress {
+  font-size: 17px;
+  line-height: 1.55;
+  color: var(--dov);
+  max-width: 700px;
+  margin: 0;
+}
+
+/* ---------- Vidare i katalogen ---------- */
+
+.vidarelista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  max-width: 620px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 16px;
+}
+
+.vidarelista__pris {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.vidare__text {
+  max-width: 620px;
+  font-size: 16px;
+}
+
+/* ---------- Bygg en bräda eller skriv ett meddelande ---------- */
+
+.lage {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.lagevaljare {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  border: none;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+
+.valkort--lage {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 14px 24px;
+  min-width: 240px;
+}
+
+/* Växlingen görs i ren CSS, så valet fungerar även om skriptet inte laddar.
+   Formulären är två separata form-element: det som är gömt kan alltså inte
+   skicka med sina fält i det andras inskick. */
+.lage:has(input[value="byggaren"]:checked) .fraga,
+.lage:has(input[value="meddelande"]:checked) .bestall {
+  display: none;
+}
+
+.fraga {
+  max-width: 640px;
+}
+
+.fraga .steg__rubrik {
+  margin-bottom: 4px;
+}
+
+.bestall {
+  display: flex;
+  gap: 52px;
+  align-items: flex-start;
+}
+
+.bestall__steg {
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+  flex-grow: 1;
+  min-width: 0;
+}
+
+.steg {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  border: none;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+
+.steg__rubrik {
+  font-weight: 400;
+  font-size: 21px;
+  padding: 0;
+  margin-bottom: 0;
+}
+
+.hjalptext {
+  font-size: 14.5px;
+  font-style: italic;
+  color: var(--dov);
+  margin: 0;
+}
+
+.valrad {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.valrad--tight {
+  gap: 14px;
+}
+
+.valkort {
+  cursor: pointer;
+  background: var(--kort);
+  border: 1px solid var(--oval);
+  position: relative;
+}
+
+.valkort:has(input:checked) {
+  border-color: var(--black);
+  box-shadow: inset 0 0 0 1px var(--black);
+}
+
+.valkort:has(input:focus-visible) {
+  outline: 2px solid var(--guld);
+  outline-offset: 2px;
+}
+
+.valkort--tra {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 12px;
+  width: 120px;
+}
+
+/* Fem monster ska rymmas tre i bredd i stegkolumnen, annars blir sista
+   kortet ensamt pa en rad med ett stort tomrum bredvid. */
+.valkort--monster {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 12px;
+  width: 176px;
+}
+
+/* Ritningen av brädan, både på korten och i förhandsvisningen. */
+.bradbild {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.valkort__bild {
+  display: block;
+}
+
+/* En plats i mönstret, alltså ett av träslagen brädan byggs av. */
+.traplats {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.traplats__rubrik {
+  font-size: 15px;
+  font-style: italic;
+  color: var(--dov);
+  margin: 0;
+}
+
+.valkort__namn {
+  font-size: 17px;
+}
+
+.valkort__tillagg {
+  font-size: 14px;
+  font-style: italic;
+  color: var(--dov);
+}
+
+.valkort--storlek {
+  padding: 13px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  align-items: center;
+  min-width: 108px;
+}
+
+.valkort--storlek .valkort__namn {
+  font-size: 18px;
+}
+
+.valkort--storlek .valkort__tillagg {
+  font-size: 13px;
+}
+
+.valkort--ranna {
+  padding: 13px 26px;
+  font-size: 17px;
+}
+
+.uppgifter {
+  max-width: 600px;
+}
+
+.faltpar {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+input[type='text'],
+input[type='email'],
+textarea {
+  font-family: inherit;
+  font-size: 16px;
+  color: var(--black);
+  background: var(--kort);
+  border: 1px solid var(--black);
+  padding: 13px 14px;
+  outline: none;
+  width: 100%;
+}
+
+input[type='text']:focus-visible,
+input[type='email']:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--guld);
+  outline-offset: 1px;
+}
+
+textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+
+/* Ritningen och summeringen följer med när man bläddrar bland stegen, så
+   kunden ser brädan ändras utan att behöva skrolla tillbaka. */
+.bradpanel {
+  width: 380px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  position: sticky;
+  top: 24px;
+}
+
+.forhandsvisning {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.forhandsvisning__text {
+  font-size: 13.5px;
+  font-style: italic;
+  line-height: 1.5;
+  color: var(--dov);
+}
+
+.summering {
+  width: 100%;
+  padding: 32px 32px 36px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 17px;
+  position: relative;
+}
+
+.summering__rubrik {
+  font-size: 20px;
+  font-style: italic;
+  border-bottom: 1px solid var(--mork-linje);
+  padding-bottom: 12px;
+  margin: 0;
+  font-weight: 400;
+}
+
+.summering__rader {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 16px;
+  margin: 0;
+}
+
+.summering__rader dt {
+  color: var(--mork-text);
+}
+
+.summering__rader dd {
+  margin: 0;
+}
+
+.summering__prisrad {
+  border-top: 1px solid var(--mork-linje);
+  padding-top: 16px;
+}
+
+.summering__prisetikett {
+  font-size: 17px;
+  color: var(--mork-text);
+}
+
+.summering__pris {
+  font-size: 34px;
+}
+
+.summering__finstilt {
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--mork-finstilt);
+  margin: 0;
+}
+
+/* ---------- Ruta när formuläret inte är kopplat än ---------- */
+
+.varning {
+  border: 1px dashed var(--rost);
+  background: #fbeee6;
+  color: var(--rost);
+  padding: 14px 18px;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.mork .varning {
+  background: #3a2119;
+  border-color: #a8654f;
+  color: #e8c3b3;
+}
+
+/* ==========================================================================
+   Responsivt
+   ========================================================================== */
+
+@media (max-width: 1180px) {
+  .sida {
+    padding: 32px 48px;
+  }
+
+  .produkt__bilder {
+    width: 46%;
+  }
+
+  .produkt__hero {
+    height: 380px;
+  }
+
+  .poster {
+    gap: 40px;
+  }
+}
+
+@media (max-width: 980px) {
+  .ram {
+    padding: 40px 36px;
+    gap: 40px;
+  }
+
+  .ram--inre {
+    padding: 36px 36px 44px 36px;
+  }
+
+  .produkt {
+    flex-direction: column;
+    gap: 36px;
+  }
+
+  .produkt__bilder {
+    width: 100%;
+  }
+
+  .produkt__hero {
+    height: 420px;
+  }
+
+  .bestall {
+    flex-direction: column;
+    gap: 40px;
+  }
+
+  /* Staplat ligger panelen sist, och da finns inget att klistra fast den vid. */
+  .bradpanel {
+    width: 100%;
+    position: static;
+  }
+
+  .passage {
+    padding: 0;
+  }
+}
+
+@media (max-width: 720px) {
+  .sida {
+    padding: 14px 12px;
+  }
+
+  .ram {
+    padding: 28px 20px;
+    gap: 32px;
+    outline-offset: 3px;
+  }
+
+  .ram--inre {
+    padding: 24px 20px 32px 20px;
+    gap: 28px;
+  }
+
+  .poster {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 34px;
+  }
+
+  .post {
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .post__bildruta {
+    width: 100%;
+    height: 200px;
+  }
+
+  .lapp--horn {
+    right: 4px;
+    top: -12px;
+  }
+
+  .huvud__kicker {
+    font-size: 12px;
+    letter-spacing: 0.22em;
+  }
+
+  .huvud__logga {
+    height: 48px;
+  }
+
+  .huvud__tagline {
+    font-size: 16px;
+  }
+
+  .nav {
+    gap: 12px 18px;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+  }
+
+  .huvud--kompakt {
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    padding-bottom: 18px;
+  }
+
+  .huvud--kompakt .nav {
+    gap: 10px 16px;
+  }
+
+  .kort--mork {
+    padding: 20px;
+  }
+
+  .passage__text {
+    font-size: 18px;
+  }
+
+  .produkt__titel {
+    font-size: 27px;
+  }
+
+  .produkt__hero {
+    height: 240px;
+  }
+
+  .tumnagel .tex {
+    height: 60px;
+    font-size: 10px;
+  }
+
+  .spec {
+    font-size: 15.5px;
+  }
+
+  .spec__pris {
+    font-size: 24px;
+  }
+
+  .bestall__titel {
+    font-size: 28px;
+  }
+
+  .bestall__steg {
+    gap: 28px;
+  }
+
+  /* Tva kort i bredd i stallet for en lang kolumn. */
+  .valkort--tra,
+  .valkort--monster {
+    width: calc(50% - 6px);
+  }
+
+  .valrad {
+    gap: 12px;
+  }
+
+  .valkort--ranna,
+  .valkort--storlek {
+    flex-grow: 1;
+  }
+
+  .faltpar {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .summering {
+    padding: 26px 20px 30px 20px;
+  }
+
+  .summering__pris {
+    font-size: 28px;
+  }
+
+  .lapp--panel {
+    right: 10px;
+  }
+
+  .sidfot {
+    padding-top: 22px;
+  }
+
+  .sidfot__rad {
+    font-size: 15.5px;
+  }
+
+  .sidfot__villkor {
+    font-size: 10.5px;
+    letter-spacing: 0.1em;
+    line-height: 1.6;
+  }
+
+  .kontaktrader {
+    font-size: 15.5px;
+  }
+}
+
+@media (max-width: 400px) {
+  .tumnaglar {
+    gap: 8px;
+  }
+
+  .tumnagel .tex {
+    font-size: 9px;
+  }
+}
+
+/* ---------- Beställningssektionen på produktsidan ---------- */
+
+.bestallsektion {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.bestallsektion__rubrik {
+  font-size: 21px;
+  font-weight: 400;
+  margin: 4px 0 0 0;
+}
+
+.loggalank {
+  border-bottom: none;
+}
+
+/* .mork a satter ljus text pa morka paneler, men den ljusa knappen
+   inuti panelen ska ha morkt blackfargat text. Hogre specificitet. */
+.mork .knapp--ljus,
+.mork .knapp--ljus:hover,
+.mork .knapp--ljus:focus-visible {
+  color: var(--black);
+}
+
+/* Kontaktraderna har hela meningar som varden. Pa mobil blir punktlinjen
+   bara en stump, sa raderna staplas och far en prickad underkant i stallet. */
+@media (max-width: 720px) {
+  .kontaktrader .leader {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 2px;
+    padding: 10px 0;
+    border-bottom: 1px dotted var(--black);
+  }
+
+  .kontaktrader .leader:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .kontaktrader .leader__linje {
+    display: none;
+  }
+}
+
+/* Sald brada: priset stryks over pa produktsidan pa samma satt
+   som pa katalogkortet. */
+.spec__pris--sald {
+  text-decoration: line-through;
+  color: var(--dov);
+  font-weight: 400;
+}
+
+/* Mork bestallningsruta over hela bredden nar den annars star ensam
+   i sista gridraden. */
+.kort--mork--bred {
+  grid-column: 1 / -1;
+}
+
+/* Tre lika kolumner gor att en eller tva tumnaglar behaller sin bredd
+   i stallet for att stracka sig over hela raden. */
+.tumnaglar {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+/* ---------- Lopande text, andtrasidan och kopvillkoren ---------- */
+
+.text {
+  max-width: 660px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.text__rubrik {
+  font-size: 22px;
+  font-weight: 400;
+  margin: 26px 0 2px 0;
+  line-height: 1.3;
+}
+
+.text__rubrik:first-of-type {
+  margin-top: 0;
+}
+
+.text p {
+  font-size: 17px;
+  line-height: 1.68;
+  color: var(--dov);
+  margin: 0 0 14px 0;
+}
+
+.text p strong {
+  color: var(--black);
+  font-weight: 500;
+}
+
+.text .kontaktrader {
+  max-width: 100%;
+  margin-bottom: 10px;
+}
+
+.knapp-grupp--smal {
+  max-width: 420px;
+  margin-top: 14px;
+}
+
+@media (max-width: 720px) {
+  .text__rubrik {
+    font-size: 20px;
+    margin-top: 22px;
+  }
+
+  .text p {
+    font-size: 16.5px;
+  }
+}

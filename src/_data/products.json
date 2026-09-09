@@ -1,0 +1,142 @@
+[
+  {
+    "nr": 1,
+    "slug": "andtraskarbrada-massiv-ek",
+    "titel": "Ändträskärbräda i massiv ek",
+    "kort": "Kraftig bräda där kniven möter fibrernas ändar. Skonsam mot eggen, oljad och klar.",
+    "beskrivning": "Träets fibrer står på högkant, så kniven skär mellan fibrerna i stället för av dem. Det skonar eggen och gör att ytan läker med tiden. Oljad med livsmedelsklassad paraffinolja och klar att användas direkt.",
+    "pris": 2000,
+    "spec": {
+      "Mått": "43,5 × 27 × 3,8 cm",
+      "Träslag": "Massiv ek, ändträ",
+      "Fötter": "Halkfria gummifötter",
+      "Ytbehandling": "Paraffinolja och bivax"
+    },
+    "textur": "ek",
+    "bilder": [
+      "andtraskarbrada-massiv-ek-1.jpg"
+    ],
+    "lapp": "",
+    "sald": false
+  },
+  {
+    "nr": 2,
+    "slug": "andtraskarbrada-tre-traslag",
+    "titel": "Ändträskärbräda i tre träslag",
+    "kort": "Ek, valnöt och lönn i mönster. Ingen bräda blir den andra lik.",
+    "beskrivning": "Stavar av ek, valnöt och lönn limmas först ihop på kant till en platta. Plattan sågas sedan i rader, och varje rad vänds ett kvarts varv så att ändträet kommer upp innan de limmas om. Förskjuter man raderna mot varandra uppstår mönstret, och det blir olika varje gång. Detta är det enda exemplaret i just den här kombinationen. Oljad med livsmedelsklassad paraffinolja och klar att användas direkt.",
+    "pris": 1800,
+    "spec": {
+      "Träslag": "Ek, valnöt och lönn, ändträ",
+      "Fötter": "Halkfria gummifötter",
+      "Ytbehandling": "Paraffinolja och bivax"
+    },
+    "textur": "mix",
+    "bilder": [
+      "andtraskarbrada-tre-traslag-1.jpg"
+    ],
+    "lapp": "endast ett exemplar!",
+    "sald": true,
+    "saldDatum": "2026-09-07"
+  },
+  {
+    "nr": 3,
+    "slug": "andtraskarbrada-saftranna",
+    "titel": "Ändträskärbräda med saftränna",
+    "kort": "Ändträ i rutmönster med en saftränna fräst längs kanten. Kraftig bräda, oljad och klar.",
+    "beskrivning": "Stavar limmas till en platta som sågas i rader, och raderna vänds på ända och limmas om i rutmönster. Fibrerna står därmed på högkant, så kniven skär mellan fibrerna i stället för av dem. Det skonar eggen och gör att ytan läker med tiden. Längs kanten löper en fräst saftränna som fångar upp kött- och fruktsaft, så den inte rinner ut på bänken. Oljad med livsmedelsklassad paraffinolja och klar att användas direkt.",
+    "pris": 1800,
+    "spec": {
+      "Mått": "45 × 24 × 4 cm",
+      "Mönster": "Rutmönster, ändträ",
+      "Saftränna": "Ja, fräst längs kanten",
+      "Ytbehandling": "Paraffinolja och bivax"
+    },
+    "textur": "mix",
+    "bilder": [
+      "andtraskarbrada-saftranna-1.jpg"
+    ],
+    "lapp": "",
+    "sald": false
+  },
+  {
+    "nr": 4,
+    "slug": "andtraskarbrada-ek-lonn-mursten",
+    "titel": "Ändträskärbräda i ek och lönn, murstensmönster",
+    "kort": "Ek och lönn förskjutna rad för rad som skiften i en mur. Kraftig bräda i ändträ, oljad och klar.",
+    "beskrivning": "Stavar av ek och lönn limmas till en platta som sågas i rader. När raderna limmas om förskjuts varje rad en bit mot den förra, precis som skiften i en mur, och det är där mönstret kommer ifrån. Fibrerna står på högkant, så kniven skär mellan dem i stället för av dem. Det skonar eggen och gör att ytan läker med tiden. Oljad med livsmedelsklassad paraffinolja och klar att användas direkt.",
+    "pris": 2000,
+    "spec": {
+      "Mått": "36 × 31 × 4 cm",
+      "Träslag": "Ek och lönn, ändträ",
+      "Mönster": "Murstensförband",
+      "Ytbehandling": "Paraffinolja och bivax"
+    },
+    "textur": "mix",
+    "bilder": [
+      "andtraskarbrada-ek-lonn-mursten-1.jpg"
+    ],
+    "lapp": "",
+    "sald": false
+  },
+  {
+    "nr": 5,
+    "slug": "langtrabrada-massiv-ek",
+    "titel": "Långträskärbräda i massiv ek",
+    "kort": "Stavar av ek limmade på längden, så ådringen löper genom hela brädan. Lättare än ändträ.",
+    "beskrivning": "Stavar av ek limmade på längden, vilket låter ådringen löpa obruten genom hela brädan. Lättare att lyfta och att hänga upp än en bräda i ändträ, och en bräda som visar ekens teckning tydligt. Oljad med livsmedelsklassad paraffinolja och klar att användas direkt.",
+    "pris": 600,
+    "spec": {
+      "Träslag": "Massiv ek, längsgående",
+      "Ytbehandling": "Paraffinolja och bivax"
+    },
+    "textur": "ek",
+    "bilder": [
+      "langtrabrada-massiv-ek-1.jpg"
+    ],
+    "lapp": "",
+    "sald": true,
+    "saldDatum": "2026-09-07"
+  },
+  {
+    "nr": 6,
+    "slug": "langtrabrada-ek-lonn-valnotskant",
+    "titel": "Långträskärbräda i ek och lönn med valnötskant",
+    "kort": "Stavar av ek och lönn på längden, inramade av en kant i valnöt.",
+    "beskrivning": "Stavar av ek och lönn limmade på längden, inramade av en kant i mörk valnöt som håller ihop brädan och ger den tyngd. Ådringen löper obruten genom hela brädan, och de tre träslagen ligger ljust mot mörkt. Oljad med livsmedelsklassad paraffinolja och klar att användas direkt.",
+    "pris": 700,
+    "spec": {
+      "Träslag": "Ek och lönn med kant i valnöt, längsgående",
+      "Ytbehandling": "Paraffinolja och bivax"
+    },
+    "textur": "mix",
+    "bilder": [
+      "langtrabrada-ek-lonn-valnotskant-1.jpg"
+    ],
+    "lapp": "",
+    "sald": true,
+    "saldDatum": "2026-09-07"
+  },
+  {
+    "nr": 7,
+    "slug": "schackbrade-andtra",
+    "titel": "Schackbräde i ändträ",
+    "kort": "Åtta gånger åtta rutor i valnöt och lönn, inramade i ek. Görs på beställning.",
+    "beskrivning": "Rutorna är ändträ. Stavar av valnöt och lönn limmas till en platta som sågas i rader, och varje rad vänds ett kvarts varv och limmas om, så att det är ändytan som ligger upp. Det ger rutorna djup, och eftersom ingen bit virke är den andra lik får varje ruta sin egen teckning. Runt spelplanen löper en ram i ek som limmas på efter att brädet hyvlats plant, vilket är varför brädet kan bli bredare än hyveln annars tillåter. Ytan är behandlad med matt hårdvaxolja. Matt med flit: ett blankt spelbräde kastar tillbaka lampan i taket rakt i ögonen på den som sitter och tänker.",
+    "pris": 3200,
+    "spec": {
+      "Mått": "34 × 34 cm",
+      "Träslag": "Valnöt och lönn, ram i ek",
+      "Mönster": "Ändträ, 8 × 8 rutor",
+      "Ytbehandling": "Matt hårdvaxolja"
+    },
+    "textur": "mix",
+    "bilder": [
+      "schackbrade-andtra-1.jpg"
+    ],
+    "lapp": "",
+    "pabestallning": true,
+    "sald": false,
+    "skotsel": ""
+  }
+]

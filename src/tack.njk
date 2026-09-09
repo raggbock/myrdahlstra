@@ -1,0 +1,17 @@
+---
+layout: base.njk
+huvudtyp: kompakt
+permalink: /tack/index.html
+noindex: true
+eleventyComputed:
+  sidtitel: "Tack för din förfrågan · {{ site.namn }}"
+  sidbeskrivning: "Förfrågan är mottagen. Jag svarar per mejl inom ett par dagar."
+---
+
+<div class="passage">
+  {% include "ornament.njk" %}
+  <h1 class="passage__rubrik">TACK</h1>
+  <p class="passage__text">Förfrågan är mottagen. Jag läser den och svarar per mejl inom ett par dagar med slutpris, leveranstid och Swishnummer.</p>
+  <p class="signatur">{{ site.signatur }}</p>
+  <p class="smatext"><a href="/">Tillbaka till katalogen</a></p>
+</div>

@@ -1,0 +1,24 @@
+{% if huvudtyp == 'start' %}
+  <header class="huvud">
+    <p class="huvud__kicker">{{ site.katalogtitel }}</p>
+    {#- Loggan ar startsidans rubrik. Utan h1 har sidan ingen, och den som
+        laser med skarmlasare far ingen ingang till vad sidan ar.
+
+        Alt-texten sager vad verkstaden gor och inte bara vad den heter: det
+        har ar sidans viktigaste rubrik, och "Myrdahls Tra" ensamt innehaller
+        inget av det nagon soker pa. -#}
+    <h1 class="huvud__titel">
+      <img class="huvud__logga" src="{{ '/assets/logga.png' | version }}" alt="{{ site.rubrik }}" width="420" height="155">
+    </h1>
+    <p class="huvud__tagline">{{ site.beskrivning }}</p>
+    {% include "ornament.njk" %}
+    {% include "nav.njk" %}
+  </header>
+{% else %}
+  <header class="huvud--kompakt">
+    <a class="loggalank" href="/">
+      <img class="huvud__logga" src="{{ '/assets/logga.png' | version }}" alt="{{ site.namn }}, till startsidan" width="420" height="155">
+    </a>
+    {% include "nav.njk" %}
+  </header>
+{% endif %}

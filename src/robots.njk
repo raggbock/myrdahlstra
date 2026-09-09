@@ -1,0 +1,12 @@
+---
+permalink: /robots.txt
+eleventyExcludeFromCollections: true
+---
+# Myrdahls Trä
+# Allt är öppet. Tacksidan och 404 är märkta noindex i sidhuvudet i stället,
+# så att sökmotorer får läsa dem men inte lägga upp dem som träffar.
+
+User-agent: *
+Allow: /
+
+Sitemap: {{ site.url }}/sitemap.xml

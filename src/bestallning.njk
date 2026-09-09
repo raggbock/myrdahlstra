@@ -1,0 +1,239 @@
+---
+layout: base.njk
+huvudtyp: kompakt
+sidnyckel: bestallning
+konfigurator: true
+permalink: /bestallning/index.html
+eleventyComputed:
+  sidtitel: "Bygg din bräda · {{ site.namn }}"
+  sidbeskrivning: "Välj mönster, träslag, mått och saftränna, så ritas brädan upp och ett cirkapris räknas fram. Handgjort i {{ site.ort }}."
+---
+{% set standardMonster = konfig.standard.monster %}
+{% set standardTraA = konfig.standard.traA %}
+{% set standardTraB = konfig.standard.traB %}
+{% set standardTraC = konfig.standard.traC %}
+{% set standardStorlek = konfig.standard.storlek %}
+{% set standardRanna = 'nej' %}
+
+<div class="bestall__intro">
+  <h1 class="bestall__titel"><span class="nr">Efter mått.</span> Bygg din bräda</h1>
+  <p class="bestall__ingress">Bygg brädan här så ritas den upp medan du väljer och ett cirkapris räknas fram, eller skriv bara ett meddelande om du hellre vill fråga något först. Jag svarar inom ett par dagar per mejl. Tillverkning tar normalt {{ site.leveranstid }}.</p>
+  {% include "ornament.njk" %}
+</div>
+
+{#- Två lägen, ett formulär vardera. Att hålla dem isär i stället för att gömma
+    fält i ett gemensamt formulär gör att inga byggarfält kan följa med i ett
+    meddelande, och tvärtom. Vilket läge som visas styrs av kryssrutorna nedan
+    och av ren CSS, så valet fungerar även utan skript. -#}
+<div class="lage" data-lage>
+
+  <fieldset class="lagevaljare">
+    <legend class="dold">Vad vill du göra?</legend>
+    <label class="valkort valkort--lage">
+      <input class="dold" type="radio" name="lage" value="byggaren" checked>
+      <span class="valkort__namn">Bygg en bräda</span>
+      <span class="valkort__tillagg">välj mönster, träslag och mått</span>
+    </label>
+    <label class="valkort valkort--lage">
+      <input class="dold" type="radio" name="lage" value="meddelande">
+      <span class="valkort__namn">Skriv ett meddelande</span>
+      <span class="valkort__tillagg">en fråga eller ett eget önskemål</span>
+    </label>
+  </fieldset>
+
+<form class="bestall"
+      data-konfigurator
+      {% if site.formEndpoint %}action="{{ site.formEndpoint }}" method="POST"{% endif %}>
+
+  <div class="bestall__steg">
+
+    <fieldset class="steg">
+      <legend class="steg__rubrik"><span class="nr">1.</span> Mönster</legend>
+      <div class="valrad">
+        {%- for m in konfig.monster %}
+        <label class="valkort valkort--monster">
+          <input class="dold" type="radio" name="Mönster" data-id="{{ m.id }}" value="{{ m.namn }}"{% if m.id == standardMonster %} checked{% endif %}>
+          {#- Ritas om av skriptet med kundens egna träslag, så korten visar
+              mönstren i det virke hen faktiskt valt. -#}
+          <span class="valkort__bild" data-monsterbild="{{ m.id }}">{{ { monster: m.id, traA: standardTraA, traB: standardTraB, storlek: '4026' } | brada(4, 3) | safe }}</span>
+          <span class="valkort__namn">{{ m.namn }}</span>
+          <span class="valkort__tillagg">{{ m.beskrivning }}</span>
+          <span class="valkort__tillagg">{{ m.tillagg }}</span>
+        </label>
+        {%- endfor %}
+      </div>
+      <p class="hjalptext">Brädan är av ändträ: stavarna kapas och vänds ett kvarts varv, så det är ändytan du skär mot. Därför blir mönstret rutor och inte långa ränder.</p>
+    </fieldset>
+
+    <fieldset class="steg">
+      <legend class="steg__rubrik"><span class="nr">2.</span> Träslag</legend>
+
+      {#- Varje plats i mönstret är ett träslag att välja. Skriptet gömmer och
+          kopplar ur de platser mönstret inte har, så att ett träslag som inte
+          sitter på brädan aldrig följer med i mejlet. Utan skript står alla
+          kvar, och då räknas de ändå inte in i priset. -#}
+      {%- set platser = [
+        { nr: 1, falt: 'Träslag', rubrik: 'Första träslaget', vald: standardTraA },
+        { nr: 2, falt: 'Andra träslaget', rubrik: 'Andra träslaget', vald: standardTraB },
+        { nr: 3, falt: 'Träslag i bruket', rubrik: 'Bruket, alltså remsorna mellan stenarna', vald: standardTraC }
+      ] %}
+
+      {%- for plats in platser %}
+      <div class="traplats" data-traplats="{{ plats.nr }}">
+        <p class="traplats__rubrik">{{ plats.rubrik }}</p>
+        <div class="valrad">
+          {%- for t in konfig.traslag %}
+          <label class="valkort valkort--tra">
+            <input class="dold" type="radio" name="{{ plats.falt }}" data-id="{{ t.id }}" value="{{ t.namn }}"{% if t.id == plats.vald %} checked{% endif %}>
+            <span class="valkort__bild">{{ { monster: 'hel', traA: t.id, storlek: '4026' } | brada(3, 3) | safe }}</span>
+            <span class="valkort__namn">{{ t.namn }}</span>
+            <span class="valkort__tillagg">{{ t.tillagg }}</span>
+          </label>
+          {%- endfor %}
+        </div>
+      </div>
+      {%- endfor %}
+
+      <p class="hjalptext" data-traplatstext>Väljer du samma träslag på flera platser blir brädan lugnare, och du betalar bara för de träslag som faktiskt används.</p>
+      <p class="hjalptext" data-naturligtext hidden>Naturlig betyder att jag väljer träslagen själv, av det som finns i verkstaden när brädan görs. Har du en önskan ändå, skriv den i meddelandet längre ner.</p>
+    </fieldset>
+
+    <fieldset class="steg">
+      <legend class="steg__rubrik"><span class="nr">3.</span> Storlek</legend>
+      <div class="valrad valrad--tight">
+        {%- for s in konfig.storlekar %}
+        <label class="valkort valkort--storlek">
+          <input class="dold" type="radio" name="Storlek" data-id="{{ s.id }}" value="{{ s.namn }}"{% if s.id == standardStorlek %} checked{% endif %}>
+          <span class="valkort__namn">{{ s.namn }}</span>
+          <span class="valkort__tillagg">{{ s.beskrivning }}</span>
+        </label>
+        {%- endfor %}
+      </div>
+      <p class="hjalptext">Andra mått? Skriv önskat mått i meddelandet, så prisas det separat. Standardmåtten stannar vid 32 cm i bredd. Bredare går att göra, men då limmas två plattor ihop efter hyvlingen, och det är betydligt mer arbete, så en sådan bräda prisas för sig.</p>
+    </fieldset>
+
+    <fieldset class="steg">
+      <legend class="steg__rubrik"><span class="nr">4.</span> Saftränna</legend>
+      <div class="valrad valrad--tight">
+        {%- for r in konfig.ranna %}
+        <label class="valkort valkort--ranna">
+          <input class="dold" type="radio" name="Saftränna" data-id="{{ r.id }}" value="{{ r.svar }}"{% if r.id == standardRanna %} checked{% endif %}>
+          <span>{{ r.namn }}</span>
+        </label>
+        {%- endfor %}
+      </div>
+      <p class="hjalptext">Saftrännan fångar upp kött- och fruktsaft, fräst längs brädans kant.</p>
+    </fieldset>
+
+    <fieldset class="steg uppgifter">
+      <legend class="steg__rubrik"><span class="nr">5.</span> Dina uppgifter</legend>
+      <div class="faltpar">
+        <label class="dold" for="namn">Namn</label>
+        <input type="text" id="namn" name="Namn" placeholder="Namn" autocomplete="name" required>
+        <label class="dold" for="kontakt">Mejl eller telefon</label>
+        <input type="text" id="kontakt" name="Mejl eller telefon" placeholder="Mejl eller telefon" autocomplete="email" required>
+      </div>
+      <label class="dold" for="meddelande">Meddelande</label>
+      <textarea id="meddelande" name="Meddelande" placeholder="Meddelande, till exempel egna mått eller önskemål om mönster"></textarea>
+    </fieldset>
+
+  </div>
+
+  <aside class="bradpanel">
+
+    <figure class="forhandsvisning">
+      <div class="inramad" data-ut="bild">{{ standard.bild | safe }}</div>
+      <figcaption class="forhandsvisning__text">Skiss, inte foto. Varje bit virke har sin egen teckning, så din bräda blir aldrig exakt den här.</figcaption>
+    </figure>
+
+    <div class="summering mork">
+      <h2 class="summering__rubrik">Din bräda</h2>
+      <dl class="summering__rader">
+        <div class="leader">
+          <dt>Mönster</dt>
+          <span class="leader__linje"></span>
+          <dd data-ut="monster">{{ standard.monster }}</dd>
+        </div>
+        <div class="leader">
+          <dt>Träslag</dt>
+          <span class="leader__linje"></span>
+          <dd data-ut="traslag">{{ standard.traslag }}</dd>
+        </div>
+        <div class="leader">
+          <dt>Mått</dt>
+          <span class="leader__linje"></span>
+          <dd data-ut="storlek">{{ standard.storlek }}</dd>
+        </div>
+        <div class="leader">
+          <dt>Saftränna</dt>
+          <span class="leader__linje"></span>
+          <dd data-ut="ranna">{{ standard.ranna }}</dd>
+        </div>
+      </dl>
+      <div class="leader summering__prisrad">
+        <span class="summering__prisetikett">Cirkapris</span>
+        <span class="leader__linje"></span>
+        <span class="summering__pris" data-ut="pris">{{ standard.pris }}</span>
+      </div>
+      <p class="summering__finstilt">Slutpriset bekräftas per mejl innan tillverkningen börjar. Momsfri försäljning. Frakt {{ site.fraktLiten }} kr, eller {{ site.fraktStor }} kr för brädor större än {{ site.fraktGrans }}. Hämtning i {{ site.ort }} kostar ingenting.</p>
+
+      {%- if site.formEndpoint %}
+      <input type="hidden" name="Cirkapris" value="{{ standard.pris }}">
+      <input type="hidden" name="_subject" value="Förfrågan: bräda efter mått">
+      <input type="text" name="_gotcha" class="dold" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <button class="knapp knapp--ljus" type="submit">Skicka förfrågan</button>
+      {%- else %}
+      {#
+        ==================================================================
+        Formuläret är inte kopplat än. Lägg in din Formspree-adress i
+        src/_data/site.json, raden "formEndpoint", och bygg om.
+        Fram till dess går knappen till ett förifyllt mejl i stället.
+        ==================================================================
+      #}
+      <a class="knapp knapp--ljus" href="mailto:{{ site.mejl }}?subject={{ 'Förfrågan: bräda efter mått' | urlencode }}">Skicka förfrågan per mejl</a>
+      <p class="summering__finstilt">Skriv mönster, träslag, mått och om du vill ha saftränna i mejlet, så räknar jag fram slutpriset.</p>
+      {%- endif %}
+
+      <span class="lapp lapp--panel">svar inom ett par dagar</span>
+    </div>
+
+  </aside>
+
+</form>
+
+{#- Läge två: bara ett meddelande. Samma mottagare och samma spärrar mot
+    bottar, men utan ett enda val att ta ställning till. -#}
+<form class="fraga" id="skriv"
+      {% if site.formEndpoint %}action="{{ site.formEndpoint }}" method="POST"{% endif %}>
+
+  <fieldset class="steg uppgifter">
+    <legend class="steg__rubrik">Skriv till mig</legend>
+    <p class="hjalptext">Undrar du något, vill ha ett mått som inte finns i byggaren, eller har en idé du vill bolla? Skriv några rader, så svarar jag personligen inom ett par dagar. Du binder dig inte till något.</p>
+
+    <div class="faltpar">
+      <label class="dold" for="fraga-namn">Namn</label>
+      <input type="text" id="fraga-namn" name="Namn" placeholder="Namn" autocomplete="name" required>
+      <label class="dold" for="fraga-kontakt">Mejl eller telefon</label>
+      <input type="text" id="fraga-kontakt" name="Mejl eller telefon" placeholder="Mejl eller telefon" autocomplete="email" required>
+    </div>
+
+    <label class="dold" for="fraga-meddelande">Meddelande</label>
+    <textarea id="fraga-meddelande" name="Meddelande" placeholder="Din fråga eller ditt önskemål" required></textarea>
+
+    {%- if site.formEndpoint %}
+    <input type="hidden" name="_subject" value="Meddelande från hemsidan">
+    <input type="text" name="_gotcha" class="dold" tabindex="-1" autocomplete="off" aria-hidden="true">
+    <div class="knapp-grupp knapp-grupp--smal">
+      <button class="knapp" type="submit">Skicka meddelande</button>
+      <p class="smatext">eller mejla <a href="mailto:{{ site.mejl }}">{{ site.mejl }}</a></p>
+    </div>
+    {%- else %}
+    <div class="knapp-grupp knapp-grupp--smal">
+      <a class="knapp" href="mailto:{{ site.mejl }}">Mejla {{ site.mejl }}</a>
+    </div>
+    {%- endif %}
+  </fieldset>
+
+</form>
+
+</div>

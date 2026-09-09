@@ -1,0 +1,98 @@
+{#-
+  Strukturerad data, alltså det Google läser i stället för att gissa ur texten.
+  Vinsten är konkret: pris och lagerstatus kan visas direkt i träfflistan, och
+  verkstaden kan hamna på kartan.
+
+  Allt som står här måste också stå synligt på sidan. Att lova ett pris här och
+  visa ett annat för besökaren är precis vad Google straffar, så priset hämtas
+  ur samma products.json som prisraden.
+-#}
+{%- if p %}
+{#- En produktsida: brädan, dess pris och om den går att köpa. -#}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": {{ p.titel | dump | safe }},
+  "description": {{ p.kort | dump | safe }},
+  "sku": {{ ('MT-' + p.nr) | dump | safe }},
+  "image": [{{ (site.url + '/assets/foto/' + p.bilder[0]) | dump | safe }}],
+  "material": {{ (p.spec['Träslag'] | default('Massivt trä')) | dump | safe }},
+  "brand": { "@type": "Brand", "name": {{ site.namn | dump | safe }} },
+  "offers": {
+    "@type": "Offer",
+    "url": {{ (site.url + '/brada/' + p.slug + '/') | dump | safe }},
+    "price": "{{ p.pris }}",
+    "priceCurrency": "SEK",
+    "availability": "https://schema.org/{% if p.sald %}SoldOut{% elif p.pabestallning %}PreOrder{% else %}InStock{% endif %}",
+    "itemCondition": "https://schema.org/NewCondition",
+    "seller": { "@type": "Organization", "name": {{ site.namn | dump | safe }} }
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Katalogen", "item": {{ site.url | dump | safe }} },
+    { "@type": "ListItem", "position": 2, "name": {{ ('N:o ' + p.nr + '. ' + p.titel) | dump | safe }} }
+  ]
+}
+</script>
+{%- elif sidnyckel == 'start' %}
+{#- Startsidan: vem som står bakom sajten och var verkstaden ligger. -#}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "name": {{ site.namn | dump | safe }},
+  "description": {{ site.beskrivning | dump | safe }},
+  "url": {{ site.url | dump | safe }},
+  "email": {{ site.mejl | dump | safe }},
+  "image": {{ (site.url + '/assets/foto/' + site.delbild) | dump | safe }},
+  "founder": { "@type": "Person", "name": {{ site.innehavare | dump | safe }} },
+  "address": {
+    "@type": "PostalAddress",
+    "addressLocality": {{ site.ort | dump | safe }},
+    "addressRegion": "Örebro län",
+    "addressCountry": "SE"
+  },
+  "areaServed": { "@type": "Country", "name": "Sverige" },
+  "paymentAccepted": "Swish",
+  "currenciesAccepted": "SEK",
+  "knowsLanguage": "sv"
+}
+</script>
+{#- Startsidan är en katalog, inte en presentation. Utan den här listan får
+    sökmotorn gissa ur markupen vad de sju korten är. Med den vet den att
+    sidan räknar upp namngivna varor med priser, i den ordning de står. -#}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "name": {{ ('Sortimentet hos ' + site.namn) | dump | safe }},
+  "numberOfItems": {{ (products | katalog).length }},
+  "itemListElement": [
+    {%- for p in products | katalog %}
+    {
+      "@type": "ListItem",
+      "position": {{ loop.index }},
+      "item": {
+        "@type": "Product",
+        "name": {{ p.titel | dump | safe }},
+        "url": {{ (site.url + '/brada/' + p.slug + '/') | dump | safe }},
+        "image": {{ (site.url + '/assets/foto/' + p.bilder[0]) | dump | safe }},
+        "offers": {
+          "@type": "Offer",
+          "price": "{{ p.pris }}",
+          "priceCurrency": "SEK",
+          "availability": "https://schema.org/{% if p.sald %}SoldOut{% elif p.pabestallning %}PreOrder{% else %}InStock{% endif %}"
+        }
+      }
+    }{% if not loop.last %},{% endif %}
+    {%- endfor %}
+  ]
+}
+</script>
+{%- endif %}

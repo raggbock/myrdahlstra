@@ -1,0 +1,20 @@
+{
+  "name": "myrdahlstra",
+  "version": "1.0.0",
+  "description": "Statisk webbplats för Myrdahls Trä, Stora Mellösa",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "start": "node verktyg/stada.js && eleventy --serve --port=4321",
+    "build": "node verktyg/stada.js && eleventy && node verktyg/bilder.js",
+    "test": "node --test test/*.test.js",
+    "admin": "node verktyg/admin.js",
+    "preview": "npm run build && wrangler pages dev _site --port=4323",
+    "deploy": "npm run build && wrangler pages deploy _site --project-name=myrdahls-storefront"
+  },
+  "devDependencies": {
+    "@11ty/eleventy": "^3.0.0",
+    "sharp": "^0.35.4",
+    "wrangler": "^4.129.0"
+  }
+}

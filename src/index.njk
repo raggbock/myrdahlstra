@@ -1,0 +1,75 @@
+---
+layout: base.njk
+huvudtyp: start
+sidnyckel: start
+permalink: /index.html
+eleventyComputed:
+  sidtitel: "{{ site.namn }}, handgjorda skärbrädor och brickor från {{ site.ort }}"
+---
+{% from "postkort.njk" import postkort %}
+
+<section class="poster" id="sortimentet" aria-label="Sortimentet">
+  <h2 class="dold">Sortimentet</h2>
+
+  {#- Katalogen gar i nummerordning, sa att N:o 4 star dar N:o 4 ska sta.
+      Salda brador ligger kvar med sitt band i en vecka och faller sedan ur
+      listan vid bygget. -#}
+  {%- set katalog = products | katalog %}
+
+  {%- for p in katalog %}
+  {{ postkort(p) }}
+  {%- endfor %}
+
+  {#- Med jamnt antal brador blir sista gridcellen tom, sa kortet far ga
+      over hela bredden. Med ojamnt antal fyller det den sista luckan,
+      precis som i referensdesignen med tre brador. -#}
+  <div class="kort--mork mork{% if katalog.length % 2 == 0 %} kort--mork--bred{% endif %}">
+    <div class="kort--mork__innehall">
+      <h3><span class="nr">Efter mått.</span> Din egen bräda</h3>
+      <p>Välj mönster, träslag, mått och saftränna, så ritas brädan upp medan du väljer och tillverkas sedan för just ditt kök. Leverans inom {{ site.leveranstid }}.</p>
+      <a href="/bestallning/">Till beställningssidan</a>
+    </div>
+  </div>
+
+</section>
+
+<section class="passage" id="om-verkstaden">
+  {% include "ornament.njk" %}
+  <h2 class="passage__rubrik">OM VERKSTADEN</h2>
+  <p class="passage__text">Ek, ask, valnöt och lönn väljs ut bit för bit och limmas till plattor. Plattorna sågas i rader som vänds på ända och limmas om, och det är där mönstret uppstår. Sedan hyvlas de plana och oljas med livsmedelsklassad paraffinolja. Ingen bräda blir den andra lik. <a href="/andtra/">Varför ändträ</a> förklarar vad det gör med kniven.</p>
+  <p class="signatur">{{ site.signatur }}</p>
+  <p class="smatext"><a href="/verkstaden/">Mer om verkstaden</a></p>
+</section>
+
+<section class="passage" id="kontakt">
+  {% include "ornament.njk" %}
+  <h2 class="passage__rubrik">KONTAKT</h2>
+  <p class="passage__text">Skicka en förfrågan här på hemsidan eller mejla direkt, så svarar jag inom ett par dagar. Har du bara en fråga går det lika bra att <a href="/bestallning/#skriv">skriva några rader</a>.</p>
+  <dl class="kontaktrader">
+    <div class="leader">
+      <dt>Mejl</dt>
+      <span class="leader__linje"></span>
+      <dd><a href="mailto:{{ site.mejl }}">{{ site.mejl }}</a></dd>
+    </div>
+    <div class="leader">
+      <dt>Betalning</dt>
+      <span class="leader__linje"></span>
+      <dd>Swish, nummer lämnas när beställningen bekräftas</dd>
+    </div>
+    <div class="leader">
+      <dt>Frakt</dt>
+      <span class="leader__linje"></span>
+      <dd>Spårbar frakt {{ site.fraktLiten }} kr, större brädor {{ site.fraktStor }} kr</dd>
+    </div>
+    <div class="leader">
+      <dt>Hämtning</dt>
+      <span class="leader__linje"></span>
+      <dd>{{ site.ort }} utanför Örebro, enligt överenskommelse</dd>
+    </div>
+    <div class="leader">
+      <dt>Leveranstid</dt>
+      <span class="leader__linje"></span>
+      <dd>Beställning efter mått tar {{ site.leveranstid }}</dd>
+    </div>
+  </dl>
+</section>

@@ -1,0 +1,162 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&amp;family=Caveat:wght@500&amp;display=swap" rel="stylesheet">
+  <style>
+    body { margin: 0; font-family: 'EB Garamond', Georgia, serif; }
+    a { color: #2B2118; text-decoration: none; border-bottom: 1px solid #B79E7F; }
+    a:hover { color: #8a5a2c; }
+    input, textarea { font-family: 'EB Garamond', Georgia, serif; font-size: 16px; color: #2B2118; background: #FBF6E9; border: 1px solid #2B2118; padding: 13px 14px; outline: none; width: 100%; box-sizing: border-box; }
+    textarea { min-height: 96px; resize: vertical; }
+  </style>
+</helmet>
+<div style="width: 1440px; background: #F4EDDD; color: #2B2118; padding: 40px 120px;">
+<div style="border: 1px solid #2B2118; outline: 3px double #2B2118; outline-offset: 4px; padding: 48px 72px 56px 72px; display: flex; flex-direction: column; gap: 40px;">
+
+  <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #2B2118; padding-bottom: 24px;">
+    <img src="logga.png" alt="Myrdahls Trä" style="height: 46px; width: auto;">
+    <div style="display: flex; gap: 30px; font-size: 14px; letter-spacing: 0.14em;">
+      <a href="#">SORTIMENTET</a>
+      <a href="#" style="color: #8a5a2c;">BESTÄLLNING EFTER MÅTT</a>
+      <a href="#">OM VERKSTADEN</a>
+      <a href="#">KONTAKT</a>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center;">
+    <div style="font-size: 36px;"><span style="font-style: italic;">Efter mått.</span> Din egen bräda</div>
+    <div style="font-size: 17px; line-height: 1.55; color: #57503F; max-width: 700px;">Välj träslag, mått och saftränna så räknas ett cirkapris fram. Skicka förfrågan, så återkommer jag inom ett par dagar per mejl med slutpris och leveranstid. Tillverkning tar normalt tre till fyra veckor.</div>
+    <svg width="340" height="14" viewBox="0 0 340 14"><line x1="0" y1="7" x2="150" y2="7" stroke="#2B2118" stroke-width="1"></line><rect x="165" y="2" width="10" height="10" transform="rotate(45 170 7)" fill="#2B2118"></rect><line x1="190" y1="7" x2="340" y2="7" stroke="#2B2118" stroke-width="1"></line></svg>
+  </div>
+
+  <div style="display: flex; gap: 52px; align-items: flex-start;">
+
+    <div style="display: flex; flex-direction: column; gap: 36px; flex-grow: 1;">
+
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <div style="font-size: 21px;"><span style="font-style: italic;">1.</span> Träslag</div>
+        <div style="display: flex; gap: 18px;">
+          <sc-for list="{{traslag}}" as="t" hint-placeholder-count="3">
+            <div onClick="{{t.pick}}" style="cursor: pointer; display: flex; flex-direction: column; gap: 9px; padding: 12px; background: #FBF6E9; border: {{t.border}}; width: 185px;">
+              <div style="height: 78px; background: {{t.tex}};"></div>
+              <div style="font-size: 17px;">{{t.namn}}</div>
+              <div style="font-size: 14px; font-style: italic; color: #57503F;">{{t.tillagg}}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <div style="font-size: 21px;"><span style="font-style: italic;">2.</span> Storlek</div>
+        <div style="display: flex; gap: 14px; flex-wrap: wrap;">
+          <sc-for list="{{storlekar}}" as="s" hint-placeholder-count="4">
+            <div onClick="{{s.pick}}" style="cursor: pointer; padding: 13px 22px; background: #FBF6E9; border: {{s.border}}; display: flex; flex-direction: column; gap: 3px; align-items: center; min-width: 108px;">
+              <div style="font-size: 18px;">{{s.namn}}</div>
+              <div style="font-size: 13px; font-style: italic; color: #57503F;">{{s.beskrivning}}</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="font-size: 14.5px; font-style: italic; color: #57503F;">Andra mått? Skriv önskat mått i meddelandet så prisas det separat.</div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <div style="font-size: 21px;"><span style="font-style: italic;">3.</span> Saftränna</div>
+        <div style="display: flex; gap: 14px;">
+          <sc-for list="{{rannval}}" as="r" hint-placeholder-count="2">
+            <div onClick="{{r.pick}}" style="cursor: pointer; padding: 13px 26px; background: #FBF6E9; border: {{r.border}}; font-size: 17px;">{{r.namn}}</div>
+          </sc-for>
+        </div>
+        <div style="font-size: 14.5px; font-style: italic; color: #57503F;">Saftrännan fångar upp kött- och fruktsaft, fräst längs brädans kant.</div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 14px; max-width: 600px;">
+        <div style="font-size: 21px;"><span style="font-style: italic;">4.</span> Dina uppgifter</div>
+        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px;">
+          <input type="text" placeholder="Namn">
+          <input type="text" placeholder="Mejl eller telefon">
+        </div>
+        <textarea placeholder="Meddelande, till exempel egna mått eller önskemål om mönster"></textarea>
+      </div>
+
+    </div>
+
+    <div style="width: 380px; flex-shrink: 0; background: #2B2118; color: #F4EDDD; padding: 32px 32px 36px 32px; display: flex; flex-direction: column; gap: 17px; position: relative;">
+      <div style="font-size: 20px; font-style: italic; border-bottom: 1px solid #4a3c2e; padding-bottom: 12px;">Din bräda</div>
+      <div style="display: flex; flex-direction: column; gap: 10px; font-size: 16px;">
+        <div style="display: flex; align-items: baseline; gap: 8px;"><div style="color: #CBBFA9;">Träslag</div><div style="flex-grow: 1; border-bottom: 1px dotted #6b5c48;"></div><div>{{valtTra}}</div></div>
+        <div style="display: flex; align-items: baseline; gap: 8px;"><div style="color: #CBBFA9;">Mått</div><div style="flex-grow: 1; border-bottom: 1px dotted #6b5c48;"></div><div>{{valdStorlek}}</div></div>
+        <div style="display: flex; align-items: baseline; gap: 8px;"><div style="color: #CBBFA9;">Saftränna</div><div style="flex-grow: 1; border-bottom: 1px dotted #6b5c48;"></div><div>{{valdRanna}}</div></div>
+      </div>
+      <div style="display: flex; align-items: baseline; gap: 8px; border-top: 1px solid #4a3c2e; padding-top: 16px;">
+        <div style="font-size: 17px; color: #CBBFA9;">Cirkapris</div>
+        <div style="flex-grow: 1; border-bottom: 1px dotted #6b5c48;"></div>
+        <div style="font-size: 34px;">{{pris}}</div>
+      </div>
+      <div style="font-size: 13.5px; line-height: 1.5; color: #9d8f7b;">Slutpriset bekräftas per mejl innan tillverkningen börjar. Momsfri försäljning, frakt eller hämtning tillkommer.</div>
+      <a href="#" style="background: #F4EDDD; color: #2B2118; padding: 16px 0; text-align: center; font-size: 17px; letter-spacing: 0.06em; border-bottom: none;">Skicka förfrågan</a>
+      <div style="position: absolute; top: -16px; right: 18px; font-family: 'Caveat', cursive; font-size: 21px; color: #8a3d2c; background: #F4EDDD; padding: 0 10px; transform: rotate(-3deg);">svar inom ett par dagar</div>
+    </div>
+
+  </div>
+
+  <div style="display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; border-top: 1px solid #2B2118; padding-top: 30px;">
+    <div style="font-size: 17px; color: #57503F;">Beställningar görs här på hemsidan eller per mejl till <a href="#">sebastian.myrdahl@gmail.com</a>.</div>
+    <div style="font-size: 13px; letter-spacing: 0.2em; color: #8a5a2c;">SWISH &middot; MOMSFRI FÖRSÄLJNING ENLIGT 18 KAP. MERVÄRDESSKATTELAGEN &middot; STORA MELLÖSA</div>
+  </div>
+
+</div>
+</div>
+</x-dc>
+<script data-dc-script data-props='{}'>
+class Component extends DCLogic {
+  renderVals() {
+    const st = this.state || {};
+    const tra = st.tra ?? 'ek';
+    const storlek = st.storlek ?? '4532';
+    const ranna = st.ranna ?? false;
+
+    const traDef = [
+      { id: 'ek', namn: 'Massiv ek', tillagg: 'grundpris', plus: 0,
+        tex: 'repeating-linear-gradient(90deg, #93714e 0 16px, #7c5f40 16px 28px)' },
+      { id: 'mix', namn: 'Ek, valnöt och lönn', tillagg: 'plus 200 kr', plus: 200,
+        tex: 'repeating-linear-gradient(90deg, #93714e 0 18px, #4a3423 18px 30px, #d9c29a 30px 42px)' },
+      { id: 'valnot', namn: 'Massiv valnöt', tillagg: 'plus 500 kr', plus: 500,
+        tex: 'repeating-linear-gradient(90deg, #4a3423 0 16px, #3a2919 16px 28px)' }
+    ];
+    const storlekDef = [
+      { id: '4030', namn: '40 × 30 cm', beskrivning: 'liten', bas: 1400 },
+      { id: '4532', namn: '45 × 32 cm', beskrivning: 'standard', bas: 1650 },
+      { id: '5035', namn: '50 × 35 cm', beskrivning: 'stor', bas: 1900 },
+      { id: '6040', namn: '60 × 40 cm', beskrivning: 'slaktarbräda', bas: 2400 }
+    ];
+    const rannaDef = [
+      { id: false, namn: 'Utan' },
+      { id: true, namn: 'Med saftränna, plus 150 kr' }
+    ];
+
+    const sel = '2px solid #2B2118';
+    const osel = '1px solid #B7A88F';
+    const traVal = traDef.find((t) => t.id === tra);
+    const storlekVal = storlekDef.find((s) => s.id === storlek);
+    const total = storlekVal.bas + traVal.plus + (ranna ? 150 : 0);
+
+    return {
+      traslag: traDef.map((t) => ({ ...t, border: t.id === tra ? sel : osel, pick: () => this.setState({ tra: t.id }) })),
+      storlekar: storlekDef.map((s) => ({ ...s, border: s.id === storlek ? sel : osel, pick: () => this.setState({ storlek: s.id }) })),
+      rannval: rannaDef.map((r) => ({ ...r, border: r.id === ranna ? sel : osel, pick: () => this.setState({ ranna: r.id }) })),
+      valtTra: traVal.namn,
+      valdStorlek: storlekVal.namn,
+      valdRanna: ranna ? 'Ja' : 'Nej',
+      pris: total.toLocaleString('sv-SE') + ' kr'
+    };
+  }
+}
+</script>
+</body>
+</html>

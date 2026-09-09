@@ -1,0 +1,34 @@
+{% from "bild.njk" import bild %}
+{% macro postkort(p) %}
+<article class="post{% if p.sald %} post--sald{% endif %}">
+  <div class="post__bildruta">
+    {%- if p.bilder and p.bilder.length -%}
+      {#- Rutan är 190 px bred på skärm och full bredd på mobil. Utan srcset
+          laddas ett foto på 1400 px för att fylla den, gånger antalet kort. -#}
+      {{ bild(p.bilder[0], p.titel, '(max-width: 720px) 92vw, 190px') }}
+    {%- else -%}
+      <div class="tex tex--{{ p.textur }}"><span class="foto-markor{% if p.textur == 'bricka' %} foto-markor--mork{% endif %}">[FOTO]</span></div>
+    {%- endif -%}
+    {%- if p.sald -%}
+      <span class="band-yta"><span class="band">Såld</span></span>
+    {%- elif p.lapp -%}
+      <span class="lapp lapp--horn">{{ p.lapp }}</span>
+    {%- elif p.pabestallning -%}
+      {#- Ingen ligger färdig, så kortet ska inte se ut som ett lagerexemplar. -#}
+      <span class="lapp lapp--horn">görs på beställning</span>
+    {%- endif -%}
+  </div>
+  <div class="post__innehall">
+    <h3 class="post__titel"><span class="nr">N:o {{ p.nr }}.</span> {{ p.titel }}</h3>
+    <p class="post__text">{{ p.kort }}</p>
+    {%- if p.spec and p.spec['Mått'] %}
+    <p class="post__matt">{{ p.spec['Mått'] }}</p>
+    {%- endif %}
+    <div class="leader">
+      <a class="post__lank" href="/brada/{{ p.slug }}/">{% if p.sald %}Visa brädan{% else %}Visa och beställ{% endif %}</a>
+      <span class="leader__linje"></span>
+      <span class="post__pris">{{ p.pris | pris }}</span>
+    </div>
+  </div>
+</article>
+{% endmacro %}

@@ -1,0 +1,75 @@
+---
+layout: base.njk
+huvudtyp: kompakt
+permalink: /villkor/index.html
+eleventyComputed:
+  sidtitel: "Köpvillkor och företagsuppgifter · {{ site.namn }}"
+  sidbeskrivning: "Ångerrätt, reklamation, betalning, frakt och företagsuppgifter för {{ site.namn }}."
+---
+
+<div class="bestall__intro">
+  <h1 class="bestall__titel"><span class="nr">Köpvillkor</span> och företagsuppgifter</h1>
+  <p class="bestall__ingress">Kortfattat och utan krångel. Undrar du något som inte står här, mejla, då svarar jag och lägger till det.</p>
+  {% include "ornament.njk" %}
+</div>
+
+<div class="text">
+
+  <h2 class="text__rubrik">Vem du handlar av</h2>
+  <dl class="kontaktrader kontaktrader--bred">
+    <div class="leader">
+      <dt>Verksamhet</dt><span class="leader__linje"></span><dd>{{ site.namn }}</dd>
+    </div>
+    <div class="leader">
+      <dt>Innehavare</dt><span class="leader__linje"></span><dd>{{ site.innehavare }}</dd>
+    </div>
+    {%- if site.orgnr %}
+    <div class="leader">
+      <dt>Organisationsnummer</dt><span class="leader__linje"></span><dd>{{ site.orgnr }}</dd>
+    </div>
+    {%- endif %}
+    <div class="leader">
+      <dt>Ort</dt><span class="leader__linje"></span><dd>{{ site.ort }} utanför Örebro</dd>
+    </div>
+    <div class="leader">
+      <dt>Mejl</dt><span class="leader__linje"></span><dd><a href="mailto:{{ site.mejl }}">{{ site.mejl }}</a></dd>
+    </div>
+  </dl>
+
+  <h2 class="text__rubrik">Skatt och moms</h2>
+  {%- if site.fskatt %}
+  <p>Verksamheten är godkänd för F-skatt. Du som köper behöver alltså inte dra av eller betala in någon skatt för det du handlar.</p>
+  {%- endif %}
+  <p>Försäljningen är momsfri enligt 18 kap. mervärdesskattelagen, eftersom omsättningen ligger under gränsen för momsplikt. Det betyder att priserna du ser är hela beloppet. Ingen moms läggs på, och ingen moms specificeras, så du kan inte dra av moms på ett köp här.</p>
+
+  <h2 class="text__rubrik">Så går en beställning till</h2>
+  <p>Du skickar en förfrågan här på sajten eller mejlar. Inget betalas i det läget, och du binder dig inte. Jag svarar personligen inom ett par dagar med bekräftelse, slutpris, leveranstid och Swishnummer. Först när vi kommit överens betalar du.</p>
+  <p>Färdiga brädor i katalogen skickas inom några dagar. En bräda efter mått tar normalt {{ site.leveranstid }} att tillverka, och detsamma gäller de poster i katalogen som är märkta att de görs på beställning.</p>
+
+  <h2 class="text__rubrik">Betalning</h2>
+  <p>Betalning sker med Swish, efter att vi bekräftat beställningen. Ingen kortbetalning, ingen faktura och ingen delbetalning.</p>
+
+  <h2 class="text__rubrik">Frakt och hämtning</h2>
+  <p>{{ site.frakt }} Att hämta kostar ingenting. Gränsen mellan de två fraktavgifterna går vid {{ site.fraktGrans }}: en större bräda väger över fem kilo med kartongen inräknad, och hamnar därmed i en dyrare viktklass hos fraktbolaget.</p>
+  <p>Brädorna är tunga och packas därför omsorgsfullt. Skulle något ändå gå sönder på vägen, hör av dig med en bild, då löser vi det.</p>
+
+  <h2 class="text__rubrik">Ångerrätt</h2>
+  <p>Handlar du som privatperson på distans har du fjorton dagars ångerrätt enligt distansavtalslagen. Fristen räknas från den dag du tog emot brädan. Du behöver inte ange något skäl, det räcker att du meddelar mig.</p>
+  <p>Brädan ska vara oanvänd och i samma skick som när den kom. {{ site.returfrakt }} När jag tagit emot den betalar jag tillbaka vad du betalat, inklusive den ursprungliga frakten.</p>
+  <p><strong>Ett undantag:</strong> en bräda som tillverkats efter dina mått eller dina önskemål om mönster är specialtillverkad, och för sådana gäller ingen ångerrätt. Det följer av lagen, och det är också rimligt: brädan är gjord bara för dig och går inte att sälja till någon annan. Därför frågar jag alltid en extra gång innan jag börjar såga.</p>
+
+  <h2 class="text__rubrik">Om något är fel</h2>
+  <p>Du har tre års reklamationsrätt enligt konsumentköplagen för fel som fanns när du fick brädan. Upptäcker du ett fel, mejla mig med en bild, då lagar jag, byter eller betalar tillbaka.</p>
+  <p>Trä är ett levande material, och en del saker är inte fel utan trä. Färgen mörknar med åren, särskilt valnöt som ljusnar och ek som gulnar. Brädan rör sig något med luftfuktigheten. Kvistar, märgstrålar och färgskiftningar hör till virket, och eftersom varje bräda sågas ur en egen bit ser ingen ut exakt som bilden. Det är meningen.</p>
+
+  <h2 class="text__rubrik">Dina uppgifter</h2>
+  <p>Skickar du en förfrågan används namnet och kontaktuppgiften bara för att svara dig och för att genomföra beställningen. Uppgifterna hamnar i min mejl och skickas dit genom mejltjänsten Resend. De läggs inte i något register, säljs inte vidare, och används inte för utskick. Vill du att jag raderar din förfrågan, skriv och säg det, då gör jag det.</p>
+
+  <h2 class="text__rubrik">Om vi inte kommer överens</h2>
+  <p>Skulle vi bli osams och inte lösa det själva kan du vända dig till Allmänna reklamationsnämnden, ARN, som prövar tvister mellan konsument och företag utan kostnad. Jag följer deras rekommendationer.</p>
+
+  <div class="knapp-grupp knapp-grupp--smal">
+    <a class="knapp" href="/#sortimentet">Till katalogen</a>
+  </div>
+
+</div>

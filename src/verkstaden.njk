@@ -1,0 +1,59 @@
+---
+layout: base.njk
+huvudtyp: kompakt
+sidnyckel: verkstaden
+permalink: /verkstaden/index.html
+eleventyComputed:
+  sidtitel: "Om verkstaden · {{ site.namn }}"
+  sidbeskrivning: "En hobbyverksamhet i ett garage i {{ site.ort }} utanför Örebro. En bräda i taget, av {{ site.innehavare }}."
+---
+
+<div class="bestall__intro">
+  <h1 class="bestall__titel"><span class="nr">Om</span> verkstaden</h1>
+  <p class="bestall__ingress">Det här är inte ett snickeri. Det är ett garage i {{ site.ort }}, och det är jag som står i det.</p>
+  {% include "ornament.njk" %}
+</div>
+
+<div class="text">
+
+  <h2 class="text__rubrik">Ett garage utanför Örebro</h2>
+  <p>Myrdahls Trä är en hobbyverksamhet. Ingen fabrik, inga anställda, ingen som packar åt mig. Brädorna görs i garaget hemma i {{ site.ort }}, en bit utanför Örebro, och det är jag, {{ site.innehavare }}, som sågar, limmar, hyvlar, slipar och oljar.</p>
+  <p>Det är värt att säga rakt ut, för det förklarar det mesta annat på den här sajten. Varför det bara finns några brädor i katalogen. Varför var och en är ett unikt exemplar. Varför du får svar av en människa och inte av ett kundtjänstsystem. Och varför en beställning efter mått tar {{ site.leveranstid }} och inte tre dagar.</p>
+
+  <h2 class="text__rubrik">En bräda i taget</h2>
+  <p>Jag gör inte serier. Varje bräda kommer ur en egen bit virke, med den bitens kvistar, färgskiftningar och märgstrålar. Två brädor av samma träslag och samma mått ser ändå olika ut, och mönstret blir aldrig exakt likadant två gånger.</p>
+  <p>Det betyder också att det som står i katalogen är det som finns. Är en bräda såld är den såld, och nästa blir lite annorlunda. Vill du ha något som liknar en som är borta, hör av dig, då gör jag ett försök.</p>
+
+  <h2 class="text__rubrik">Vad som händer med virket</h2>
+  <p>Ek, ask, valnöt och lönn väljs ut bit för bit. Plankorna sågas till stavar som limmas ihop på kant till en platta. För en långträbräda är plattan i princip färdig efter det, den hyvlas plan och får en kant.</p>
+  <p>Ska det bli ändträ sågas plattan i stället tvärs över i rader. Varje rad vänds ett kvarts varv så att fibrernas ändar kommer upp, och sedan limmas raderna ihop igen. Det är i det andra steget mönstret uppstår, beroende på hur raderna läggs mot varandra.</p>
+  <p>Därefter hyvlas brädan plan, slipas, och oljas med livsmedelsklassad paraffinolja och bivax. En burk träbalsam följer med, så att du kan hålla efter den själv.</p>
+  <p><a href="/andtra/">Mer om skillnaden mellan ändträ och långträ</a></p>
+
+  <h2 class="text__rubrik">Litet med flit</h2>
+  <p>Omsättningen ligger under gränsen för momsplikt, så försäljningen är momsfri. Det är inget kryphål, det är bara storleken på verksamheten. Priset du ser är hela beloppet, och det finns ingen moms att dra av för den som handlar till ett företag.</p>
+  <p>Jag har ingen ambition att bli en möbelfabrik. Det roliga är att göra brädorna, och det slutar vara roligt om det blir en produktionslinje.</p>
+
+  <h2 class="text__rubrik">Du pratar med mig</h2>
+  <p>Skickar du en förfrågan hamnar den i min mejl, och det är jag som svarar, oftast inom ett par dagar. Har du en fråga om virke, mått, skötsel eller om en bräda passar just ditt kök, fråga. Jag säljer hellre rätt bräda än en bräda.</p>
+
+  <dl class="kontaktrader">
+    <div class="leader">
+      <dt>Mejl</dt><span class="leader__linje"></span><dd><a href="mailto:{{ site.mejl }}">{{ site.mejl }}</a></dd>
+    </div>
+    <div class="leader">
+      <dt>Ort</dt><span class="leader__linje"></span><dd>{{ site.ort }} utanför Örebro</dd>
+    </div>
+    <div class="leader">
+      <dt>Hämtning</dt><span class="leader__linje"></span><dd>Går bra, enligt överenskommelse</dd>
+    </div>
+  </dl>
+
+  <p class="signatur">{{ site.signatur }}</p>
+
+  <div class="knapp-grupp knapp-grupp--smal">
+    <a class="knapp" href="/#sortimentet">Till katalogen</a>
+    <p class="smatext">eller läs <a href="/andtra/">varför ändträ</a></p>
+  </div>
+
+</div>
