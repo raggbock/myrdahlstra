@@ -23,9 +23,9 @@ test('sortimentet ar inte tomt', () => {
 });
 
 test('varje brada klarar samma validering som panelen kraver', () => {
-  for (const b of PRODUKTER) {
-    const ovriga = PRODUKTER.filter((x) => x.nr !== b.nr);
-    assert.deepEqual(P.validera(b, ovriga, b.nr), [], 'N:o ' + b.nr + ' ' + b.titel);
+  for (const [i, b] of PRODUKTER.entries()) {
+    const ovriga = PRODUKTER.filter((_, j) => j !== i);
+    assert.deepEqual(P.validera(b, ovriga), [], 'N:o ' + b.nr + ' ' + b.titel);
   }
 });
 

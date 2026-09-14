@@ -29,6 +29,41 @@ const TIDSGRANS_MS = 10000;
 const STANDARD_MOTTAGARE = 'sebastian.myrdahl@gmail.com';
 const STANDARD_AVSANDARE = 'Myrdahls Trä <bestallning@myrdahlstra.se>';
 
+class ForStorKropp extends Error {}
+
+// Content-Length ar bara en snabb kontroll. Rakna aven de mottagna byten
+// och avbryt lasningen sa snart gransen overskrids, fore formData().
+async function lasFormular(request) {
+  const lasare = request.body?.getReader();
+  const bitar = [];
+  let storlek = 0;
+  if (lasare) {
+    try {
+      while (true) {
+        const { done, value } = await lasare.read();
+        if (done) break;
+        storlek += value.byteLength;
+        if (storlek > MAX_KROPP) {
+          await lasare.cancel().catch(() => {});
+          throw new ForStorKropp();
+        }
+        bitar.push(value);
+      }
+    } finally {
+      lasare.releaseLock();
+    }
+  }
+  const kropp = new Uint8Array(storlek);
+  let offset = 0;
+  for (const bit of bitar) {
+    kropp.set(bit, offset);
+    offset += bit.byteLength;
+  }
+  return new Response(kropp, {
+    headers: { 'Content-Type': request.headers.get('content-type') || '' }
+  }).formData();
+}
+
 /* ---------- sidor ---------- */
 
 // Enkel sida i katalogens stil, for de fall dar nagot gar fel
@@ -92,12 +127,15 @@ export async function onRequestPost(context) {
 
   let falt;
   try {
-    const data = await request.formData();
+    const data = await lasFormular(request);
     falt = {};
     for (const [k, v] of data.entries()) {
       if (typeof v === 'string') falt[k] = v.trim();
     }
   } catch (e) {
+    if (e instanceof ForStorKropp) {
+      return svarssida('För stort', 'Meddelandet var för stort att ta emot.', mottagare, 413);
+    }
     return svarssida('Något gick fel', 'Formuläret kunde inte läsas.', mottagare, 400);
   }
 

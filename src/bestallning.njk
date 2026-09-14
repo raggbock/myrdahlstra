@@ -43,6 +43,8 @@ eleventyComputed:
 
 <form class="bestall"
       data-konfigurator
+      data-frakt-liten="{{ site.fraktLiten }}"
+      data-frakt-stor="{{ site.fraktStor }}"
       {% if site.formEndpoint %}action="{{ site.formEndpoint }}" method="POST"{% endif %}>
 
   <div class="bestall__steg">
@@ -175,7 +177,13 @@ eleventyComputed:
         <span class="leader__linje"></span>
         <span class="summering__pris" data-ut="pris">{{ standard.pris }}</span>
       </div>
-      <p class="summering__finstilt">Slutpriset bekräftas per mejl innan tillverkningen börjar. Momsfri försäljning. Frakt {{ site.fraktLiten }} kr, eller {{ site.fraktStor }} kr för brädor större än {{ site.fraktGrans }}. Hämtning i {{ site.ort }} kostar ingenting.</p>
+      <div class="kopinfo" aria-live="polite" aria-atomic="true">
+        <p><strong>Med frakt: cirka <span data-ut="total-liten">{{ (standard.belopp + site.fraktLiten) | pris }}</span> till <span data-ut="total-stor">{{ (standard.belopp + site.fraktStor) | pris }}</span> totalt.</strong></p>
+        <p>Vid hämtning i {{ site.ort }}: cirka <span data-ut="total-hamtning">{{ standard.pris }}</span> totalt.</p>
+      </div>
+      <p class="summering__finstilt">Spårbar frakt {{ site.fraktLiten }} kr, eller {{ site.fraktStor }} kr för brädor större än {{ site.fraktGrans }}. Egna mått och önskemål prisas separat. Slutpris och frakt bekräftas innan du betalar. Momsfri försäljning.</p>
+      <p class="kopbonus"><strong>Träbalsam ingår.</strong> En burk följer med din skärbräda.</p>
+      {% include "kopsteg.njk" %}
 
       {%- if site.formEndpoint %}
       <input type="hidden" name="Cirkapris" value="{{ standard.pris }}">

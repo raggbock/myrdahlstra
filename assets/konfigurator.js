@@ -598,6 +598,9 @@
       skriv('storlek', s.storlek);
       skriv('ranna', s.ranna);
       skriv('pris', s.pris);
+      skriv('total-liten', formatera(berakna(val) + Number(form.getAttribute('data-frakt-liten'))));
+      skriv('total-stor', formatera(berakna(val) + Number(form.getAttribute('data-frakt-stor'))));
+      skriv('total-hamtning', s.pris);
 
       if (bild) {
         bild.innerHTML = s.bild;

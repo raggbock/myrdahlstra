@@ -1,0 +1,5 @@
+<div class="kopinfo">
+  <p><strong>Med frakt: {{ (p.pris + site.fraktLiten) | pris }} till {{ (p.pris + site.fraktStor) | pris }} totalt.</strong></p>
+  <p>Brädan {{ p.pris | pris }} + spårbar frakt {{ site.fraktLiten }} eller {{ site.fraktStor }} kr. Den högre frakten gäller brädor större än {{ site.fraktGrans }}. Jag bekräftar frakten innan du betalar.</p>
+  <p>Vid hämtning i {{ site.ort }}: <strong>{{ p.pris | pris }} totalt.</strong></p>
+</div>

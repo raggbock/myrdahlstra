@@ -51,7 +51,8 @@ function tillMatt(langd, bredd, tjocklek) {
 
 const SLUG_MONSTER = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
-function validera(brada, ovriga, egetNr) {
+// ovriga innehaller alla andra poster, aven om de rakar ha samma nummer.
+function validera(brada, ovriga) {
   const fel = [];
   const b = brada || {};
 
@@ -68,7 +69,7 @@ function validera(brada, ovriga, egetNr) {
     fel.push('Adressen får bara innehålla små bokstäver a till z, siffror och bindestreck.');
   }
 
-  const andra = (ovriga || []).filter((x) => egetNr == null || x.nr !== egetNr);
+  const andra = ovriga || [];
 
   if (andra.some((x) => x.nr === b.nr)) {
     fel.push('N:o ' + b.nr + ' används redan av en annan bräda.');

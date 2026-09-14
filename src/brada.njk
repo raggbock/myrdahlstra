@@ -19,6 +19,7 @@ eleventyComputed:
 ---
 
 {% from "bild.njk" import bild %}
+{% set skotselText = p.skotsel | default(site.skotsel) %}
 <p class="brodsmula"><a href="/">Katalogen</a> &nbsp;/&nbsp; N:o {{ p.nr }}</p>
 
 <div class="produkt">
@@ -80,24 +81,29 @@ eleventyComputed:
       <a href="/bestallning/">beställ efter mått</a>.
     </div>
     {%- else %}
+    {% include "produktpris.njk" %}
+    {%- if skotselText %}
+    <p class="kopbonus"><strong>Träbalsam ingår.</strong> En burk följer med så att du kan ta hand om brädan från början.</p>
+    {%- endif %}
     {#- En bräda på beställning ligger inte färdig i verkstaden, och då gäller
         tillverkningstid i stället för leverans inom några dagar. -#}
     {%- if p.pabestallning %}
     <p class="hjalptext">Den här görs på beställning, ingen ligger färdig i verkstaden. Tillverkning tar normalt {{ site.leveranstid }}.</p>
     {%- endif %}
     <div class="knapp-grupp">
-      <a class="knapp" href="#bestall">Beställ här på hemsidan</a>
+      <a class="knapp" href="#bestall">Skicka en förfrågan</a>
       <p class="smatext">eller mejla <a href="mailto:{{ site.mejl }}?subject={{ ('Beställning: N:o ' + p.nr + '. ' + p.titel) | urlencode }}">{{ site.mejl }}</a></p>
     </div>
     {%- endif %}
 
-    <p class="villkor">Betalning med Swish. {{ site.frakt }}</p>
+    {%- if not p.sald %}
+    <p class="villkor">Du betalar med Swish först när vi kommit överens.</p>
+    {%- endif %}
 
     {#- Skötseln följer ytbehandlingen, inte brädan. En oljad skärbräda vill
         oljas om, medan en hårdvaxoljad yta varken behöver eller tål det. En
         post får därför skriva över den gemensamma texten, och en tom sträng
         tar bort rutan helt för det som inte är en skärbräda. -#}
-    {%- set skotselText = p.skotsel | default(site.skotsel) %}
     {%- if skotselText %}
     <div class="skotsel">
       <h2 class="skotsel__rubrik">SKÖTSEL</h2>
@@ -111,13 +117,14 @@ eleventyComputed:
 {%- if not p.sald %}
 <section id="bestall" class="uppgifter bestallsektion">
   {% include "ornament.njk" %}
-  <h2 class="bestallsektion__rubrik">Beställ N:o {{ p.nr }}, {{ p.titel }}</h2>
-  <p class="hjalptext">Skicka en beställning så bekräftar jag per mejl med Swishnummer och leveranstid. Du binder dig inte förrän vi kommit överens.</p>
+  <h2 class="bestallsektion__rubrik">Förfrågan om N:o {{ p.nr }}, {{ p.titel }}</h2>
+  {% include "kopsteg.njk" %}
+  {% include "produktpris.njk" %}
   {% set dolda = [
     { namn: 'Bräda', varde: 'N:o ' + p.nr + '. ' + p.titel },
     { namn: 'Pris', varde: p.pris | pris }
   ] %}
-  {% set skickaText = 'Skicka beställning' %}
+  {% set skickaText = 'Skicka förfrågan' %}
   {% set mejlAmne = 'Beställning: N:o ' + p.nr + '. ' + p.titel %}
   {% include "formular.njk" %}
 </section>

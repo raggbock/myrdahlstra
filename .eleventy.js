@@ -30,6 +30,8 @@ module.exports = function (eleventyConfig) {
   // skulle ta med obehandlade originalfoton i assets/images/ och dra upp
   // uppladdningen till tiotalet megabyte i onodan.
   eleventyConfig.addPassthroughCopy('assets/logga.png');
+  eleventyConfig.addPassthroughCopy('assets/favicon.svg');
+  eleventyConfig.addPassthroughCopy('assets/favicon.png');
   eleventyConfig.addPassthroughCopy('assets/style.css');
   eleventyConfig.addPassthroughCopy('assets/konfigurator.js');
   eleventyConfig.addPassthroughCopy('assets/foto');

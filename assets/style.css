@@ -805,6 +805,42 @@ img {
   margin: 0;
 }
 
+.kopinfo {
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.kopinfo p {
+  margin: 0 0 8px;
+}
+
+.kopinfo p:last-child {
+  margin-bottom: 0;
+}
+
+.kopbonus {
+  margin: 0;
+  padding: 12px 0;
+  border-block: 1px solid var(--black);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.kopsteg {
+  margin: 0;
+  padding-left: 1.4em;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.kopsteg li + li {
+  margin-top: 8px;
+}
+
+.mork .kopbonus {
+  border-color: var(--mork-linje);
+}
+
 .skotsel {
   border: 1px solid var(--black);
   padding: 18px 22px;
