@@ -1340,8 +1340,17 @@ textarea {
     letter-spacing: 0.22em;
   }
 
+  /* Loggan är bred: emblem och ordbild sida vid sida. Krymps den till en
+     fast höjd blir ordbilden oläslig på en telefon, så här styr bredden i
+     stället och höjden följer med. */
   .huvud__logga {
-    height: 48px;
+    height: auto;
+    width: min(100%, 280px);
+  }
+
+  .huvud--kompakt .huvud__logga {
+    height: auto;
+    width: 220px;
   }
 
   .huvud__tagline {
@@ -1569,6 +1578,61 @@ textarea {
   margin-bottom: 10px;
 }
 
+/* ---------- Fotoserien: så blir en bräda till ---------- */
+
+/* Numrerade figurer som planscherna i en gammal katalog. Fotona är tagna
+   stående i verkstaden och beskärs här till 4:5, det räcker för att visa
+   vad som händer utan att spalten blir en lång remsa. */
+.fotoserie {
+  list-style: none;
+  margin: 8px 0 18px 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px 20px;
+}
+
+.fotoserie__post {
+  margin: 0;
+}
+
+.fotoserie__figur {
+  margin: 0;
+}
+
+.fotoserie__bild {
+  aspect-ratio: 4 / 5;
+  max-width: 100%;
+  overflow: hidden;
+  border: 1px solid var(--black);
+  outline: 1px solid var(--black);
+  outline-offset: 3px;
+  background: var(--kort);
+}
+
+.fotoserie__text {
+  font-size: 15.5px;
+  line-height: 1.55;
+  color: var(--dov);
+  margin: 12px 4px 0 4px;
+}
+
+.fotoserie__nr {
+  font-style: italic;
+}
+
+.fotoserie__rubrik {
+  color: var(--black);
+  font-weight: 500;
+}
+
+/* Sista figuren i en udda serie får hela bredden, så raden inte står halvtom. */
+.fotoserie__post:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+  max-width: calc(50% - 10px);
+  margin: 0 auto;
+}
+
 .knapp-grupp--smal {
   max-width: 420px;
   margin-top: 14px;
@@ -1582,5 +1646,14 @@ textarea {
 
   .text p {
     font-size: 16.5px;
+  }
+
+  .fotoserie {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 26px;
+  }
+
+  .fotoserie__post:last-child:nth-child(odd) {
+    max-width: 100%;
   }
 }

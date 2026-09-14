@@ -18,7 +18,7 @@ eleventyExcludeFromCollections: true
 {%- set sidor = [
   { adress: '/', vikt: '1.0', kallor: ['src/index.njk', 'src/_data/products.json'] },
   { adress: '/bestallning/', vikt: '0.9', kallor: ['src/bestallning.njk', 'assets/konfigurator.js'] },
-  { adress: '/andtra/', vikt: '0.7', kallor: ['src/andtra.njk'] },
+  { adress: '/andtra/', vikt: '0.7', kallor: ['src/andtra.njk', 'src/_data/process.json'] },
   { adress: '/verkstaden/', vikt: '0.6', kallor: ['src/verkstaden.njk'] },
   { adress: '/villkor/', vikt: '0.3', kallor: ['src/villkor.njk', 'src/_data/site.json'] }
 ] -%}

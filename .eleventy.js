@@ -5,6 +5,7 @@ const crypto = require('node:crypto');
 const Konfigurator = require('./assets/konfigurator.js');
 const Sortiment = require('./lib/sortiment.js');
 const Fotomatt = require('./lib/fotomatt.js');
+const Frakt = require('./lib/frakt.js');
 
 /*
  * Lägger innehållets fingeravtryck sist i adressen: /assets/style.css blir
@@ -88,6 +89,10 @@ module.exports = function (eleventyConfig) {
 
   // Hela katalogen i nummerordning, sålda inräknade så länge de syns
   eleventyConfig.addFilter('katalog', (produkter) => Sortiment.katalog(produkter));
+
+  // Fraktbeloppet för en bräda i katalogen, till den strukturerade datan.
+  // null när måttet saknas, då skrivs inga fraktuppgifter ut alls.
+  eleventyConfig.addFilter('frakt', (produkt, site) => Frakt.belopp(produkt, site));
 
   // Brädor att länka vidare till från en brädas egen sida
   eleventyConfig.addFilter('andraBrador', (produkter, slug, antal) =>

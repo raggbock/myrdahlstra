@@ -7,6 +7,7 @@ eleventyComputed:
   sidtitel: "Varför ändträ · {{ site.namn }}"
   sidbeskrivning: "Skillnaden mellan ändträ och långträ, varför ändträ är skonsamt mot knivens egg, och vad det kostar i vikt och skötsel."
 ---
+{% from "bild.njk" import bild %}
 
 <div class="bestall__intro">
   <h1 class="bestall__titel"><span class="nr">Varför</span> ändträ</h1>
@@ -28,6 +29,28 @@ eleventyComputed:
   <p>Mönstret sågas inte fram, det limmas fram i två steg. Först limmas stavar av olika träslag ihop på kant till en platta, ungefär som en randig skiva. Sedan sågas plattan tvärs över i rader.</p>
   <p>Varje rad har nu randningen i genomskärning. Vänder man raden ett kvarts varv står ändträet upp, och limmar man ihop raderna igen blir randerna ett rutmönster. Förskjuter man varje rad en bit mot den förra blir det i stället ett murstensmönster. Samma stavar, olika mönster, beroende på hur raderna läggs.</p>
   <p>Det är också därför ingen bräda blir den andra lik. Virket ser olika ut i varje planka, och förskjutningen blir aldrig exakt densamma.</p>
+
+  {#- Fotoserien ligger i src/_data/process.json så att verkstadspanelen
+      vet vilka foton som är i bruk. Bilderna beskärs till stående 4:5 i
+      CSS, inte i filen, så hela fotot finns kvar om formatet ändras. -#}
+  <h2 class="text__rubrik">{{ process.rubrik }}</h2>
+  <p>{{ process.ingress }}</p>
+  <ol class="fotoserie">
+    {%- for st in process.steg %}
+    <li class="fotoserie__post">
+      <figure class="fotoserie__figur">
+        <div class="fotoserie__bild">
+          {{ bild(st.fil, st.alt, '(max-width: 720px) 92vw, 320px') }}
+        </div>
+        <figcaption class="fotoserie__text">
+          <span class="fotoserie__nr">Fig. {{ loop.index }}.</span>
+          <strong class="fotoserie__rubrik">{{ st.rubrik }}</strong>
+          {{ st.text }}
+        </figcaption>
+      </figure>
+    </li>
+    {%- endfor %}
+  </ol>
 
   <h2 class="text__rubrik">Snällare mot knivarna</h2>
   <p>Det här är den vanligaste anledningen att folk byter. En vass kniv håller sig vass längre mot ändträ. Har du lagt pengar på knivar är brädan du lägger dem mot inte en detalj.</p>

@@ -26,6 +26,7 @@ function skapaServer({ rot = path.join(__dirname, '..'), foto = Foto,
   const F = foto;
   const ROT = rot;
   const PRODUKTFIL = path.join(ROT, 'src', '_data', 'products.json');
+  const PROCESSFIL = path.join(ROT, 'src', '_data', 'process.json');
   const FOTOMAPP = path.join(ROT, 'assets', 'foto');
 
   // Uppladdade original ligger i minnet tills de sparas, sa reglaget kan
@@ -104,7 +105,12 @@ function skapaServer({ rot = path.join(__dirname, '..'), foto = Foto,
 
   async function hamtaAllt(res) {
     const produkter = P.las(PRODUKTFIL);
-    const anvanda = new Set(produkter.flatMap((x) => x.bilder || []));
+    // Fotoserien på ändträsidan hör inte till någon bräda men är i bruk, och
+    // ska inte ligga i panelen som något att städa bort.
+    const serie = P.las(PROCESSFIL);
+    const anvanda = new Set(
+      produkter.flatMap((x) => x.bilder || []).concat((serie.steg || []).map((s) => s.fil))
+    );
     const alla = fotolista();
     json(res, 200, {
       produkter,

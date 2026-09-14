@@ -25,7 +25,7 @@
        src="{{ f.reserv }}"
        {% if f.jpeg %}srcset="{{ f.jpeg }}"
        sizes="{{ sizes }}"{% endif %}
-       {#- Måtten är originalets, vilket är det som ger rätt proportion och
+       {# Måtten är originalets, vilket är det som ger rätt proportion och
            hindrar sidan från att hoppa till när fotot dyker upp. -#}
        {% if f.bredd %}width="{{ f.bredd }}" height="{{ f.hojd }}"{% endif %}
        {% if ivrig %}fetchpriority="high"{% else %}loading="lazy"{% endif %} decoding="async"

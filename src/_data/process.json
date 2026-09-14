@@ -1,0 +1,49 @@
+{
+  "//": "Fotoserien på ändträsidan: så blir en bräda till, steg för steg. Fotona togs när schackbrädet N:o 7 gjordes, men gången är densamma för varje ändträbräda. Filerna ligger i assets/foto och räknas som använda av verkstadspanelen så länge de står här. Ordningen i listan är ordningen på sidan.",
+  "rubrik": "Så blir en bräda till",
+  "ingress": "Bilderna togs när schackbrädet gjordes, men vägen är densamma för varje ändträbräda: från planka till stavar, från stavar till platta, från platta till rader, och sedan om igen.",
+  "steg": [
+    {
+      "fil": "process-virke.jpg",
+      "rubrik": "Virket",
+      "text": "En planka valnöt och en planka lönn, sågade och torkade men ännu råa. Här väljs bitarna, en i taget, efter färg och ådring.",
+      "alt": "En grov planka valnöt liggande på en planka lönn på sågbänken"
+    },
+    {
+      "fil": "process-hyvlat.jpg",
+      "rubrik": "Hyvlat",
+      "text": "Efter rikt- och planhyveln är plankorna plana och vinkelräta. Först nu syns vad valnöten egentligen har för färg.",
+      "alt": "Hyvlade plankor av valnöt och lönn på arbetsbänken"
+    },
+    {
+      "fil": "process-stavar.jpg",
+      "rubrik": "Stavar",
+      "text": "Plankorna sågas till stavar, alla lika breda. Varannan valnöt, varannan lönn, upplagda i den ordning de ska limmas.",
+      "alt": "Åtta stavar av valnöt och lönn uppradade varannan mörk och varannan ljus"
+    },
+    {
+      "fil": "process-rader.jpg",
+      "rubrik": "Raderna vänds",
+      "text": "Stavarna har limmats till en randig platta, och plattan har sågats tvärs över i rader. Varje rad vänds ett kvarts varv så att ändträet kommer upp, och läggs förskjuten mot den förra. Här ligger de på prov, utan lim.",
+      "alt": "Rader av ändträ i valnöt och lönn upplagda till ett rutmönster, ännu utan lim"
+    },
+    {
+      "fil": "process-limning.jpg",
+      "rubrik": "Andra limningen",
+      "text": "Raderna limmas om, nu på ända. Det är den fog som måste sitta, för ändträ rör sig mer än långträ. Limmet får svälla ut, det hyvlas bort sedan.",
+      "alt": "Ändträrader i limtvingar med lim som svällt ut i fogarna"
+    },
+    {
+      "fil": "process-ram.jpg",
+      "rubrik": "Ramen",
+      "text": "Schackbrädet får en ram av ek runt rutorna. Fyra bitar, fyra tvingar, och ett dygn att torka.",
+      "alt": "Rutmönstret av ändträ inramat av ek och spänt i fyra tvingar"
+    },
+    {
+      "fil": "process-fardig.jpg",
+      "rubrik": "Färdigt",
+      "text": "Planhyvlat, slipat och oljat. Nu syns årsringarna i varje ruta, det är dem man ser i ändträ.",
+      "alt": "Det färdiga schackbrädet i valnöt, lönn och ek, oljat och blankt"
+    }
+  ]
+}

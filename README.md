@@ -169,6 +169,19 @@ katalogen, referensdesignens produktbilder är också träytor som fyller rutan.
 Men för en riktig produktbild behövs en omtagning: brädan rakt ovanifrån på ett
 rent underlag, gärna i dagsljus.
 
+## Fotoserien på ändträsidan
+
+Sju foton med prefixet `process-` i `assets/foto/` visar hur en ändträbräda
+blir till, från planka till färdigt bräde. De togs när schackbrädet N:o 7
+gjordes (14 september 2026) och är stående telefonbilder, nedskalade till
+1080 px och rensade från EXIF. Sidan beskär dem till 4:5 i CSS, så filen har
+hela fotot kvar.
+
+Ordning, rubriker och bildtexter står i `src/_data/process.json`. Vill du
+byta ett foto, lägg den nya filen i `assets/foto/` och peka på den där.
+Panelen räknar fotona i den filen som använda, så de dyker inte upp som
+något att städa bort.
+
 ## Lägga till fler foton
 
 Lägg de webbklara filerna i `assets/foto/` och skriv filnamnen i `bilder`:

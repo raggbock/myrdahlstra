@@ -77,7 +77,8 @@
       "andtraskarbrada-ek-lonn-mursten-1.jpg"
     ],
     "lapp": "",
-    "sald": false
+    "sald": false,
+    "frakt": "liten"
   },
   {
     "nr": 5,
@@ -137,6 +138,7 @@
     "lapp": "",
     "pabestallning": true,
     "sald": false,
-    "skotsel": ""
+    "skotsel": "",
+    "frakt": "liten"
   }
 ]

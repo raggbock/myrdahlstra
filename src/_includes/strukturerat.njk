@@ -7,6 +7,50 @@
   visa ett annat för besökaren är precis vad Google straffar, så priset hämtas
   ur samma products.json som prisraden.
 -#}
+{#-
+  Erbjudandet för en bräda: pris, lagerstatus, frakt och ångerrätt. Samma
+  block används på brädans egen sida och i startsidans lista, så att Google
+  får identiska uppgifter var det än läser dem.
+
+  Frakten är ett enda belopp här, fast kunden ser båda nivåerna på sidan och
+  får den rätta bekräftad per mejl. Nivån räknas ur brädans mått i
+  lib/frakt.js. Saknar brädan mått skrivs ingen frakt ut alls, hellre
+  ingenting än en gissning.
+
+  Ångerrätten står i klartext på villkorssidan, som länken pekar på:
+  fjorton dagar, kunden står för returfrakten, hela beloppet tillbaka.
+-#}
+{%- macro erbjudande(p, site, medUrl) %}
+  {%- set frakt = p | frakt(site) %}
+  "offers": {
+    "@type": "Offer",
+    {%- if medUrl %}
+    "url": {{ (site.url + '/brada/' + p.slug + '/') | dump | safe }},
+    {%- endif %}
+    "price": "{{ p.pris }}",
+    "priceCurrency": "SEK",
+    "availability": "https://schema.org/{% if p.sald %}SoldOut{% elif p.pabestallning %}PreOrder{% else %}InStock{% endif %}",
+    "itemCondition": "https://schema.org/NewCondition",
+    "seller": { "@type": "Organization", "name": {{ site.namn | dump | safe }} },
+    {%- if frakt %}
+    "shippingDetails": {
+      "@type": "OfferShippingDetails",
+      "shippingRate": { "@type": "MonetaryAmount", "value": "{{ frakt }}", "currency": "SEK" },
+      "shippingDestination": { "@type": "DefinedRegion", "addressCountry": "SE" }
+    },
+    {%- endif %}
+    "hasMerchantReturnPolicy": {
+      "@type": "MerchantReturnPolicy",
+      "applicableCountry": "SE",
+      "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+      "merchantReturnDays": 14,
+      "returnMethod": "https://schema.org/ReturnByMail",
+      "returnFees": "https://schema.org/ReturnShippingFees",
+      "refundType": "https://schema.org/FullRefund",
+      "merchantReturnLink": {{ (site.url + '/villkor/') | dump | safe }}
+    }
+  }
+{%- endmacro %}
 {%- if p %}
 {#- En produktsida: brädan, dess pris och om den går att köpa. -#}
 <script type="application/ld+json">
@@ -19,15 +63,7 @@
   "image": [{{ (site.url + '/assets/foto/' + p.bilder[0]) | dump | safe }}],
   "material": {{ (p.spec['Träslag'] | default('Massivt trä')) | dump | safe }},
   "brand": { "@type": "Brand", "name": {{ site.namn | dump | safe }} },
-  "offers": {
-    "@type": "Offer",
-    "url": {{ (site.url + '/brada/' + p.slug + '/') | dump | safe }},
-    "price": "{{ p.pris }}",
-    "priceCurrency": "SEK",
-    "availability": "https://schema.org/{% if p.sald %}SoldOut{% elif p.pabestallning %}PreOrder{% else %}InStock{% endif %}",
-    "itemCondition": "https://schema.org/NewCondition",
-    "seller": { "@type": "Organization", "name": {{ site.namn | dump | safe }} }
-  }
+  {{- erbjudande(p, site, true) }}
 }
 </script>
 <script type="application/ld+json">
@@ -66,7 +102,10 @@
 </script>
 {#- Startsidan är en katalog, inte en presentation. Utan den här listan får
     sökmotorn gissa ur markupen vad de sju korten är. Med den vet den att
-    sidan räknar upp namngivna varor med priser, i den ordning de står. -#}
+    sidan räknar upp namngivna varor med priser, i den ordning de står.
+    Varje vara får samma uppgifter som på sin egen sida: Google läser
+    handelsuppgifter (frakt, ångerrätt, varumärke) även härifrån och varnar
+    annars för att de saknas. -#}
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -81,14 +120,12 @@
       "item": {
         "@type": "Product",
         "name": {{ p.titel | dump | safe }},
+        "description": {{ p.kort | dump | safe }},
+        "sku": {{ ('MT-' + p.nr) | dump | safe }},
         "url": {{ (site.url + '/brada/' + p.slug + '/') | dump | safe }},
         "image": {{ (site.url + '/assets/foto/' + p.bilder[0]) | dump | safe }},
-        "offers": {
-          "@type": "Offer",
-          "price": "{{ p.pris }}",
-          "priceCurrency": "SEK",
-          "availability": "https://schema.org/{% if p.sald %}SoldOut{% elif p.pabestallning %}PreOrder{% else %}InStock{% endif %}"
-        }
+        "brand": { "@type": "Brand", "name": {{ site.namn | dump | safe }} },
+        {{- erbjudande(p, site, false) }}
       }
     }{% if not loop.last %},{% endif %}
     {%- endfor %}
