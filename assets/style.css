@@ -292,9 +292,25 @@ img {
   gap: 56px;
 }
 
+/* Hela kortet är klickyta: länken "Visa och beställ" sträcks ut över
+   kortet med ett pseudoelement, så foto och text leder till brädans sida
+   utan att kortet får flera länkar till samma adress. Kortet är därför
+   positionerat, och inget mellan kortet och länken får vara det. */
 .post {
   display: flex;
   gap: 24px;
+  position: relative;
+}
+.post__lank::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+.post:hover .post__titel,
+.post:hover .post__lank,
+.post:focus-within .post__titel,
+.post:focus-within .post__lank {
+  color: var(--guld);
 }
 
 .post__bildruta {
