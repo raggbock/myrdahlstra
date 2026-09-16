@@ -24,12 +24,23 @@ eleventyComputed:
 
 <div class="produkt">
 
-  <div class="produkt__bilder">
+  {#- Galleriet bläddras i ren CSS, som lägena på beställningssidan: en
+      radioknapp per foto, och den valda bestämmer vilket foto som visas
+      stort och vilken tumnagel som är markerad. Tumnaglarna är etiketter
+      till knapparna. Med exakt ett foto finns inget att bläddra i, då
+      hoppas tumnagelraden över. Utan foton står platshållarna kvar. -#}
+  {%- set foton = (p.bilder or []).slice(0, 4) %}
+  <div class="produkt__bilder galleri">
+    {%- for fil in foton %}
+    <input type="radio" class="galleri__val" name="galleri" id="galleri-{{ loop.index }}"{% if loop.first %} checked{% endif %}>
+    {%- endfor %}
     <div class="inramad">
-      {%- if p.bilder and p.bilder.length -%}
-        {#- Hjältebilden är det första man ser, alltså sidans LCP. Den laddas
-            ivrigt och med hög prioritet, till skillnad från allt annat foto. -#}
-        {{ bild(p.bilder[0], p.titel + ', sedd rakt uppifrån', '(max-width: 720px) 92vw, (max-width: 1180px) 46vw, 560px', 'produkt__hero', true) }}
+      {%- if foton.length -%}
+        {%- for fil in foton %}
+        {#- Första fotot är det första man ser, alltså sidans LCP. Det laddas
+            ivrigt och med hög prioritet, de andra först när de väljs. -#}
+        <div class="galleri__stor">{{ bild(fil, p.titel + (', sedd rakt uppifrån' if loop.first else ', ytterligare bild'), '(max-width: 720px) 92vw, (max-width: 1180px) 46vw, 560px', 'produkt__hero', loop.first) }}</div>
+        {%- endfor %}
       {%- else -%}
         <div class="tex tex--stor produkt__hero"><span class="hero-markor">[FOTO: brädan rakt uppifrån]</span></div>
       {%- endif -%}
@@ -37,16 +48,13 @@ eleventyComputed:
         <span class="band-yta"><span class="band band--stor">Såld</span></span>
       {%- endif -%}
     </div>
-    {#- Tumnaglar visas nar det finns flera foton. Finns inga foton alls
-        star platshallarna kvar. Med exakt ett foto hoppas raden over, ett
-        riktigt foto med randiga platshallare under ser halvfardigt ut. -#}
-    {%- if p.bilder and p.bilder.length > 1 %}
+    {%- if foton.length > 1 %}
     <div class="tumnaglar">
-      {%- for fil in p.bilder.slice(1, 4) %}
-      <div class="tumnagel">{{ bild(fil, p.titel + ', ytterligare bild', '120px') }}</div>
+      {%- for fil in foton %}
+      <label class="tumnagel" for="galleri-{{ loop.index }}">{{ bild(fil, p.titel + (', sedd rakt uppifrån' if loop.first else ', ytterligare bild'), '120px') }}</label>
       {%- endfor %}
     </div>
-    {%- elif not p.bilder or p.bilder.length == 0 %}
+    {%- elif foton.length == 0 %}
     <div class="tumnaglar">
       <div class="tumnagel"><div class="tex tex--vinkel">[VINKEL]</div></div>
       <div class="tumnagel"><div class="tex tex--kant">[KANT]</div></div>

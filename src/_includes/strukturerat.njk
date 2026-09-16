@@ -60,7 +60,7 @@
   "name": {{ p.titel | dump | safe }},
   "description": {{ p.kort | dump | safe }},
   "sku": {{ ('MT-' + p.nr) | dump | safe }},
-  "image": [{{ (site.url + '/assets/foto/' + p.bilder[0]) | dump | safe }}],
+  "image": [{% for fil in p.bilder %}{{ (site.url + '/assets/foto/' + fil) | dump | safe }}{% if not loop.last %}, {% endif %}{% endfor %}],
   "material": {{ (p.spec['Träslag'] | default('Massivt trä')) | dump | safe }},
   "brand": { "@type": "Brand", "name": {{ site.namn | dump | safe }} },
   {{- erbjudande(p, site, true) }}

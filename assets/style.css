@@ -1657,3 +1657,50 @@ textarea {
     max-width: 100%;
   }
 }
+
+/* ---------- Bildgalleriet på produktsidan ----------
+   Bläddras i ren CSS. Radioknapparna ligger först i kolumnen så att
+   syskonväljaren når både den stora bilden och tumnaglarna. Knapparna
+   göms utan display: none, så att de går att nå med tangentbordet:
+   tabb till galleriet, pil för att bläddra. Högst fyra foton, fler
+   skärs bort redan i mallen. */
+.galleri {
+  position: relative;
+}
+.galleri__val {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+.galleri__stor {
+  display: none;
+}
+.galleri__val:nth-of-type(1):checked ~ .inramad .galleri__stor:nth-of-type(1),
+.galleri__val:nth-of-type(2):checked ~ .inramad .galleri__stor:nth-of-type(2),
+.galleri__val:nth-of-type(3):checked ~ .inramad .galleri__stor:nth-of-type(3),
+.galleri__val:nth-of-type(4):checked ~ .inramad .galleri__stor:nth-of-type(4) {
+  display: block;
+}
+.galleri .tumnagel {
+  cursor: pointer;
+  opacity: 0.72;
+  transition: opacity 0.15s;
+}
+.galleri .tumnagel:hover {
+  opacity: 1;
+}
+.galleri__val:nth-of-type(1):checked ~ .tumnaglar .tumnagel:nth-of-type(1),
+.galleri__val:nth-of-type(2):checked ~ .tumnaglar .tumnagel:nth-of-type(2),
+.galleri__val:nth-of-type(3):checked ~ .tumnaglar .tumnagel:nth-of-type(3),
+.galleri__val:nth-of-type(4):checked ~ .tumnaglar .tumnagel:nth-of-type(4) {
+  opacity: 1;
+  outline: 1px solid var(--black);
+  outline-offset: 2px;
+}
+.galleri__val:focus-visible ~ .tumnaglar {
+  outline: 2px solid var(--rost);
+  outline-offset: 4px;
+}
