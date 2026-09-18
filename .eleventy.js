@@ -90,6 +90,11 @@ module.exports = function (eleventyConfig) {
   // Hela katalogen i nummerordning, sålda inräknade så länge de syns
   eleventyConfig.addFilter('katalog', (produkter) => Sortiment.katalog(produkter));
 
+  // Sant när en såld bräda har passerat sin vecka och fallit ur katalogen.
+  // Brädsidan sätter noindex på det, så sidan lämnar sökresultatet samtidigt
+  // som den lämnar sajten.
+  eleventyConfig.addFilter('urKatalogen', (brada) => Sortiment.urKatalogen(brada));
+
   // Fraktbeloppet för en bräda i katalogen, till den strukturerade datan.
   // null när måttet saknas, då skrivs inga fraktuppgifter ut alls.
   eleventyConfig.addFilter('frakt', (produkt, site) => Frakt.belopp(produkt, site));

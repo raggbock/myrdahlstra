@@ -13,6 +13,15 @@ eleventyComputed:
   # klickfrekvensen, utom på en såld bräda där det bara är missvisande.
   sidtitel: "{{ p.titel }}{% if not p.sald %}, {{ p.pris | pris }}{% endif %} · {{ site.namn }}"
   sidbeskrivning: "{{ p.kort }}"
+  # En bräda ska synas i Google precis så länge som den syns på sajten.
+  # Under sin vecka med bandet ligger den kvar i katalogen och ska gå att
+  # hitta som förut. När veckan är slut faller den ur listningarna och ur
+  # sidkartan, och då ska den ur sökresultatet också. Sidan ligger kvar för
+  # den som har länken, men noindex tar den ur registret: att bara lyfta bort
+  # adressen ur sidkartan räckte inte, sidan svarar ändå 200 och Google
+  # behåller det den redan har. Tom sträng när brädan ska synas, för "false"
+  # som text är sant i en if-sats.
+  noindex: "{% if p | urKatalogen %}true{% endif %}"
   # Delas länken till en bräda ska brädans eget foto följa med
   produktbild: "{{ p.bilder[0] }}"
   delbildtext: "{{ p.titel }}"

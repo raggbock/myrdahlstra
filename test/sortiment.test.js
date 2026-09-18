@@ -73,6 +73,31 @@ test('ett datum fram i tiden ar en felskrivning, inte ett skal att dolja', () =>
   assert.equal(S.visasAnnu({ sald: true, saldDatum: '2026-12-24' }, IDAG), true);
 });
 
+/* ---------- noindex ---------- */
+
+test("en brada som gar att kopa ska alltid vara sokbar", () => {
+  assert.equal(S.urKatalogen(till_salu, IDAG), false);
+});
+
+test("en sald brada ar sokbar hela sin vecka med bandet", () => {
+  // Samma granser som visningsfonstret: sa lange bradan syns pa startsidan
+  // ska den ga att hitta i Google, med sitt band och sitt overstrukna pris.
+  assert.equal(S.urKatalogen(saldIdag, IDAG), false, "salsdagen");
+  assert.equal(S.urKatalogen(saldIdag, "2026-09-13"), false, "dag sex");
+});
+
+test("en sald brada faller ur sokresultatet nar den faller ur katalogen", () => {
+  assert.equal(S.urKatalogen(saldIdag, "2026-09-14"), true, "dag sju");
+  assert.equal(S.urKatalogen(saldIFjol, IDAG), true);
+});
+
+test("en sald brada utan datum halls kvar, precis som i katalogen", () => {
+  // visasAnnu visar hellre en gang for mycket an doljer tyst, och da ska
+  // noindex inte ga sin egen vag och plocka bort sidan ur Google anda.
+  assert.equal(S.urKatalogen({ sald: true }, IDAG), false);
+  assert.equal(S.urKatalogen({ sald: true, saldDatum: "i somras" }, IDAG), false);
+});
+
 /* ---------- listorna ---------- */
 
 const alla = [saldIFjol, saldIdag, till_salu, saldIForrgar];
