@@ -5,7 +5,7 @@ sidnyckel: andtra
 permalink: /andtra/index.html
 eleventyComputed:
   sidtitel: "Varför ändträ · {{ site.namn }}"
-  sidbeskrivning: "Skillnaden mellan ändträ och långträ, varför ändträ är skonsamt mot knivens egg, och vad det kostar i vikt och skötsel."
+  sidbeskrivning: "Skillnaden mellan ändträ och långträ, varför ändträ är skonsamt mot knivens egg, hur det står sig mot plast och vilket träslag som passar dig."
 ---
 {% from "bild.njk" import bild %}
 
@@ -54,6 +54,35 @@ eleventyComputed:
 
   <h2 class="text__rubrik">Snällare mot knivarna</h2>
   <p>Det här är den vanligaste anledningen att folk byter. En vass kniv håller sig vass längre mot ändträ. Har du lagt pengar på knivar är brädan du lägger dem mot inte en detalj.</p>
+
+  <h2 class="text__rubrik">Trä mot plast</h2>
+  <p>En plastbräda är billig, lätt och går i diskmaskin. Det är dess fördelar, och de är verkliga. Men plast läker inte. Varje skåra blir kvar, och efter några år är ytan full av små spår där vatten och matrester sätter sig och där diskborsten inte når ned. Det som skärs loss ur plasten försvinner inte heller, en del av det följer med maten.</p>
+  <p>En ändträbräda vill handdiskas och oljas, det är priset. I gengäld sluter sig ytan efter kniven, eggen håller längre, och brädan blir inte uttjänt på samma sätt. Blir ytan ojämn efter många års bruk går den att slipa eller hyvla plan igen.</p>
+
+  {#- Tilläggen hämtas ur konfiguratorn, där priserna bor. Texten om varje
+      träslag står här, men id:na måste stämma med TRASLAG i
+      assets/konfigurator.js. -#}
+  {%- set omTraslag = {
+    ek: "Hård och tålig, med tydlig ådring och öppna porer. Ek innehåller garvsyra, så en kolstålskniv som blir liggande blöt mot brädan kan lämna en mörk fläck. Den gulnar något med åren.",
+    ask: "Hårdast av de fyra, och seg. Porerna är öppna som i ek men virket är ljusare och har så lite garvsyra att stål inte svärtar det. Ett bra val för den som vill ha ett ljust mönster utan att betala för lönn.",
+    lonn: "Ljus och jämn, med så fina porer att ytan känns nästan slät. Det ljusa visar å andra sidan rödbetor och bär tydligare än de andra.",
+    valnot: "Mörk, så fläckar syns minst. Till skillnad från de andra mörknar den inte med åren utan ljusnar något i dagsljus, mot en varmare brun. Det dyraste virket att köpa hem."
+  } %}
+  <h2 class="text__rubrik">Vilket träslag är bäst</h2>
+  <p>Inget av de fyra är fel. Alla är hårda lövträd som tål att skäras på varje dag, och skillnaden sitter mer i färg, porer och pris än i hållbarhet.</p>
+  <dl class="spec">
+    {%- for t in konfig.traslag %}
+    <div class="leader">
+      <dt>{{ t.namn }}</dt>
+      <span class="leader__linje"></span>
+      <dd>{{ t.tillagg }}</dd>
+    </div>
+    {%- endfor %}
+  </dl>
+  {%- for t in konfig.traslag %}
+  <p><strong>{{ t.namn }}.</strong> {{ omTraslag[t.id] }}</p>
+  {%- endfor %}
+  <p>Vet du inte vilket du vill ha kan du välja det naturliga mönstret i byggaren, så väljer jag bland det som finns hemma i verkstaden. Det är också det billigaste.</p>
 
   <h2 class="text__rubrik">Vad det kostar</h2>
   <p>Ändträ är dubbelt arbete. Stavarna limmas först till en platta, plattan sågas i rader, raderna vänds ett kvarts varv och limmas om. Två limningar i stället för en, och den andra måste sitta perfekt eftersom ändträ rör sig mer än långträ. Det blir spill i varje steg. Därför kostar den mer.</p>
