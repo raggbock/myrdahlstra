@@ -84,6 +84,13 @@ eleventyComputed:
         <dd>{{ varde }}</dd>
       </div>
       {%- endfor %}
+      {#- Samma för varje bräda, så raden står här och inte i products.json.
+          Den bär också countryOfOrigin i strukturerat.njk. -#}
+      <div class="leader">
+        <dt>Tillverkad</dt>
+        <span class="leader__linje"></span>
+        <dd>För hand i {{ site.ort }}, Sverige</dd>
+      </div>
       <div class="leader leader--pris">
         <dt class="spec__prisetikett">Pris</dt>
         <span class="leader__linje"></span>
