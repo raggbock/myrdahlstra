@@ -484,8 +484,8 @@ texten i länken som säger vad sidan handlar om.
 
 ### Mätning
 
-**Sajten mäter ingenting, och Cloudflare Web Analytics går inte att få igång
-här.** Fyra vägar är prövade skarpt mot den riktiga domänen:
+**Cloudflare Web Analytics går inte att få igång här.** Klicken räknas i
+stället av sajten själv, på egen domän, se Klickkartan nedan. Fyra vägar är prövade skarpt mot den riktiga domänen:
 
 1. **Zonens automatiska injicering.** Cloudflare injicerar beaconen åt riktiga
    webbläsare, det syns bara i webbläsaren och inte om man hämtar sidan med
@@ -516,6 +516,57 @@ Vill du ha riktig besöksstatistik är nästa steg antingen att fråga Cloudflar
 support varför `/cdn-cgi/rum` inte finns på ett Pages-projekt, eller att välja
 en tjänst som inte förutsätter Cloudflares proxy. Kravet från briefen är att
 det ska fungera utan kakruta, alltså ingen spårning av enskilda personer.
+
+### Klickkartan
+
+Sajten räknar var besökarna klickar, och verkstadspanelen visar det som en
+värmekarta ovanpå sidan: `npm run admin`, sedan länken **Klickkartan** uppe
+till höger. Välj sida, dator eller mobil och hur många dagar bakåt. Under
+kartan står det som klickats mest, med vart länken gick.
+
+Så går det till:
+
+1. `assets/klick.js` skickar varje klick till `/api/klick` med
+   `navigator.sendBeacon`. Med följer sidan, platsen räknad mot katalogramen,
+   vad som klickades (länkens text, eller fältets namn men aldrig vad som
+   skrivits i det) och om skärmen är smalare än 720 px. Skriptet gör
+   ingenting utom på myrdahlstra.se, så förhandsvisningar räknas inte.
+2. `functions/api/klick.js` kontrollerar att klicket kommer från sajten och
+   lägger det i D1-databasen **myrdahls-klick** med dagens datum. Klick äldre
+   än 180 dagar städas bort.
+3. Panelen frågar databasen genom wrangler, som redan är inloggad på kontot.
+   Kartan ritas ovanpå det senaste lokala bygget i `_site`.
+
+Ingen kaka, ingen lagring i webbläsaren, ingen IP-adress och inget besöks-id.
+Två klick går inte att knyta till samma person, och därför behövs ingen
+kakruta. Köpvillkoren säger under "Dina uppgifter" vad som räknas. Dina egna
+klick på sajten räknas också, tänk på det de första veckorna.
+
+D1:s gratisnivå tar 100 000 skrivningar om dagen. Skulle någon skicka skräp
+i mängd slutar klicken sparas den dagen, men sajten påverkas inte.
+
+Stäng av räkningen genom att sätta `klick` till `false` i
+`src/_data/site.json`.
+
+Databasen skapades 1 oktober 2026 i Västeuropa, och dess id står i
+`wrangler.toml`. Skulle den behöva göras om från början:
+
+```
+npx wrangler d1 create myrdahls-klick --location weur
+```
+
+Byt `database_id` i `wrangler.toml` mot det nya och skapa tabellen:
+
+```
+npx wrangler d1 execute myrdahls-klick --remote --file=db/klick.sql
+```
+
+För att prova lokalt med `npm run preview`, kör samma sak med `--local`, och
+starta panelen med `KLICK_LOKAL=1` satt så läser den den lokala databasen.
+
+`wrangler.toml` gör att bindningarna styrs av filen och inte av Cloudflares
+panel. Secreten `RESEND_API_KEY` ligger kvar i panelen som förut. Andra
+variabler, om du lägger till några, skrivs under `[vars]` i filen.
 
 ### Kvar att göra hos dig
 
@@ -600,7 +651,12 @@ src/404.njk                sidan för adresser som inte finns
 src/_includes/             huvud, sidfot, ornament, katalogkort, formulär
 assets/style.css           all formgivning
 assets/konfigurator.js     prislistan och räknandet
-functions/api/            beställningsformuläret, körs på Cloudflare
+functions/api/            beställningsformuläret och klickräkningen, körs på Cloudflare
+assets/klick.js            skickar klicken till klickkartan
+db/klick.sql               klickdatabasens tabell
+wrangler.toml              Pages-projektets bindningar, klickdatabasen
+verktyg/klick.html         panelens klickkarta
+verktyg/klickkarta.js      ritar värmekartan
 lib/brev.mjs               bygger mejlen, delas av funktionen och testerna
 assets/foto/               webbklara brädfoton, laddas upp
 assets/images/             obehandlade original, laddas inte upp

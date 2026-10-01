@@ -7,7 +7,7 @@ eleventyExcludeFromCollections: true
 # Standard är fyra timmar på allt, vilket är onödigt kort här: varje fil under
 # /assets/ byter adress när innehållet byter.
 #
-#   style.css och konfigurator.js har innehållets fingeravtryck i adressen,
+#   style.css, konfigurator.js och klick.js har innehållets fingeravtryck i adressen,
 #   /assets/style.css?v=8f3c1a2b, och samma gäller loggan.
 #
 #   Typsnitten är namngivna efter vad de innehåller och ändras aldrig.
@@ -32,6 +32,9 @@ eleventyExcludeFromCollections: true
   Cache-Control: public, max-age=31536000, immutable
 
 /assets/konfigurator.js
+  Cache-Control: public, max-age=31536000, immutable
+
+/assets/klick.js
   Cache-Control: public, max-age=31536000, immutable
 
 /assets/logga.png

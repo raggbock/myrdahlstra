@@ -12,7 +12,7 @@
 const http = require('node:http');
 const fs = require('node:fs');
 const path = require('node:path');
-const { spawn } = require('node:child_process');
+const { spawn, execFile } = require('node:child_process');
 const crypto = require('node:crypto');
 
 const P = require('./produkter.js');
@@ -21,8 +21,42 @@ const Foto = require('./foto.js');
 
 const PORT = 4322;
 const VARD = '127.0.0.1'; // aldrig 0.0.0.0, panelen skriver filer
+// Klickmätningens databas, samma namn som i wrangler.toml
+const KLICKDATABAS = 'myrdahls-klick';
+
+// Ställer en fråga till D1 genom wrangler, som redan är inloggad på kontot.
+// Wrangler körs med node direkt och inte genom npx: på Windows behöver npx
+// ett skal, och då går SQL-frågan inte att skicka utan att citattecknen
+// tolkas om. KLICK_LOKAL=1 frågar den lokala databasen från npm run preview.
+function fragaD1Wrangler(rot, sql) {
+  // Paketet exporterar inte sin bin-fil, så den kan inte hämtas med require.resolve
+  const wrangler = path.join(rot, 'node_modules', 'wrangler', 'bin', 'wrangler.js');
+  const var_ = process.env.KLICK_LOKAL === '1' ? '--local' : '--remote';
+  return new Promise((klar, fel) => {
+    execFile(process.execPath, [wrangler, 'd1', 'execute', KLICKDATABAS, var_, '--json', '--command', sql],
+      { cwd: rot, maxBuffer: 64 * 1024 * 1024, timeout: 60000 }, (err, ut, felut) => {
+        if (err) {
+          const rad = String(felut || ut || err.message).split('\n').map((r) => r.trim())
+            .filter((r) => /error|fel|✘/i.test(r))[0];
+          return fel(new Error('Wrangler kunde inte hämta klicken: ' + (rad || err.message)));
+        }
+        try {
+          klar(JSON.parse(ut).map((r) => r.results));
+        } catch (e) {
+          fel(new Error('Wrangler svarade med något som inte var JSON.'));
+        }
+      });
+  });
+}
+
+const FILTYPER = {
+  '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8',
+  '.js': 'text/javascript; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png',
+  '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.avif': 'image/avif', '.woff2': 'font/woff2'
+};
+
 function skapaServer({ rot = path.join(__dirname, '..'), foto = Foto,
-  byggSajt, skrivProdukter = P.skriv } = {}) {
+  byggSajt, skrivProdukter = P.skriv, fragaD1 } = {}) {
   const F = foto;
   const ROT = rot;
   const PRODUKTFIL = path.join(ROT, 'src', '_data', 'products.json');
@@ -238,6 +272,58 @@ function skapaServer({ rot = path.join(__dirname, '..'), foto = Foto,
     });
   }
 
+  /* ---------- klickkartan ---------- */
+
+  async function hamtaKlick(res, dagar) {
+    // Talet går rakt in i SQL-frågan, så det får bara vara ett av de här
+    const n = [7, 30, 90, 180].includes(dagar) ? dagar : 30;
+    const fran = "dag >= date('now', '-" + n + " days')";
+    const sql = [
+      'SELECT sida, lage, COUNT(*) AS n FROM klick WHERE ' + fran + ' GROUP BY sida, lage ORDER BY n DESC',
+      'SELECT sida, lage, mal, till, COUNT(*) AS n FROM klick WHERE ' + fran +
+        " AND mal <> '' GROUP BY sida, lage, mal, till ORDER BY n DESC LIMIT 1000",
+      'SELECT sida, lage, x, y FROM klick WHERE ' + fran + ' AND x IS NOT NULL LIMIT 50000'
+    ].join('; ');
+    let svar;
+    try {
+      svar = await (fragaD1 || ((q) => fragaD1Wrangler(ROT, q)))(sql);
+    } catch (e) {
+      return json(res, 502, { fel: [e.message] });
+    }
+    const [sidor = [], topp = [], punkter = []] = svar;
+    json(res, 200, { dagar: n, sidor, topp, punkter });
+  }
+
+  // Den byggda sajten, så värmekartan kan läggas ovanpå sidan den hör till.
+  // Sidorna hämtar sina filer under /assets/, därför serveras de på samma
+  // adresser som på riktigt. Bara läsning, och bara inifrån _site.
+  function sajtfil(res, vag) {
+    const SAJT = path.join(ROT, '_site');
+    let rel;
+    try {
+      rel = decodeURIComponent(vag);
+    } catch (e) {
+      return json(res, 400, { fel: ['Ogiltig adress.'] });
+    }
+    if (rel.endsWith('/')) rel += 'index.html';
+    const fil = path.resolve(SAJT, '.' + rel);
+    if (!fil.startsWith(SAJT + path.sep)) {
+      return json(res, 404, { fel: ['Okänd adress: ' + vag] });
+    }
+    fs.readFile(fil, (err, data) => {
+      if (err) {
+        return json(res, 404, { fel: [fs.existsSync(SAJT)
+          ? 'Sidan finns inte i det senaste bygget: ' + vag
+          : 'Sajten är inte byggd. Kör npm run build först.'] });
+      }
+      res.writeHead(200, {
+        'Content-Type': FILTYPER[path.extname(fil).toLowerCase()] || 'application/octet-stream',
+        'Content-Length': data.length
+      });
+      res.end(data);
+    });
+  }
+
   /* ---------- servern ---------- */
 
   const server = http.createServer(async (req, res) => {
@@ -258,6 +344,23 @@ function skapaServer({ rot = path.join(__dirname, '..'), foto = Foto,
       }
       if (req.method === 'GET' && väg === '/api/allt') {
         return await hamtaAllt(res);
+      }
+      if (req.method === 'GET' && väg === '/klick') {
+        return statisk(res, 'klick.html', 'text/html; charset=utf-8');
+      }
+      if (req.method === 'GET' && väg === '/klickkarta.js') {
+        return statisk(res, 'klickkarta.js', 'text/javascript; charset=utf-8');
+      }
+      if (req.method === 'GET' && väg === '/api/klick') {
+        // Varje fråga startar wrangler mot Cloudflare. Det ska bara panelen kunna.
+        if (!franPanelen(req)) return json(res, 403, { fel: ['Anropet kom inte från panelen.'] });
+        return await hamtaKlick(res, parseInt(u.searchParams.get('dagar'), 10));
+      }
+      if (req.method === 'GET' && väg.startsWith('/sajt/')) {
+        return sajtfil(res, väg.slice('/sajt'.length));
+      }
+      if (req.method === 'GET' && väg.startsWith('/assets/')) {
+        return sajtfil(res, väg);
       }
 
       // Allt som skriver kraver panelens eget huvud

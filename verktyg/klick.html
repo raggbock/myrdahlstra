@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Klickkartan · Myrdahls Trä</title>
+<style>
+  :root {
+    --papper: #F4EDDD; --black: #2B2118; --guld: #8a5a2c; --rost: #8a3d2c;
+    --kort: #FBF6E9; --dov: #57503F; --linje: #B7A88F;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--papper); color: var(--black);
+    font-family: 'EB Garamond', Georgia, serif; font-size: 16px;
+  }
+  .ram { max-width: 1280px; margin: 0 auto; padding: 24px 20px 60px 20px; }
+  header {
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: 20px; border-bottom: 1px solid var(--black); padding-bottom: 14px; flex-wrap: wrap;
+  }
+  h1 { font-size: 26px; font-weight: 400; margin: 0; }
+  h1 span { font-style: italic; }
+  h2 { font-size: 14px; letter-spacing: 0.18em; color: var(--guld); font-weight: 400; margin: 0 0 10px 0; }
+  a { color: var(--black); }
+  .layout { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 32px; margin-top: 24px; }
+  @media (max-width: 900px) { .layout { grid-template-columns: minmax(0, 1fr); } }
+
+  .val { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 18px; }
+  select, button {
+    font: inherit; padding: 6px 10px; background: #fff; border: 1px solid var(--linje); color: var(--black);
+  }
+  button { cursor: pointer; }
+  button[aria-pressed="true"] { background: var(--black); color: var(--papper); border-color: var(--black); }
+
+  .lista { display: flex; flex-direction: column; gap: 6px; }
+  .rad {
+    display: flex; align-items: baseline; gap: 8px; background: var(--kort);
+    border: 1px solid var(--linje); padding: 8px 11px; cursor: pointer; text-align: left; width: 100%;
+  }
+  .rad:hover { border-color: var(--black); }
+  .rad[aria-current="true"] { border-color: var(--black); box-shadow: inset 0 0 0 1px var(--black); }
+  .rad .namn { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  /* Punktlinje fram till antalet, som i katalogen */
+  .ledare { flex: 1; border-bottom: 1px dotted var(--dov); min-width: 16px; transform: translateY(-4px); }
+  .antal { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+  .karta {
+    position: relative; overflow: hidden; background: #fff;
+    border: 1px solid var(--black); outline: 3px double var(--black); outline-offset: 4px;
+  }
+  .karta iframe { border: 0; display: block; transform-origin: 0 0; pointer-events: none; }
+  .karta--mobil { max-width: 390px; }
+  .summa { font-size: 15px; color: var(--dov); margin: 16px 0 24px 0; }
+
+  .topp { margin-top: 28px; }
+  .topp li { display: flex; align-items: baseline; gap: 8px; padding: 4px 0; }
+  .topp ol { list-style: none; margin: 0; padding: 0; }
+  .topp .till { color: var(--dov); font-size: 14px; font-style: italic; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 40%; }
+
+  .meddelande { padding: 12px 16px; margin: 16px 0; font-size: 15px; line-height: 1.5; }
+  .fel { border: 1px solid var(--rost); background: #fbeee6; color: var(--rost); }
+  .tom { color: var(--dov); font-style: italic; }
+  .forklaring { font-size: 14px; color: var(--dov); line-height: 1.5; margin-top: 28px; }
+</style>
+</head>
+<body>
+<div class="ram">
+  <header>
+    <h1><span>Klickkartan.</span> Myrdahls Trä</h1>
+    <div><a href="/">Tillbaka till brädorna</a></div>
+  </header>
+
+  <div id="meddelanden"></div>
+
+  <div class="layout">
+    <div>
+      <div class="val">
+        <label for="dagar" style="font-size:14px;color:var(--dov)">Senaste</label>
+        <select id="dagar">
+          <option value="7">7 dagarna</option>
+          <option value="30" selected>30 dagarna</option>
+          <option value="90">90 dagarna</option>
+          <option value="180">180 dagarna</option>
+        </select>
+      </div>
+      <div class="val" role="group" aria-label="Skärm">
+        <button type="button" data-lage="dator" aria-pressed="true">Dator</button>
+        <button type="button" data-lage="mobil" aria-pressed="false">Mobil</button>
+      </div>
+      <h2>SIDOR</h2>
+      <div class="lista" id="sidor"><p class="tom">Hämtar klicken…</p></div>
+      <p class="forklaring">
+        Varje prick är ett klick, de mörkaste fälten är där flest har klickat.
+        Kartan ritas ovanpå det senaste lokala bygget, så den visar sidan som
+        den ser ut nu. Har sidan ändrats sedan klicken gjordes kan de hamna
+        lite fel.
+      </p>
+    </div>
+    <div>
+      <div class="karta" id="karta" hidden></div>
+      <p class="summa" id="summa"></p>
+      <div class="topp" id="topp"></div>
+    </div>
+  </div>
+</div>
+<script src="/klickkarta.js"></script>
+</body>
+</html>

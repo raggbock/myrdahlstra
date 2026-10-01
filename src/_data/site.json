@@ -27,5 +27,7 @@
   "delbild": "delbild.jpg",
   "delbildtext": "Ändträskärbräda i massiv ek från Myrdahls Trä",
   "//analys": "Cloudflare Web Analytics. Lämnas TOM: för ett Pages-projekt sköts mätningen av Pages egen koppling, inte av en beacon i sidan. Slå på den under Workers & Pages, myrdahls-storefront, Settings, Web Analytics, så injicerar Cloudflare beaconen själv. En egen beacon här avvisas av insamlaren, se README.",
-  "analys": ""
+  "analys": "",
+  "//klick": "Klickräkningen till värmekartan i verkstadspanelen. Inga kakor och inget som kan knytas till en person, se README under Klickkartan. Sätt false för att sluta räkna.",
+  "klick": true
 }

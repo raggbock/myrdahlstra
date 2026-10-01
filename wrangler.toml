@@ -1,0 +1,13 @@
+# Pages-projektets inställningar. Med den här filen är det den, och inte
+# Cloudflares panel, som bestämmer bindningarna. Secreten RESEND_API_KEY
+# ligger kvar i panelen som förut.
+
+name = "myrdahls-storefront"
+pages_build_output_dir = "_site"
+compatibility_date = "2026-05-21"
+
+# Klickmätningen, se functions/api/klick.js och db/klick.sql
+[[d1_databases]]
+binding = "KLICK"
+database_name = "myrdahls-klick"
+database_id = "22c4eeb8-a7bb-4d56-a3af-c44d2cafea24"
