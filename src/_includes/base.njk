@@ -52,6 +52,7 @@
     </div>
   </div>
   {% if konfigurator %}<script src="{{ '/assets/konfigurator.js' | version }}"></script>{% endif %}
+  {% if forstora %}<script defer src="{{ '/assets/forstora.js' | version }}"></script>{% endif %}
   {#- Klickräkningen till panelens värmekarta, utan kakor. Skriptet gör
       ingenting utom på den skarpa domänen, se assets/klick.js. -#}
   {%- if site.klick %}

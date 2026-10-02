@@ -1720,3 +1720,56 @@ textarea {
   outline: 2px solid var(--rost);
   outline-offset: 4px;
 }
+
+/* ---------- Fotot i full storlek ----------
+   Det stora fotot är beskuret till ramen och länkar till originalet. Med
+   skript öppnas originalet här, oskuret, i en ram som katalogens. */
+.galleri__forstora {
+  display: block;
+  cursor: zoom-in;
+}
+.galleri__forstora:focus-visible {
+  outline: 2px solid var(--rost);
+  outline-offset: 3px;
+}
+.forstoring {
+  border: none;
+  padding: 0;
+  background: transparent;
+  max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 32px);
+  overflow: visible;
+}
+.forstoring::backdrop {
+  background: rgba(43, 33, 24, 0.82);
+}
+.forstoring__ram {
+  background: var(--kort);
+  border: 1px solid var(--black);
+  outline: 3px double var(--kort);
+  outline-offset: 4px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+.forstoring__bild {
+  display: block;
+  max-width: 100%;
+  max-height: calc(100vh - 110px);
+  width: auto;
+  height: auto;
+}
+.forstoring__stang {
+  font-family: inherit;
+  font-size: 16px;
+  letter-spacing: 0.08em;
+  background: none;
+  border: none;
+  color: var(--black);
+  padding: 4px 6px;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

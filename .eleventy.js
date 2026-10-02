@@ -36,6 +36,7 @@ module.exports = function (eleventyConfig) {
   eleventyConfig.addPassthroughCopy('assets/style.css');
   eleventyConfig.addPassthroughCopy('assets/konfigurator.js');
   eleventyConfig.addPassthroughCopy('assets/klick.js');
+  eleventyConfig.addPassthroughCopy('assets/forstora.js');
   eleventyConfig.addPassthroughCopy('assets/foto');
   eleventyConfig.addPassthroughCopy('assets/fonts');
 

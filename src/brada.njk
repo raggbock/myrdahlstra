@@ -1,6 +1,7 @@
 ---
 layout: base.njk
 huvudtyp: kompakt
+forstora: true
 pagination:
   data: products
   size: 1
@@ -48,7 +49,11 @@ eleventyComputed:
         {%- for fil in foton %}
         {#- Första fotot är det första man ser, alltså sidans LCP. Det laddas
             ivrigt och med hög prioritet, de andra först när de väljs. -#}
-        <div class="galleri__stor">{{ bild(fil, p.titel + (', sedd rakt uppifrån' if loop.first else ', ytterligare bild'), '(max-width: 720px) 92vw, (max-width: 1180px) 46vw, 560px', 'produkt__hero', loop.first) }}</div>
+        {#- Fotot är beskuret till ramen. Klickkartan visade att folk klickar
+            på det för att se mer, så det är en länk till hela originalet.
+            Med JavaScript öppnas det i en ruta på sidan, se forstora.js. -#}
+        {%- set alt = p.titel + (', sedd rakt uppifrån' if loop.first else ', ytterligare bild') %}
+        <div class="galleri__stor"><a class="galleri__forstora" href="/assets/foto/{{ fil }}" data-forstora data-alt="{{ alt }}" aria-label="Visa fotot större: {{ alt }}">{{ bild(fil, alt, '(max-width: 720px) 92vw, (max-width: 1180px) 46vw, 560px', 'produkt__hero', loop.first) }}</a></div>
         {%- endfor %}
       {%- else -%}
         <div class="tex tex--stor produkt__hero"><span class="hero-markor">[FOTO: brädan rakt uppifrån]</span></div>
@@ -137,6 +142,15 @@ eleventyComputed:
     {%- endif %}
   </div>
 </div>
+
+{%- if foton.length %}
+<dialog class="forstoring" id="forstoring" aria-label="Fotot i full storlek">
+  <div class="forstoring__ram">
+    <img class="forstoring__bild" alt="">
+    <button type="button" class="forstoring__stang" data-stang>Stäng</button>
+  </div>
+</dialog>
+{%- endif %}
 
 {%- if not p.sald %}
 <section id="bestall" class="uppgifter bestallsektion">
