@@ -6,6 +6,7 @@ const Konfigurator = require('./assets/konfigurator.js');
 const Sortiment = require('./lib/sortiment.js');
 const Fotomatt = require('./lib/fotomatt.js');
 const Frakt = require('./lib/frakt.js');
+const Sokbeskrivning = require('./lib/sokbeskrivning.js');
 
 /*
  * Lägger innehållets fingeravtryck sist i adressen: /assets/style.css blir
@@ -100,6 +101,9 @@ module.exports = function (eleventyConfig) {
   // Fraktbeloppet för en bräda i katalogen, till den strukturerade datan.
   // null när måttet saknas, då skrivs inga fraktuppgifter ut alls.
   eleventyConfig.addFilter('frakt', (produkt, site) => Frakt.belopp(produkt, site));
+
+  // Brädsidans beskrivning i sökresultatet, byggd ur posten
+  eleventyConfig.addFilter('sokbeskrivning', (produkt, site) => Sokbeskrivning.sokbeskrivning(produkt, site));
 
   // Brädor att länka vidare till från en brädas egen sida
   eleventyConfig.addFilter('andraBrador', (produkter, slug, antal) =>

@@ -13,7 +13,8 @@ eleventyComputed:
   # ingenting för den som söker, så den utelämnas här. Priset däremot höjer
   # klickfrekvensen, utom på en såld bräda där det bara är missvisande.
   sidtitel: "{{ p.titel }}{% if not p.sald %}, {{ p.pris | pris }}{% endif %} · {{ site.namn }}"
-  sidbeskrivning: "{{ p.kort }}"
+  # Vad brädan är, måttet, var den görs och priset, se lib/sokbeskrivning.js
+  sidbeskrivning: "{{ p | sokbeskrivning(site) }}"
   # En bräda ska synas i Google precis så länge som den syns på sajten.
   # Under sin vecka med bandet ligger den kvar i katalogen och ska gå att
   # hitta som förut. När veckan är slut faller den ur listningarna och ur
