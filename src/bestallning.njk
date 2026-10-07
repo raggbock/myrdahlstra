@@ -127,6 +127,16 @@ eleventyComputed:
       <p class="hjalptext">Saftrännan fångar upp kött- och fruktsaft, fräst längs brädans kant.</p>
     </fieldset>
 
+    {#- På telefon hamnar skissen och priset under alla stegen. Den här raden
+        klistrar sig då mot skärmens underkant medan kunden väljer, så brädan
+        syns ändras, och lägger sig här när steg 4 är passerat. På bred skärm
+        följer hela panelen med i stället, och raden visas inte. -#}
+    <div class="miniraden" aria-hidden="true">
+      <span class="miniraden__bild" data-ut="minibild">{{ standard.minibild | safe }}</span>
+      <span class="miniraden__pris"><span class="miniraden__etikett">Cirkapris</span> <span data-ut="minipris">{{ standard.pris }}</span></span>
+      <a class="miniraden__lank" href="#din-brada" tabindex="-1">Din bräda</a>
+    </div>
+
     <fieldset class="steg uppgifter">
       <legend class="steg__rubrik"><span class="nr">5.</span> Dina uppgifter</legend>
       <div class="faltpar">
@@ -148,7 +158,7 @@ eleventyComputed:
       <figcaption class="forhandsvisning__text">Skiss, inte foto. Varje bit virke har sin egen teckning, så din bräda blir aldrig exakt den här.</figcaption>
     </figure>
 
-    <div class="summering mork">
+    <div class="summering mork" id="din-brada">
       <h2 class="summering__rubrik">Din bräda</h2>
       <dl class="summering__rader">
         <div class="leader">

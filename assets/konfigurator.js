@@ -398,8 +398,10 @@
 
     // Id:t måste vara unikt på sidan men får inte räknas upp, för då skulle
     // bygget och webbläsaren hamna på olika nummer. Innehållet räcker: två
-    // likadana brädor kan dela klippbana utan att det märks.
-    var id = 'bb-' + n.monster.id + '-' + n.traA.id + '-' + n.traB.id + '-' + n.traC.id +
+    // likadana brädor kan dela klippbana utan att det märks. Ritas samma
+    // bräda två gånger, och den ena ligger gömd, får den ett eget prefix:
+    // en klippbana i en gömd ruta når inte den synliga.
+    var id = (o.prefix || 'bb-') + n.monster.id + '-' + n.traA.id + '-' + n.traB.id + '-' + n.traC.id +
       '-' + kolumner + 'x' + rader + (visaRanna ? '-r' : '');
 
     var etikett = '';
@@ -587,6 +589,7 @@
       var n = normalisera(val);
       var s = sammanfatta(val);
       var bild = form.querySelector('[data-ut="bild"]');
+      var minibild = form.querySelector('[data-ut="minibild"]');
       var dolt = form.querySelector('input[name="Cirkapris"]');
       var falt;
       var behovs;
@@ -598,12 +601,16 @@
       skriv('storlek', s.storlek);
       skriv('ranna', s.ranna);
       skriv('pris', s.pris);
+      skriv('minipris', s.pris);
       skriv('total-liten', formatera(berakna(val) + Number(form.getAttribute('data-frakt-liten'))));
       skriv('total-stor', formatera(berakna(val) + Number(form.getAttribute('data-frakt-stor'))));
       skriv('total-hamtning', s.pris);
 
       if (bild) {
         bild.innerHTML = s.bild;
+      }
+      if (minibild) {
+        minibild.innerHTML = rita(val, { dekor: true, prefix: 'mini-' });
       }
 
       ritaOmKorten(val, n.monster.platser);

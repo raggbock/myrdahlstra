@@ -4,5 +4,6 @@ const Konfigurator = require('../../assets/konfigurator.js');
 
 module.exports = {
   ...Konfigurator.sammanfatta(Konfigurator.DEFINITIONER.standard),
-  belopp: Konfigurator.berakna(Konfigurator.DEFINITIONER.standard)
+  belopp: Konfigurator.berakna(Konfigurator.DEFINITIONER.standard),
+  minibild: Konfigurator.rita(Konfigurator.DEFINITIONER.standard, { dekor: true, prefix: 'mini-' })
 };
