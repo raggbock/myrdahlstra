@@ -127,7 +127,6 @@
         "image": {{ (site.url + '/assets/foto/' + p.bilder[0]) | dump | safe }},
         "brand": { "@type": "Brand", "name": {{ site.namn | dump | safe }} },
         "countryOfOrigin": { "@type": "Country", "name": "Sverige" },
-  "countryOfOrigin": { "@type": "Country", "name": "Sverige" },
         {{- erbjudande(p, site, false) }}
       }
     }{% if not loop.last %},{% endif %}
