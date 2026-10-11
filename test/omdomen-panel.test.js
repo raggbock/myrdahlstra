@@ -54,3 +54,119 @@ test('SQL-värden citeras', () => {
 test('länken till skrivsidan', () => {
   assert.equal(O.lank('https://myrdahlstra.se', 'Ab3_-xYz9Q0w'), 'https://myrdahlstra.se/omdome/#Ab3_-xYz9Q0w');
 });
+
+/* ---------- panelens endpoints ---------- */
+
+const { skapaServer } = require('../verktyg/admin.js');
+
+// En panel mot en tillfällig rot med en bräda och en tom omdomen.json.
+// fragaD1 får frågan och svarar med det testet bestämmer.
+async function panel(t, fragaD1) {
+  const rot = fs.mkdtempSync(path.join(os.tmpdir(), 'myrdahl-omdome-test-'));
+  fs.mkdirSync(path.join(rot, 'src/_data'), { recursive: true });
+  fs.writeFileSync(path.join(rot, 'src/_data/products.json'), JSON.stringify(produkter));
+  fs.writeFileSync(path.join(rot, 'src/_data/site.json'), JSON.stringify({ url: 'https://myrdahlstra.se' }));
+  fs.writeFileSync(path.join(rot, 'src/_data/omdomen.json'), '[]\n');
+  const byggen = [];
+  const server = skapaServer({ rot, byggSajt: async () => { byggen.push(1); return { ok: true }; }, fragaD1 });
+  t.after(async () => {
+    await new Promise((klar) => server.close(klar));
+    fs.rmSync(rot, { recursive: true, force: true });
+  });
+  await new Promise((klar) => server.listen(0, '127.0.0.1', klar));
+  const url = 'http://127.0.0.1:' + server.address().port;
+  const anrop = (vag, kropp) => fetch(url + vag, {
+    method: kropp === undefined ? 'GET' : 'POST',
+    headers: { 'X-Panel': '1', 'Content-Type': 'application/json' },
+    body: kropp === undefined ? undefined : JSON.stringify(kropp)
+  });
+  const fil = () => JSON.parse(fs.readFileSync(path.join(rot, 'src/_data/omdomen.json'), 'utf8'));
+  return { url, anrop, fil, byggen };
+}
+
+const vantande = { id: 9, kod: 'AAAAAAAAAAAA', mal: 'ek-ett', betyg: 2, namn: 'Per', ort: 'Ö', text: 'Sprack efter en månad.', dag: '2026-10-03' };
+
+test('en inbjudan sparas med ny kod och ger länken', async (t) => {
+  const fragor = [];
+  const { anrop } = await panel(t, async (q) => { fragor.push(q); return [[]]; });
+  const svar = await anrop('/api/inbjudan', { mal: 'ek-tre' });
+  assert.equal(svar.status, 200);
+  const { kod, lank } = await svar.json();
+  assert.match(kod, O.KOD);
+  assert.equal(lank, 'https://myrdahlstra.se/omdome/#' + kod);
+  assert.match(fragor[0], new RegExp("INSERT INTO inbjudan .*'" + kod.replace(/[-_]/g, '\$&') + "', 'ek-tre'"));
+});
+
+test('en inbjudan till ett okänt mål avvisas utan att databasen frågas', async (t) => {
+  const { anrop } = await panel(t, async () => assert.fail('ska inte frågas'));
+  const svar = await anrop('/api/inbjudan', { mal: "x'); DROP TABLE omdome;--" });
+  assert.equal(svar.status, 400);
+});
+
+test('publicera skriver filen, tar bort raden och bygger', async (t) => {
+  const fragor = [];
+  const { anrop, fil, byggen } = await panel(t, async (q) => {
+    fragor.push(q);
+    return q.startsWith('SELECT') ? [[vantande]] : [[]];
+  });
+  const svar = await anrop('/api/omdomen/9/publicera', {});
+  assert.equal(svar.status, 200);
+  assert.equal(fil().length, 1);
+  assert.equal(fil()[0].datum, '2026-10-03');
+  assert.match(fragor[1], /^DELETE FROM omdome WHERE id = 9$/);
+  assert.equal(byggen.length, 1);
+});
+
+test('misslyckas borttagningen ligger omdömet i filen, och nästa försök dubblerar inte', async (t) => {
+  let felVidDelete = true;
+  const { anrop, fil } = await panel(t, async (q) => {
+    if (q.startsWith('DELETE') && felVidDelete) throw new Error('Wrangler kunde inte fråga databasen: nätet');
+    return q.startsWith('SELECT') ? [[vantande]] : [[]];
+  });
+  const forsta = await anrop('/api/omdomen/9/publicera', {});
+  assert.equal(forsta.status, 502);
+  assert.match((await forsta.json()).fel[0], /igen/);
+  assert.equal(fil().length, 1);
+
+  felVidDelete = false;
+  assert.equal((await anrop('/api/omdomen/9/publicera', {})).status, 200);
+  assert.equal(fil().length, 1);
+});
+
+test('ett omdöme som inte finns i inkorgen ger 404', async (t) => {
+  const { anrop } = await panel(t, async () => [[]]);
+  assert.equal((await anrop('/api/omdomen/9/publicera', {})).status, 404);
+});
+
+test('avslå tar bara bort raden', async (t) => {
+  const fragor = [];
+  const { anrop, fil } = await panel(t, async (q) => { fragor.push(q); return [[]]; });
+  assert.equal((await anrop('/api/omdomen/9/avsla', {})).status, 200);
+  assert.deepEqual(fragor, ['DELETE FROM omdome WHERE id = 9']);
+  assert.deepEqual(fil(), []);
+});
+
+test('ta bort ett publicerat omdöme ur filen och bygg om', async (t) => {
+  const { anrop, fil, byggen } = await panel(t, async (q) => (q.startsWith('SELECT') ? [[vantande]] : [[]]));
+  await anrop('/api/omdomen/9/publicera', {});
+  assert.equal((await anrop('/api/omdomen/9/ta-bort', {})).status, 200);
+  assert.deepEqual(fil(), []);
+  assert.equal(byggen.length, 2);
+});
+
+test('listan innehåller inkorgen, inbjudningarna, filen och målen', async (t) => {
+  const { anrop } = await panel(t, async () => [[vantande], [{ kod: 'AAAAAAAAAAAA', mal: 'ek-ett', skapad: '2026-10-01', anvand: '2026-10-03' }]]);
+  const data = await (await anrop('/api/omdomen')).json();
+  assert.equal(data.vantande[0].id, 9);
+  assert.equal(data.inbjudningar[0].anvand, '2026-10-03');
+  assert.deepEqual(data.publicerade, []);
+  assert.equal(data.mal[0].mal, 'bestallning');
+});
+
+test('allt om omdömen kräver panelens huvud', async (t) => {
+  const { url } = await panel(t, async () => assert.fail('ska inte frågas'));
+  assert.equal((await fetch(url + '/api/omdomen')).status, 403);
+  for (const vag of ['/api/inbjudan', '/api/omdomen/9/publicera', '/api/omdomen/9/avsla', '/api/omdomen/9/ta-bort']) {
+    assert.equal((await fetch(url + vag, { method: 'POST', body: '{}' })).status, 403, vag);
+  }
+});

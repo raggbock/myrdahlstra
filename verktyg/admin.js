@@ -18,10 +18,11 @@ const crypto = require('node:crypto');
 const P = require('./produkter.js');
 const S = require('../lib/sortiment.js');
 const Foto = require('./foto.js');
+const O = require('./omdomen.js');
 
 const PORT = 4322;
 const VARD = '127.0.0.1'; // aldrig 0.0.0.0, panelen skriver filer
-// Klickmätningens databas, samma namn som i wrangler.toml
+// Databasen för klick och omdömen, samma namn som i wrangler.toml
 const KLICKDATABAS = 'myrdahls-klick';
 
 // Ställer en fråga till D1 genom wrangler, som redan är inloggad på kontot.
@@ -38,7 +39,7 @@ function fragaD1Wrangler(rot, sql) {
         if (err) {
           const rad = String(felut || ut || err.message).split('\n').map((r) => r.trim())
             .filter((r) => /error|fel|✘/i.test(r))[0];
-          return fel(new Error('Wrangler kunde inte hämta klicken: ' + (rad || err.message)));
+          return fel(new Error('Wrangler kunde inte fråga databasen: ' + (rad || err.message)));
         }
         try {
           klar(JSON.parse(ut).map((r) => r.results));
@@ -62,6 +63,9 @@ function skapaServer({ rot = path.join(__dirname, '..'), foto = Foto,
   const PRODUKTFIL = path.join(ROT, 'src', '_data', 'products.json');
   const PROCESSFIL = path.join(ROT, 'src', '_data', 'process.json');
   const FOTOMAPP = path.join(ROT, 'assets', 'foto');
+  const OMDOMESFIL = path.join(ROT, 'src', '_data', 'omdomen.json');
+  const SAJTFIL = path.join(ROT, 'src', '_data', 'site.json');
+  const d1 = fragaD1 || ((q) => fragaD1Wrangler(ROT, q));
 
   // Uppladdade original ligger i minnet tills de sparas, sa reglaget kan
   // forhandsvisa utan att skicka upp filen en gang till.
@@ -286,12 +290,105 @@ function skapaServer({ rot = path.join(__dirname, '..'), foto = Foto,
     ].join('; ');
     let svar;
     try {
-      svar = await (fragaD1 || ((q) => fragaD1Wrangler(ROT, q)))(sql);
+      svar = await d1(sql);
     } catch (e) {
       return json(res, 502, { fel: [e.message] });
     }
     const [sidor = [], topp = [], punkter = []] = svar;
     json(res, 200, { dagar: n, sidor, topp, punkter });
+  }
+
+  /* ---------- omdömen ---------- */
+
+  // Väntande omdömen bor i D1 och publicerade i omdomen.json, se db/omdome.sql.
+  // Frågorna går genom wrangler som text, så varje värde går genom O.sql.
+
+  async function hamtaOmdomen(res) {
+    let svar;
+    try {
+      svar = await d1(
+        'SELECT id, kod, mal, betyg, namn, ort, text, dag FROM omdome ORDER BY id; ' +
+        'SELECT kod, mal, skapad, anvand FROM inbjudan ORDER BY skapad DESC, rowid DESC LIMIT 50'
+      );
+    } catch (e) {
+      return json(res, 502, { fel: [e.message] });
+    }
+    const [vantande = [], inbjudningar = []] = svar;
+    json(res, 200, {
+      vantande, inbjudningar, publicerade: O.las(OMDOMESFIL), mal: O.malLista(P.las(PRODUKTFIL))
+    });
+  }
+
+  async function nyInbjudan(req, res) {
+    let mal;
+    try {
+      mal = JSON.parse((await lasKropp(req)).toString('utf8')).mal;
+    } catch (e) {
+      return json(res, 400, { fel: ['Ogiltig data.'] });
+    }
+    if (!O.giltigtMal(mal, P.las(PRODUKTFIL))) return json(res, 400, { fel: ['Okänd bräda.'] });
+    const kod = O.nyKod();
+    try {
+      await d1('INSERT INTO inbjudan (kod, mal, skapad) VALUES (' + O.sql(kod) + ', ' + O.sql(mal) + ", date('now'))");
+    } catch (e) {
+      return json(res, 502, { fel: [e.message] });
+    }
+    const site = JSON.parse(fs.readFileSync(SAJTFIL, 'utf8'));
+    json(res, 200, { kod, lank: O.lank(site.url, kod) });
+  }
+
+  // Bara ett av publicera och ta bort åt gången, och aldrig samtidigt som
+  // sortimentet sparas: alla tre skriver i src/_data och bygger.
+  async function medLas(res, gor) {
+    if (sparar) return json(res, 409, { fel: ['En sparning pågår redan. Försök igen när den är klar.'] });
+    sparar = true;
+    try {
+      return await gor();
+    } finally {
+      sparar = false;
+    }
+  }
+
+  async function publicera(res, id) {
+    return medLas(res, async () => {
+      let rad;
+      try {
+        [[rad] = []] = await d1('SELECT id, kod, mal, betyg, namn, ort, text, dag FROM omdome WHERE id = ' + O.sql(id));
+      } catch (e) {
+        return json(res, 502, { fel: [e.message] });
+      }
+      if (!rad) return json(res, 404, { fel: ['Omdömet finns inte i inkorgen. Ladda om sidan.'] });
+
+      // Filen först. Går borttagningen ur D1 fel efteråt ligger omdömet redan
+      // publicerat, och ett nytt försök lägger inte till det igen.
+      P.skriv(OMDOMESFIL, O.medOmdome(O.las(OMDOMESFIL), rad));
+      try {
+        await d1('DELETE FROM omdome WHERE id = ' + O.sql(id));
+      } catch (e) {
+        return json(res, 502, { fel: [
+          'Omdömet är publicerat men ligger kvar i inkorgen. Tryck Publicera igen när nätet fungerar. (' + e.message + ')'
+        ] });
+      }
+      const bygge = await (byggSajt || bygg)();
+      json(res, 200, { publicerade: O.las(OMDOMESFIL), bygge });
+    });
+  }
+
+  async function avsla(res, id) {
+    try {
+      await d1('DELETE FROM omdome WHERE id = ' + O.sql(id));
+    } catch (e) {
+      return json(res, 502, { fel: [e.message] });
+    }
+    json(res, 200, { ok: true });
+  }
+
+  async function taBort(res, id) {
+    return medLas(res, async () => {
+      P.skriv(OMDOMESFIL, O.utanOmdome(O.las(OMDOMESFIL), id));
+      const bygge = await (byggSajt || bygg)();
+      json(res, 200, { publicerade: O.las(OMDOMESFIL), bygge });
+    });
   }
 
   // Den byggda sajten, så värmekartan kan läggas ovanpå sidan den hör till.
@@ -356,6 +453,14 @@ function skapaServer({ rot = path.join(__dirname, '..'), foto = Foto,
         if (!franPanelen(req)) return json(res, 403, { fel: ['Anropet kom inte från panelen.'] });
         return await hamtaKlick(res, parseInt(u.searchParams.get('dagar'), 10));
       }
+      if (req.method === 'GET' && väg === '/omdomen') {
+        return statisk(res, 'omdomen.html', 'text/html; charset=utf-8');
+      }
+      if (req.method === 'GET' && väg === '/api/omdomen') {
+        // Startar wrangler mot Cloudflare. Det ska bara panelen kunna.
+        if (!franPanelen(req)) return json(res, 403, { fel: ['Anropet kom inte från panelen.'] });
+        return await hamtaOmdomen(res);
+      }
       if (req.method === 'GET' && väg.startsWith('/sajt/')) {
         return sajtfil(res, väg.slice('/sajt'.length));
       }
@@ -373,6 +478,16 @@ function skapaServer({ rot = path.join(__dirname, '..'), foto = Foto,
       }
       if (req.method === 'POST' && väg === '/api/spara') {
         return await spara(req, res);
+      }
+      if (req.method === 'POST' && väg === '/api/inbjudan') {
+        return await nyInbjudan(req, res);
+      }
+      const om = väg.match(/^\/api\/omdomen\/(\d{1,9})\/(publicera|avsla|ta-bort)$/);
+      if (req.method === 'POST' && om) {
+        const id = Number(om[1]);
+        if (om[2] === 'publicera') return await publicera(res, id);
+        if (om[2] === 'avsla') return await avsla(res, id);
+        return await taBort(res, id);
       }
 
       const fv = väg.match(/^\/api\/bild\/([0-9a-f-]+)\/forhandsvisning$/);
