@@ -574,6 +574,48 @@ Verifiera domänen i Google Search Console och skicka in
 `https://myrdahlstra.se/sitemap.xml`. Utan det hittar Google sajten ändå, men
 långsammare, och du ser inte vad som indexerats.
 
+## Omdömen
+
+Kunder som köpt något kan skriva ett omdöme, som visas på brädans sida eller,
+för en bräda gjord efter mått, på beställningssidan. Där märks det också upp
+för Google, så att sidan kan få stjärnor i sökträffen.
+
+Så går det till:
+
+1. Skapa en inbjudan i panelen: `npm run admin`, sedan länken **Omdömen**.
+   Välj brädan, eller "Efter mått" för en bräda från byggaren, och tryck
+   Skapa länk.
+2. Klistra in länken i mejlet efter leveransen. Varje länk ger ett omdöme.
+3. Kunden skriver på `/omdome/`, och du får ett notismejl. Omdömet väntar i
+   D1-databasen **myrdahls-klick** tills du har läst det.
+4. Tryck Publicera eller Avslå i panelen. Publicera lägger omdömet i
+   `src/_data/omdomen.json` och bygger om. Sedan `npm run deploy` som vanligt.
+
+Publicerade omdömen bor bara i `src/_data/omdomen.json`, som checkas in i git
+precis som sortimentet. Databasen håller bara det som väntar på granskning.
+Ett publicerat omdöme kan tas bort i panelen, till exempel om kunden ber om
+det.
+
+Granskningsregeln står i panelen och ska följas: avslå bara skräp, uppgifter
+om andra personer eller påhopp. Ett ärligt lågt betyg ska publiceras.
+Marknadsföringslagen säger att den som visar omdömen ska tala om hur de
+kontrolleras, och att det är vilseledande att sålla bort de dåliga. Raden
+under omdömena och stycket i köpvillkoren säger hur det går till här.
+
+Stjärnorna i sökträffen kommer främst från beställningssidan. En unik bräda
+får noindex en vecka efter att den sålts, och omdömet kommer oftast efter
+leveransen. Omdömen på unika brädor syns ändå för besökarna på brädans sida.
+Google bestämmer själv om och när stjärnorna visas.
+
+Tabellerna skapas en gång:
+
+```
+npx wrangler d1 execute myrdahls-klick --remote --file=db/omdome.sql
+```
+
+För `npm run preview`, kör samma sak med `--local` och starta panelen med
+`KLICK_LOKAL=1`.
+
 ## Frakt
 
 Frakten går i två nivåer efter vikt, och beloppen står på ett enda ställe:
