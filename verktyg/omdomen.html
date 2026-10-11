@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Omdömen · Myrdahls Trä</title>
+<style>
+  :root {
+    --papper: #F4EDDD; --black: #2B2118; --guld: #8a5a2c; --rost: #8a3d2c;
+    --kort: #FBF6E9; --dov: #57503F; --linje: #B7A88F;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--papper); color: var(--black);
+    font-family: 'EB Garamond', Georgia, serif; font-size: 17px;
+  }
+  .ram { max-width: 860px; margin: 0 auto; padding: 24px 20px 60px 20px; }
+  header {
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: 20px; border-bottom: 1px solid var(--black); padding-bottom: 14px; flex-wrap: wrap;
+  }
+  h1 { font-size: 26px; font-weight: 400; margin: 0; }
+  h2 { font-size: 14px; letter-spacing: 0.18em; color: var(--guld); font-weight: 400; margin: 36px 0 12px 0; }
+  a { color: var(--black); }
+  select, button, input {
+    font: inherit; padding: 6px 10px; background: #fff; border: 1px solid var(--linje); color: var(--black);
+  }
+  button { cursor: pointer; }
+  button.huvud { background: var(--black); color: var(--papper); border-color: var(--black); }
+  .rad { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .lank { width: 100%; margin-top: 10px; }
+  .kort { background: var(--kort); border: 1px solid var(--linje); padding: 14px 16px; margin-bottom: 12px; }
+  .kort .text { white-space: pre-line; font-style: italic; margin: 8px 0; }
+  .kort .vem { color: var(--dov); font-size: 15px; }
+  .betyg { color: var(--guld); letter-spacing: 0.1em; }
+  .regel { color: var(--rost); font-size: 15px; margin: 0 0 12px 0; }
+  .tom { color: var(--dov); font-style: italic; }
+  .fel { color: var(--rost); white-space: pre-line; }
+  table { border-collapse: collapse; width: 100%; font-size: 15px; }
+  td, th { text-align: left; padding: 4px 8px 4px 0; border-bottom: 1px dotted var(--dov); }
+</style>
+</head>
+<body>
+<div class="ram">
+  <header>
+    <h1>Omdömen</h1>
+    <div><a href="/">Sortimentet</a> · <a href="/klick">Klickkartan</a></div>
+  </header>
+
+  <p class="fel" data-fel hidden></p>
+
+  <h2>NY INBJUDAN</h2>
+  <div class="rad">
+    <select data-mal aria-label="Vad omdömet gäller"></select>
+    <button class="huvud" data-skapa>Skapa länk</button>
+  </div>
+  <div data-ny hidden>
+    <input class="lank" data-lank readonly aria-label="Länk att klistra in i mejlet">
+    <div class="rad" style="margin-top:8px">
+      <button data-kopiera>Kopiera länken</button>
+      <span class="tom">Klistra in den i mejlet efter leveransen. Länken ger ett omdöme.</span>
+    </div>
+  </div>
+
+  <h2>VÄNTAR PÅ GRANSKNING</h2>
+  <p class="regel">Avslå bara skräp, uppgifter om andra personer eller påhopp. Ett ärligt lågt betyg ska publiceras.</p>
+  <div data-vantande></div>
+
+  <h2>PUBLICERADE</h2>
+  <p class="tom">Publicerade omdömen syns på sajten efter nästa uppladdning (npm run deploy).</p>
+  <div data-publicerade></div>
+
+  <h2>SENASTE INBJUDNINGARNA</h2>
+  <table>
+    <thead><tr><th>Gäller</th><th>Skapad</th><th>Omdöme</th></tr></thead>
+    <tbody data-inbjudningar></tbody>
+  </table>
+</div>
+
+<script>
+  // All text från kunder sätts med textContent. Panelen kan skriva filer,
+  // så ingenting som en kund skrivit får tolkas som HTML här.
+  const $ = (s) => document.querySelector(s);
+  const huvud = { 'X-Panel': '1', 'Content-Type': 'application/json' };
+  let malNamn = {};
+
+  function el(tagg, klass, text) {
+    const e = document.createElement(tagg);
+    if (klass) e.className = klass;
+    if (text != null) e.textContent = text;
+    return e;
+  }
+
+  function visaFel(text) {
+    $('[data-fel]').textContent = text || '';
+    $('[data-fel]').hidden = !text;
+  }
+
+  async function anrop(vag, kropp) {
+    const svar = await fetch(vag, kropp === undefined ? { headers: huvud }
+      : { method: 'POST', headers: huvud, body: JSON.stringify(kropp) });
+    const data = await svar.json().catch(() => ({ fel: ['Panelen svarade inte med JSON.'] }));
+    if (!svar.ok) throw new Error((data.fel || ['Okänt fel']).join('\n'));
+    if (data.bygge && !data.bygge.ok) visaFel('Bygget misslyckades:\n' + data.bygge.utskrift);
+    return data;
+  }
+
+  const stjarnor = (n) => '★'.repeat(n) + '☆'.repeat(5 - n);
+
+  function omdomeskort(o, datum, knappar) {
+    const kort = el('div', 'kort');
+    kort.append(el('div', 'betyg', stjarnor(o.betyg) + '  ' + o.betyg + ' av 5'));
+    kort.append(el('p', 'text', o.text));
+    kort.append(el('div', 'vem', o.namn + (o.ort ? ', ' + o.ort : '') + ' · ' + datum + ' · ' + (malNamn[o.mal] || o.mal)));
+    const rad = el('div', 'rad');
+    rad.style.marginTop = '10px';
+    for (const [text, gor, klass] of knappar) {
+      const b = el('button', klass, text);
+      b.addEventListener('click', async () => {
+        b.disabled = true;
+        try { await gor(); } catch (e) { visaFel(e.message); }
+        b.disabled = false;
+      });
+      rad.append(b);
+    }
+    kort.append(rad);
+    return kort;
+  }
+
+  async function ladda() {
+    let data;
+    try {
+      data = await anrop('/api/omdomen');
+    } catch (e) {
+      return visaFel(e.message);
+    }
+    malNamn = Object.fromEntries(data.mal.map((m) => [m.mal, m.namn]));
+
+    const val = $('[data-mal]');
+    if (!val.options.length) {
+      for (const m of data.mal) val.append(new Option(m.namn, m.mal));
+    }
+
+    const vant = $('[data-vantande]');
+    vant.replaceChildren();
+    if (!data.vantande.length) vant.append(el('p', 'tom', 'Inga omdömen väntar.'));
+    for (const o of data.vantande) {
+      vant.append(omdomeskort(o, o.dag, [
+        ['Publicera', async () => { visaFel(''); await anrop('/api/omdomen/' + o.id + '/publicera', {}); await ladda(); }, 'huvud'],
+        ['Avslå', async () => {
+          if (!confirm('Avslå omdömet från ' + o.namn + '? Det raderas och går inte att få tillbaka.\n\n' +
+            'Avslå bara skräp, uppgifter om andra personer eller påhopp.')) return;
+          visaFel('');
+          await anrop('/api/omdomen/' + o.id + '/avsla', {});
+          await ladda();
+        }]
+      ]));
+    }
+
+    const publ = $('[data-publicerade]');
+    publ.replaceChildren();
+    if (!data.publicerade.length) publ.append(el('p', 'tom', 'Inga publicerade omdömen än.'));
+    for (const o of data.publicerade.slice().reverse()) {
+      publ.append(omdomeskort(o, o.datum, [
+        ['Ta bort', async () => {
+          if (!confirm('Ta bort omdömet från ' + o.namn + ' från sajten?')) return;
+          visaFel('');
+          await anrop('/api/omdomen/' + o.id + '/ta-bort', {});
+          await ladda();
+        }]
+      ]));
+    }
+
+    const tabell = $('[data-inbjudningar]');
+    tabell.replaceChildren();
+    for (const i of data.inbjudningar) {
+      const tr = el('tr');
+      tr.append(el('td', null, malNamn[i.mal] || i.mal), el('td', null, i.skapad),
+        el('td', null, i.anvand ? 'skrivet ' + i.anvand : 'inte än'));
+      tabell.append(tr);
+    }
+  }
+
+  $('[data-skapa]').addEventListener('click', async () => {
+    visaFel('');
+    try {
+      const { lank } = await anrop('/api/inbjudan', { mal: $('[data-mal]').value });
+      $('[data-lank]').value = lank;
+      $('[data-ny]').hidden = false;
+      $('[data-lank]').select();
+      await ladda();
+    } catch (e) {
+      visaFel(e.message);
+    }
+  });
+
+  $('[data-kopiera]').addEventListener('click', async () => {
+    await navigator.clipboard.writeText($('[data-lank]').value);
+    $('[data-kopiera]').textContent = 'Kopierad';
+    setTimeout(() => { $('[data-kopiera]').textContent = 'Kopiera länken'; }, 1500);
+  });
+
+  ladda();
+</script>
+</body>
+</html>
