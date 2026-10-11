@@ -64,6 +64,11 @@
   "material": {{ (p.spec['Träslag'] | default('Massivt trä')) | dump | safe }},
   "brand": { "@type": "Brand", "name": {{ site.namn | dump | safe }} },
   "countryOfOrigin": { "@type": "Country", "name": "Sverige" },
+  {%- set betyg = omdomen | omdomenFor(p.slug) | omdomeData %}
+  {%- if betyg %}
+  "aggregateRating": {{ betyg.aggregateRating | jsonld | safe }},
+  "review": {{ betyg.review | jsonld | safe }},
+  {%- endif %}
   {{- erbjudande(p, site, true) }}
 }
 </script>
@@ -132,6 +137,35 @@
     }{% if not loop.last %},{% endif %}
     {%- endfor %}
   ]
+}
+</script>
+{%- elif sidnyckel == 'bestallning' %}
+{#- Beställningssidan: brädan som byggs efter kundens val. Den har inget fast
+    pris, så erbjudandet är ett spann där det lägsta står i ingressen. Hit hör
+    omdömena från brädor gjorda efter mått, och det är främst här stjärnorna i
+    sökträffen kan växa, för de unika brädornas sidor lämnar sökresultatet
+    en vecka efter att de sålts. -#}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": "Ändträskärbräda efter mått",
+  "description": {{ sidbeskrivning | dump | safe }},
+  "url": {{ (site.url + '/bestallning/') | dump | safe }},
+  "brand": { "@type": "Brand", "name": {{ site.namn | dump | safe }} },
+  "countryOfOrigin": { "@type": "Country", "name": "Sverige" },
+  {%- set betyg = omdomen | omdomenFor('bestallning') | omdomeData %}
+  {%- if betyg %}
+  "aggregateRating": {{ betyg.aggregateRating | jsonld | safe }},
+  "review": {{ betyg.review | jsonld | safe }},
+  {%- endif %}
+  "offers": {
+    "@type": "AggregateOffer",
+    "lowPrice": "{{ franpris }}",
+    "priceCurrency": "SEK",
+    "availability": "https://schema.org/MadeToOrder",
+    "seller": { "@type": "Organization", "name": {{ site.namn | dump | safe }} }
+  }
 }
 </script>
 {%- endif %}
