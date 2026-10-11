@@ -29,6 +29,7 @@ function filter(namn) {
   konfig({
     addPassthroughCopy() {},
     addWatchTarget() {},
+    addGlobalData() {},
     addFilter(n, f) { funna[n] = f; }
   });
   return funna[namn];
