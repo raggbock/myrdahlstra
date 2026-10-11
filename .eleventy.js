@@ -7,6 +7,7 @@ const Sortiment = require('./lib/sortiment.js');
 const Fotomatt = require('./lib/fotomatt.js');
 const Frakt = require('./lib/frakt.js');
 const Sokbeskrivning = require('./lib/sokbeskrivning.js');
+const Omdomen = require('./lib/omdomen.js');
 
 /*
  * Lägger innehållets fingeravtryck sist i adressen: /assets/style.css blir
@@ -109,6 +110,33 @@ module.exports = function (eleventyConfig) {
   eleventyConfig.addFilter('andraBrador', (produkter, slug, antal) =>
     Sortiment.andraBrador(produkter, slug, antal)
   );
+
+  // Omdömena, se lib/omdomen.js. Sidan och den strukturerade datan använder
+  // samma filter, så betyget kan inte skilja sig mellan dem.
+  eleventyConfig.addFilter('omdomenFor', (lista, mal) => Omdomen.omdomenFor(lista, mal));
+  eleventyConfig.addFilter('betygssnitt', (lista) => Omdomen.betygssnitt(lista));
+  eleventyConfig.addFilter('betygText', (tal) => Omdomen.betygText(tal));
+  eleventyConfig.addFilter('manad', (datum) => Omdomen.manad(datum));
+  eleventyConfig.addFilter('omdomeData', (lista) => Omdomen.strukturerat(lista));
+  eleventyConfig.addFilter('jsonld', (varde) => Omdomen.jsonld(varde));
+
+  // Det lägsta en bräda från byggaren kan kosta, räknat ur prislistan i
+  // assets/konfigurator.js: varje mönster i varje storlek, med det billigaste
+  // träslaget på alla platser och utan saftränna. Står synligt på
+  // beställningssidan och som lägsta pris i dess strukturerade data.
+  eleventyConfig.addGlobalData('franpris', () => {
+    const D = Konfigurator.DEFINITIONER;
+    const billigast = D.traslag.reduce((a, b) => (b.plus < a.plus ? b : a)).id;
+    const priser = [];
+    for (const m of D.monster) {
+      for (const s of D.storlekar) {
+        priser.push(Konfigurator.berakna({
+          monster: m.id, storlek: s.id, ranna: 'nej', traA: billigast, traB: billigast, traC: billigast
+        }));
+      }
+    }
+    return Math.min(...priser);
+  });
 
   return {
     dir: {
