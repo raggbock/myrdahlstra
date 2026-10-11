@@ -7,10 +7,10 @@ const path = require('node:path');
 const { pathToFileURL } = require('node:url');
 
 // Pages laddar endpointen som ESM, medan verktygen i repot ar CommonJS.
-// Ladda samma kallkod som ESM aven i Node, med absolut import till brev.mjs.
+// Ladda samma kallkod som ESM aven i Node, med absoluta importer till lib/.
 const fil = path.join(__dirname, '../functions/api/bestallning.js');
-const source = fs.readFileSync(fil, 'utf8').replace("'../../lib/brev.mjs'",
-  JSON.stringify(pathToFileURL(path.join(__dirname, '../lib/brev.mjs')).href));
+const source = fs.readFileSync(fil, 'utf8').replace(/'\.\.\/\.\.\/lib\/([\w-]+\.mjs)'/g, (_, namn) =>
+  JSON.stringify(pathToFileURL(path.join(__dirname, '../lib', namn)).href));
 const endpoint = import('data:text/javascript;base64,' + Buffer.from(source).toString('base64'));
 const env = { RESEND_API_KEY: 'endast-simulerade-utskick' };
 const form = () => new URLSearchParams({ Namn: 'Test', 'Mejl eller telefon': 'test@example.invalid' });
