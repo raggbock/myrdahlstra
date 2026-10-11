@@ -41,13 +41,23 @@ function las(fil) {
 }
 
 // Samma omdöme två gånger blir ett. Det gör att Publicera kan tryckas igen
-// om borttagningen ur D1 misslyckades förra gången.
+// om borttagningen ur D1 misslyckades förra gången. Koden följer med in i
+// filen, för id:t ensamt räcker inte: den lokala databasen från npm run
+// preview räknar sina id från 1 precis som den skarpa, och ett lokalt
+// provomdöme i filen skulle annars få ett riktigt omdöme att försvinna.
 function medOmdome(lista, rad) {
-  if (lista.some((o) => o.id === rad.id)) return lista;
+  const finns = lista.find((o) => o.id === rad.id);
+  if (finns && finns.kod === rad.kod) return lista;
+  if (finns) {
+    throw new KrockandeId('Ett annat publicerat omdöme har redan id ' + rad.id +
+      ' (' + finns.namn + '). Ta bort det i listan Publicerade, eller ändra dess id i omdomen.json, och publicera sedan igen.');
+  }
   return lista.concat([{
-    id: rad.id, mal: rad.mal, betyg: rad.betyg, namn: rad.namn, ort: rad.ort, text: rad.text, datum: rad.dag
+    id: rad.id, kod: rad.kod, mal: rad.mal, betyg: rad.betyg, namn: rad.namn, ort: rad.ort, text: rad.text, datum: rad.dag
   }]);
 }
+
+class KrockandeId extends Error {}
 
 function utanOmdome(lista, id) {
   return lista.filter((o) => o.id !== id);
@@ -67,4 +77,4 @@ function lank(url, kod) {
   return url + '/omdome/#' + kod;
 }
 
-module.exports = { KOD, nyKod, malLista, giltigtMal, las, medOmdome, utanOmdome, sql, lank };
+module.exports = { KrockandeId, KOD, nyKod, malLista, giltigtMal, las, medOmdome, utanOmdome, sql, lank };

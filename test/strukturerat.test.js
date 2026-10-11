@@ -27,6 +27,12 @@ async function bygg() {
   return sidor;
 }
 
+// Det en besökare ser: sidans kropp utan skript, alltså utan den
+// strukturerade datan själv
+function synligt(html) {
+  return html.slice(html.indexOf('<body')).replace(/<script[\s\S]*?<\/script>/g, '');
+}
+
 function block(html) {
   return [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map((m) => JSON.parse(m[1]));
 }
@@ -42,7 +48,30 @@ test('beställningssidan är en Product vars lägsta pris står på sidan', asyn
   const produkt = block(sida.content).find((b) => b['@type'] === 'Product');
   assert.ok(produkt, 'Product saknas på beställningssidan');
   assert.equal(produkt.offers['@type'], 'AggregateOffer');
-  assert.ok(sida.content.includes(Konfigurator.formatera(Number(produkt.offers.lowPrice))), 'lägsta priset syns inte');
+  assert.ok(synligt(sida.content).includes(Konfigurator.formatera(Number(produkt.offers.lowPrice))), 'lägsta priset syns inte');
+  assert.ok(synligt(sida.content).toLowerCase().includes(produkt.name.toLowerCase()), 'namnet ' + produkt.name + ' syns inte');
+});
+
+test('sidkartan flyttar lastmod för sidor med omdömen när ett omdöme publiceras', async () => {
+  const fs = require('node:fs');
+  const fil = path.join(ROT, 'src/_data/omdomen.json');
+  const fore = fs.statSync(fil);
+  const framtid = new Date('2031-05-05T12:00:00Z');
+  fs.utimesSync(fil, framtid, framtid);
+  try {
+    const mod = await import('@11ty/eleventy');
+    const Eleventy = mod.Eleventy || mod.default;
+    const elev = new Eleventy(path.join(ROT, 'src'), path.join(ROT, '_site'), {
+      configPath: path.join(ROT, '.eleventy.js'), quietMode: true
+    });
+    const karta = (await elev.toJSON()).find((s) => s.url === '/sitemap.xml').content;
+    const lastmod = (adress) => new RegExp('<loc>[^<]*' + adress + '</loc>\\s*<lastmod>([^<]*)').exec(karta)[1];
+    assert.equal(lastmod('/bestallning/'), '2031-05-05');
+    assert.match(karta, /\/brada\/[^<]*<\/loc>\s*<lastmod>2031-05-05/);
+    assert.notEqual(lastmod('/verkstaden/'), '2031-05-05');
+  } finally {
+    fs.utimesSync(fil, fore.atime, fore.mtime);
+  }
 });
 
 test('betyg finns i datan precis där omdömen syns på sidan', async () => {

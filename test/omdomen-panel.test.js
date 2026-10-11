@@ -32,9 +32,15 @@ test('mål: beställningssidan först, sedan brädorna i nummerordning', () => {
 test('ett publicerat omdöme läggs till en gång, även om det publiceras igen', () => {
   const rad = { id: 7, kod: 'AAAAAAAAAAAA', mal: 'ek-ett', betyg: 2, namn: 'Per', ort: '', text: 'Sprack.', dag: '2026-10-03' };
   const en = O.medOmdome([], rad);
-  assert.deepEqual(en, [{ id: 7, mal: 'ek-ett', betyg: 2, namn: 'Per', ort: '', text: 'Sprack.', datum: '2026-10-03' }]);
+  assert.deepEqual(en, [{ id: 7, kod: 'AAAAAAAAAAAA', mal: 'ek-ett', betyg: 2, namn: 'Per', ort: '', text: 'Sprack.', datum: '2026-10-03' }]);
   assert.equal(O.medOmdome(en, rad), en);
   assert.deepEqual(O.utanOmdome(en, 7), []);
+});
+
+test('samma id med en annan kod är ett annat omdöme och stoppas', () => {
+  const publicerat = [{ id: 7, kod: 'LOKALTPROV12', mal: 'ek-ett', betyg: 5, namn: 'Prov', ort: '', text: 'Lokalt prov.', datum: '2026-10-01' }];
+  const rad = { id: 7, kod: 'AAAAAAAAAAAA', mal: 'ek-ett', betyg: 2, namn: 'Per', ort: '', text: 'Sprack.', dag: '2026-10-03' };
+  assert.throws(() => O.medOmdome(publicerat, rad), /id 7/);
 });
 
 test('filen: saknas den är listan tom, och fel innehåll stoppas', () => {
@@ -81,7 +87,7 @@ async function panel(t, fragaD1) {
     body: kropp === undefined ? undefined : JSON.stringify(kropp)
   });
   const fil = () => JSON.parse(fs.readFileSync(path.join(rot, 'src/_data/omdomen.json'), 'utf8'));
-  return { url, anrop, fil, byggen };
+  return { url, anrop, fil, byggen, rot };
 }
 
 const vantande = { id: 9, kod: 'AAAAAAAAAAAA', mal: 'ek-ett', betyg: 2, namn: 'Per', ort: 'Ö', text: 'Sprack efter en månad.', dag: '2026-10-03' };
@@ -131,6 +137,23 @@ test('misslyckas borttagningen ligger omdömet i filen, och nästa försök dubb
   felVidDelete = false;
   assert.equal((await anrop('/api/omdomen/9/publicera', {})).status, 200);
   assert.equal(fil().length, 1);
+});
+
+test('ett id som redan används av ett annat publicerat omdöme stoppar utan att radera', async (t) => {
+  const fragor = [];
+  const { anrop, fil, byggen, rot } = await panel(t, async (q) => {
+    fragor.push(q);
+    return q.startsWith('SELECT') ? [[vantande]] : [[]];
+  });
+  // Ett omdöme publicerat från den lokala databasen, med samma id men en annan kod
+  const lokalt = { id: 9, kod: 'LOKALTPROV12', mal: 'bestallning', betyg: 5, namn: 'Prov', ort: '', text: 'Lokalt prov.', datum: '2026-10-01' };
+  fs.writeFileSync(path.join(rot, 'src/_data/omdomen.json'), JSON.stringify([lokalt]));
+  const svar = await anrop('/api/omdomen/9/publicera', {});
+  assert.equal(svar.status, 409);
+  assert.match((await svar.json()).fel[0], /id 9/);
+  assert.deepEqual(fil(), [lokalt]);
+  assert.ok(!fragor.some((q) => q.startsWith('DELETE')), 'raden i inkorgen får inte raderas');
+  assert.equal(byggen.length, 0);
 });
 
 test('ett omdöme som inte finns i inkorgen ger 404', async (t) => {

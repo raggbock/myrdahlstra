@@ -361,7 +361,14 @@ function skapaServer({ rot = path.join(__dirname, '..'), foto = Foto,
 
       // Filen först. Går borttagningen ur D1 fel efteråt ligger omdömet redan
       // publicerat, och ett nytt försök lägger inte till det igen.
-      P.skriv(OMDOMESFIL, O.medOmdome(O.las(OMDOMESFIL), rad));
+      let lista;
+      try {
+        lista = O.medOmdome(O.las(OMDOMESFIL), rad);
+      } catch (e) {
+        if (e instanceof O.KrockandeId) return json(res, 409, { fel: [e.message] });
+        throw e;
+      }
+      P.skriv(OMDOMESFIL, lista);
       try {
         await d1('DELETE FROM omdome WHERE id = ' + O.sql(id));
       } catch (e) {
