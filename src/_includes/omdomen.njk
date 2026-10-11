@@ -1,0 +1,28 @@
+{#-
+  Omdömena för en sida. Väntar på: mal (brädans slug eller 'bestallning').
+  Utan omdömen syns ingenting. Snittet räknas med samma filter som den
+  strukturerade datan i strukturerat.njk, så sidan och Google får samma tal.
+
+  Raden om hur omdömena kontrolleras krävs enligt marknadsföringslagen,
+  och den ska stå kvar.
+-#}
+{%- from "stjarnor.njk" import stjarnor %}
+{%- set lista = omdomen | omdomenFor(mal) %}
+{%- if lista.length %}
+{%- set s = lista | betygssnitt %}
+<section class="passage omdomen" id="omdomen">
+  {% include "ornament.njk" %}
+  <h2 class="passage__rubrik">OMDÖMEN</h2>
+  <p class="omdomen__snitt">{{ stjarnor(s.snitt, 'snitt') }} <span>{{ s.snitt | betygText }} av 5, {{ s.antal }} {{ 'omdöme' if s.antal == 1 else 'omdömen' }}</span></p>
+  <ul class="omdomen__lista">
+    {%- for o in lista %}
+    <li class="omdomen__post">
+      {{ stjarnor(o.betyg, 'omdome' + o.id) }}
+      <p class="omdomen__text">{{ o.text }}</p>
+      <p class="omdomen__vem">{{ o.namn }}{% if o.ort %}, {{ o.ort }}{% endif %}, {{ o.datum | manad }}</p>
+    </li>
+    {%- endfor %}
+  </ul>
+  <p class="smatext omdomen__kontroll">Omdömena skrivs av kunder som köpt härifrån, via en personlig länk som skickas efter leveransen. Jag läser dem innan de publiceras, och alla som följer <a href="/villkor/#omdomen">reglerna</a> publiceras oavsett betyg.</p>
+</section>
+{%- endif %}

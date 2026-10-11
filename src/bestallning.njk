@@ -17,7 +17,7 @@ eleventyComputed:
 
 <div class="bestall__intro">
   <h1 class="bestall__titel"><span class="nr">Efter mått.</span> Bygg din bräda</h1>
-  <p class="bestall__ingress">Bygg brädan här så ritas den upp medan du väljer och ett cirkapris räknas fram, eller skriv bara ett meddelande om du hellre vill fråga något först. Jag svarar inom ett par dagar per mejl. Tillverkning tar normalt {{ site.leveranstid }}.</p>
+  <p class="bestall__ingress">Bygg brädan här så ritas den upp medan du väljer och ett cirkapris räknas fram, eller skriv bara ett meddelande om du hellre vill fråga något först. Jag svarar inom ett par dagar per mejl. Brädorna kostar från {{ franpris | pris }}, beroende på storlek, mönster och träslag. Tillverkning tar normalt {{ site.leveranstid }}.</p>
   {% include "ornament.njk" %}
 </div>
 
@@ -255,3 +255,6 @@ eleventyComputed:
 </form>
 
 </div>
+
+{% set mal = 'bestallning' %}
+{% include "omdomen.njk" %}

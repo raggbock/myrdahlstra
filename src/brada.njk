@@ -169,6 +169,9 @@ eleventyComputed:
 </section>
 {%- endif %}
 
+{% set mal = p.slug %}
+{% include "omdomen.njk" %}
+
 {#- Vidare i katalogen. Interna länkar i brödtexten saknades helt: varje sida
     hade bara menyns och sidfotens sju länkar. Det hjälper både besökaren som
     vill se nästa bräda och sökmotorn som försöker förstå vad som hör ihop. -#}
