@@ -81,6 +81,10 @@ module.exports = function (eleventyConfig) {
   // Bara brädor som går att köpa, sorterade på N:o
   eleventyConfig.addFilter('tillSalu', (produkter) => Sortiment.tillSalu(produkter));
 
+  // Brädorna vars namn innehåller ett ord, till exempel "ändträ"
+  eleventyConfig.addFilter('titelMed', (produkter, ord) =>
+    produkter.filter((p) => p.titel.toLowerCase().includes(ord)));
+
   // Ritar en bräda som SVG. Korten i byggaren är dekor, inte information:
   // kortets egen text säger redan vad det är, så skärmläsaren hoppar över dem.
   eleventyConfig.addFilter('brada', (val, kolumner, rader) =>

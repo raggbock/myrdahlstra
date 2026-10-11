@@ -929,6 +929,11 @@ img {
   font-size: 16px;
 }
 
+/* Samma lista i löptext, som på ändträsidan */
+.text .vidarelista {
+  margin: 6px 0 22px 0;
+}
+
 .vidarelista__pris {
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
