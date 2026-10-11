@@ -1886,3 +1886,131 @@ textarea {
     display: none;
   }
 }
+
+/* ---------- Omdömen ---------- */
+
+.stjarna,
+.stjarnor polygon {
+  fill: var(--guld);
+}
+
+.stjarnor .stjarnor__tom {
+  fill: none;
+  stroke: var(--guld);
+  stroke-width: 1;
+}
+
+.stjarnor {
+  width: 92px;
+  height: 18px;
+  vertical-align: -2px;
+}
+
+.omdomesformular {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 0 auto;
+}
+
+.omdomesformular__lapp {
+  font-size: 26px;
+  transform: rotate(-2deg);
+  margin: 0;
+}
+
+.stjarnval {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: 4px;
+}
+
+.stjarnval__rubrik {
+  font-size: 15px;
+  letter-spacing: 0.18em;
+  color: var(--guld);
+  padding: 0;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+
+.stjarnval label {
+  cursor: pointer;
+  padding: 4px;
+}
+
+.stjarnval .stjarna {
+  width: 34px;
+  height: 34px;
+  fill: none;
+  stroke: var(--guld);
+  stroke-width: 1;
+}
+
+/* Den valda stjärnan och alla före den fylls. Etiketten till stjärna n
+   står efter sin knapp, så de tidigare etiketterna hittas med :has(). */
+.stjarnval input:checked + label .stjarna,
+.stjarnval label:has(~ input:checked) .stjarna {
+  fill: var(--guld);
+}
+
+.stjarnval input:focus-visible + label {
+  outline: 1px solid var(--black);
+  outline-offset: 2px;
+}
+
+.omdomesformular__kod {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  font-size: 15px;
+  color: var(--dov);
+}
+
+.omdomen__snitt {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 17px;
+  color: var(--dov);
+}
+
+.omdomen__lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  max-width: 640px;
+  text-align: left;
+}
+
+.omdomen__post {
+  background: var(--kort);
+  border: 1px solid var(--black);
+  padding: 18px 22px;
+}
+
+.omdomen__text {
+  font-style: italic;
+  font-size: 19px;
+  line-height: 1.55;
+  white-space: pre-line;
+  margin: 8px 0;
+}
+
+.omdomen__vem {
+  color: var(--dov);
+  font-size: 15px;
+  margin: 0;
+}
+
+.omdomen__kontroll {
+  max-width: 640px;
+}

@@ -1,0 +1,59 @@
+---
+layout: base.njk
+huvudtyp: kompakt
+permalink: /omdome/index.html
+noindex: true
+eleventyComputed:
+  sidtitel: "Skriv ett omdöme · {{ site.namn }}"
+  sidbeskrivning: "Berätta hur brädan fungerar hemma hos dig."
+---
+{% from "stjarnor.njk" import stjarna %}
+
+<div class="bestall__intro">
+  <h1 class="bestall__titel"><span class="nr">Omdöme.</span> Hur blev det?</h1>
+  <p class="bestall__ingress">Berätta hur brädan fungerar i ditt kök, vad du tycker om den och om något kunde ha varit bättre. Jag läser allt, och ett ärligt omdöme hjälper nästa kund mer än ett artigt.</p>
+  {% include "ornament.njk" %}
+</div>
+
+<form class="omdomesformular uppgifter" action="/api/omdome" method="POST">
+  <p class="lapp omdomesformular__lapp">tack för att du tar dig tid!</p>
+
+  <fieldset class="stjarnval">
+    <legend class="stjarnval__rubrik">Ditt betyg</legend>
+    {%- for n in range(1, 6) %}
+    <input class="dold" type="radio" id="betyg{{ n }}" name="betyg" value="{{ n }}" required>
+    <label for="betyg{{ n }}">{{ stjarna() }}<span class="dold">{{ n }} av 5</span></label>
+    {%- endfor %}
+  </fieldset>
+
+  <div class="faltpar">
+    <label class="dold" for="namn">Namn</label>
+    <input type="text" id="namn" name="namn" maxlength="40" required placeholder="Förnamn, som det ska stå" autocomplete="given-name">
+    <label class="dold" for="ort">Ort</label>
+    <input type="text" id="ort" name="ort" maxlength="40" placeholder="Ort (frivilligt)" autocomplete="address-level2">
+  </div>
+  <label class="dold" for="text">Omdöme</label>
+  <textarea id="text" name="text" minlength="10" maxlength="1500" required placeholder="Hur fungerar brädan? Vad är bra, och vad kunde ha varit bättre?"></textarea>
+
+  <p class="omdomesformular__kod" data-kodrad>
+    <label for="kod">Koden från mejlet</label>
+    <input type="text" id="kod" name="kod" required pattern="[A-Za-z0-9_\-]{12}" autocomplete="off" spellcheck="false">
+  </p>
+
+  <button class="knapp" type="submit">Skicka omdömet</button>
+  <p class="smatext">Omdömet visas på sajten med betyget, texten, namnet och orten du skriver och vilken månad det skrevs. Jag läser det innan det publiceras. Mer om hur omdömen hanteras står i <a href="/villkor/#omdomen">villkoren</a>.</p>
+</form>
+
+<script>
+  // Koden står efter # i länken från mejlet. Då fylls den i och fältet
+  // göms. Utan skript, eller med en länk som klippts av, syns fältet och
+  // koden kan skrivas in för hand.
+  (function () {
+    var kod = '';
+    try { kod = decodeURIComponent(location.hash.slice(1)); } catch (e) {}
+    if (/^[A-Za-z0-9_-]{12}$/.test(kod)) {
+      document.getElementById('kod').value = kod;
+      document.querySelector('[data-kodrad]').hidden = true;
+    }
+  })();
+</script>

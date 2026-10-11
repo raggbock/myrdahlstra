@@ -1,0 +1,25 @@
+{#-
+  Stjärnor som SVG, i guldbrunt. Ritas själva i stället för att sättas som
+  tecken, för ★ finns inte i de självhostade typsnitten.
+
+  stjarnor(varde, id): fem stjärnor, fyllda så långt betyget räcker, även
+  delvis (4,7 fyller sista stjärnan till sju tiondelar). id ska vara unikt på
+  sidan, för klippningen pekas ut med det.
+
+  Punkterna står utskrivna i varje polygon med flit: ett makro i en
+  importerad fil ser inte variabler som satts utanför det.
+-#}
+
+{%- macro stjarna() -%}
+<svg class="stjarna" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><polygon points="10,1.2 12.6,7.1 19,7.6 14.1,11.8 15.6,18.2 10,14.8 4.4,18.2 5.9,11.8 1,7.6 7.4,7.1"/></svg>
+{%- endmacro -%}
+
+{%- macro stjarnor(varde, id) -%}
+<svg class="stjarnor" viewBox="0 0 100 20" role="img" aria-label="Betyg {{ varde | betygText }} av 5">
+  <defs><clipPath id="{{ id }}"><rect width="{{ varde * 20 }}" height="20"/></clipPath></defs>
+  {%- for i in range(5) %}<polygon class="stjarnor__tom" transform="translate({{ i * 20 }} 0)" points="10,1.2 12.6,7.1 19,7.6 14.1,11.8 15.6,18.2 10,14.8 4.4,18.2 5.9,11.8 1,7.6 7.4,7.1"/>{% endfor %}
+  <g class="stjarnor__fylld" clip-path="url(#{{ id }})">
+    {%- for i in range(5) %}<polygon transform="translate({{ i * 20 }} 0)" points="10,1.2 12.6,7.1 19,7.6 14.1,11.8 15.6,18.2 10,14.8 4.4,18.2 5.9,11.8 1,7.6 7.4,7.1"/>{% endfor %}
+  </g>
+</svg>
+{%- endmacro -%}
