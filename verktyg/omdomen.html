@@ -51,8 +51,8 @@
 
   <h2>NY INBJUDAN</h2>
   <div class="rad">
-    <select data-mal aria-label="Vad omdömet gäller"></select>
     <button class="huvud" data-skapa>Skapa länk</button>
+    <span class="tom">Omdömet gäller brädan kunden köpt, och visas tillsammans med de andra.</span>
   </div>
   <div data-ny hidden>
     <input class="lank" data-lank readonly aria-label="Länk att klistra in i mejlet">
@@ -72,7 +72,7 @@
 
   <h2>SENASTE INBJUDNINGARNA</h2>
   <table>
-    <thead><tr><th>Gäller</th><th>Skapad</th><th>Omdöme</th></tr></thead>
+    <thead><tr><th>Skapad</th><th>Omdöme</th></tr></thead>
     <tbody data-inbjudningar></tbody>
   </table>
 </div>
@@ -82,7 +82,6 @@
   // så ingenting som en kund skrivit får tolkas som HTML här.
   const $ = (s) => document.querySelector(s);
   const huvud = { 'X-Panel': '1', 'Content-Type': 'application/json' };
-  let malNamn = {};
 
   function el(tagg, klass, text) {
     const e = document.createElement(tagg);
@@ -111,7 +110,7 @@
     const kort = el('div', 'kort');
     kort.append(el('div', 'betyg', stjarnor(o.betyg) + '  ' + o.betyg + ' av 5'));
     kort.append(el('p', 'text', o.text));
-    kort.append(el('div', 'vem', o.namn + (o.ort ? ', ' + o.ort : '') + ' · ' + datum + ' · ' + (malNamn[o.mal] || o.mal)));
+    kort.append(el('div', 'vem', o.namn + (o.ort ? ', ' + o.ort : '') + ' · ' + datum));
     const rad = el('div', 'rad');
     rad.style.marginTop = '10px';
     for (const [text, gor, klass] of knappar) {
@@ -134,13 +133,6 @@
     } catch (e) {
       return visaFel(e.message);
     }
-    malNamn = Object.fromEntries(data.mal.map((m) => [m.mal, m.namn]));
-
-    const val = $('[data-mal]');
-    if (!val.options.length) {
-      for (const m of data.mal) val.append(new Option(m.namn, m.mal));
-    }
-
     const vant = $('[data-vantande]');
     vant.replaceChildren();
     if (!data.vantande.length) vant.append(el('p', 'tom', 'Inga omdömen väntar.'));
@@ -175,7 +167,7 @@
     tabell.replaceChildren();
     for (const i of data.inbjudningar) {
       const tr = el('tr');
-      tr.append(el('td', null, malNamn[i.mal] || i.mal), el('td', null, i.skapad),
+      tr.append(el('td', null, i.skapad),
         el('td', null, i.anvand ? 'skrivet ' + i.anvand : 'inte än'));
       tabell.append(tr);
     }
@@ -184,7 +176,7 @@
   $('[data-skapa]').addEventListener('click', async () => {
     visaFel('');
     try {
-      const { lank } = await anrop('/api/inbjudan', { mal: $('[data-mal]').value });
+      const { lank } = await anrop('/api/inbjudan', {});
       $('[data-lank]').value = lank;
       $('[data-ny]').hidden = false;
       $('[data-lank]').select();

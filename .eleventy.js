@@ -115,15 +115,11 @@ module.exports = function (eleventyConfig) {
     Sortiment.andraBrador(produkter, slug, antal)
   );
 
-  // Omdömena, se lib/omdomen.js. Sidan och den strukturerade datan använder
-  // samma filter, så betyget kan inte skilja sig mellan dem.
-  eleventyConfig.addFilter('omdomenFor', (lista, mal) => Omdomen.omdomenFor(lista, mal));
-  eleventyConfig.addFilter('omdomenOmSalda', (lista, produkter) => Omdomen.omSalda(lista, produkter));
+  // Omdömena, se lib/omdomen.js. De är allmänna och visas likadant överallt.
+  eleventyConfig.addFilter('omdomenUrval', (lista) => Omdomen.urval(lista));
   eleventyConfig.addFilter('betygssnitt', (lista) => Omdomen.betygssnitt(lista));
   eleventyConfig.addFilter('betygText', (tal) => Omdomen.betygText(tal));
   eleventyConfig.addFilter('manad', (datum) => Omdomen.manad(datum));
-  eleventyConfig.addFilter('omdomeData', (lista) => Omdomen.strukturerat(lista));
-  eleventyConfig.addFilter('jsonld', (varde) => Omdomen.jsonld(varde));
 
   // Det lägsta en bräda från byggaren kan kosta, räknat ur prislistan i
   // assets/konfigurator.js: varje mönster i varje storlek, med det billigaste

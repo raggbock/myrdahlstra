@@ -19,7 +19,7 @@ const KOD = 'Ab3_-xYz9Q0w';
 
 function databas() {
   const d1 = fejkD1(SCHEMA);
-  d1.db.prepare("INSERT INTO inbjudan (kod, mal, skapad) VALUES (?, 'bestallning', '2026-10-01')").run(KOD);
+  d1.db.prepare("INSERT INTO inbjudan (kod, mal, skapad) VALUES (?, 'allmant', '2026-10-01')").run(KOD);
   return d1;
 }
 
@@ -48,7 +48,7 @@ test('ett omdöme sparas, koden märks som använd och Sebastian får en notis',
   assert.equal(svar.status, 303);
   assert.equal(new URL(svar.headers.get('location')).pathname, '/omdome/tack/');
   assert.equal(rader.length, 1);
-  assert.equal(rader[0].mal, 'bestallning');
+  assert.equal(rader[0].mal, 'allmant');
   assert.equal(rader[0].betyg, 4);
   assert.equal(rader[0].namn, 'Karin');
   assert.equal(rader[0].ort, 'Västerås');
@@ -56,6 +56,8 @@ test('ett omdöme sparas, koden märks som använd och Sebastian får en notis',
   assert.ok(d1.db.prepare('SELECT anvand FROM inbjudan WHERE kod = ?').get(KOD).anvand);
   assert.equal(brev.length, 1);
   assert.match(brev[0].subject, /4 av 5/);
+  assert.match(brev[0].text, /från Karin/);
+  assert.doesNotMatch(brev[0].text, /allmant/, 'databasens interna värde ska inte stå i notisen');
   assert.doesNotMatch(brev[0].text, /används varje dag/, 'kundens text ska inte stå i notisen');
 });
 
@@ -136,9 +138,9 @@ test('utan Resend-nyckel sparas omdömet ändå', async (t) => {
 test('ett raderat omdömes id ges aldrig till ett nytt', () => {
   const d1 = fejkD1(SCHEMA);
   const ny = (kod) => {
-    d1.db.prepare("INSERT INTO inbjudan (kod, mal, skapad) VALUES (?, 'bestallning', '2026-10-01')").run(kod);
+    d1.db.prepare("INSERT INTO inbjudan (kod, mal, skapad) VALUES (?, 'allmant', '2026-10-01')").run(kod);
     return Number(d1.db.prepare(
-      "INSERT INTO omdome (kod, mal, betyg, namn, ort, text, dag) VALUES (?, 'bestallning', 5, 'A', '', 'Bra bräda!', '2026-10-01')"
+      "INSERT INTO omdome (kod, mal, betyg, namn, ort, text, dag) VALUES (?, 'allmant', 5, 'A', '', 'Bra bräda!', '2026-10-01')"
     ).run(kod).lastInsertRowid);
   };
   const forsta = ny('AAAAAAAAAAAA');

@@ -10,7 +10,7 @@
 
 CREATE TABLE IF NOT EXISTS inbjudan (
   kod    TEXT PRIMARY KEY,   -- 12 tecken base64url, slumpad i panelen
-  mal    TEXT NOT NULL,      -- brädans slug, eller 'bestallning'
+  mal    TEXT NOT NULL,      -- alltid 'allmant': omdömena gäller inte en viss bräda, se verktyg/omdomen.js
   skapad TEXT NOT NULL,      -- 2026-10-10
   anvand TEXT                -- dagen omdömet kom in, null tills dess
 );

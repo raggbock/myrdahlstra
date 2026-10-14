@@ -1,20 +1,22 @@
 {#-
-  Omdömena för en sida. Väntar på: mal (brädans slug eller 'bestallning').
-  Utan omdömen syns ingenting. Snittet räknas med samma filter som den
-  strukturerade datan i strukturerat.njk, så sidan och Google får samma tal.
+  Omdömena, samma ruta på startsidan, beställningssidan och brädornas sidor.
+  De är allmänna, om en bräda kunden köpt, och inte knutna till en viss post,
+  se lib/omdomen.js. Utan omdömen syns ingenting.
+
+  Snittet räknas på alla omdömen, listan visar de nyaste. Ingen strukturerad
+  data, med flit: Google visar bara stjärnor för omdömen om en bestämd vara.
 
   Raden om hur omdömena kontrolleras krävs enligt marknadsföringslagen,
-  och den ska stå kvar. Den står i omdomen-kontroll.njk, som startsidans
-  ruta med omdömen om sålda brädor också använder.
+  och den ska stå kvar.
 -#}
 {%- from "stjarnor.njk" import stjarnor %}
-{%- set lista = omdomen | omdomenFor(mal) %}
-{%- if lista.length %}
-{%- set s = lista | betygssnitt %}
+{%- if omdomen and omdomen.length %}
+{%- set s = omdomen | betygssnitt %}
+{%- set lista = omdomen | omdomenUrval %}
 <section class="passage omdomen" id="omdomen">
   {% include "ornament.njk" %}
   <h2 class="passage__rubrik">OMDÖMEN</h2>
-  <p class="omdomen__snitt">{{ stjarnor(s.snitt, 'snitt') }} <span>{{ s.snitt | betygText }} av 5, {{ s.antal }} {{ 'omdöme' if s.antal == 1 else 'omdömen' }}</span></p>
+  <p class="omdomen__snitt">{{ stjarnor(s.snitt, 'snitt') }} <span>{{ s.snitt | betygText }} av 5, {{ s.antal }} {{ 'omdöme' if s.antal == 1 else 'omdömen' }}{% if s.antal > lista.length %}, här de {{ lista.length }} senaste{% endif %}</span></p>
   <ul class="omdomen__lista">
     {%- for o in lista %}
     <li class="omdomen__post">
@@ -24,6 +26,6 @@
     </li>
     {%- endfor %}
   </ul>
-  {% include "omdomen-kontroll.njk" %}
+  <p class="smatext omdomen__kontroll">Omdömena skrivs av kunder som köpt härifrån, via en personlig länk som skickas efter leveransen. Jag läser dem innan de publiceras, och alla som följer <a href="/villkor/#omdomen">reglerna</a> publiceras oavsett betyg.</p>
 </section>
 {%- endif %}

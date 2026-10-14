@@ -65,13 +65,12 @@ function franSajten(request) {
   }
 }
 
-function notis(omdome, mal, avsandare, mottagare) {
-  const vad = mal === 'bestallning' ? 'en bräda efter mått' : 'brädan ' + mal;
+function notis(omdome, avsandare, mottagare) {
   return {
     from: avsandare,
     to: [mottagare],
     subject: 'Nytt omdöme väntar, ' + omdome.betyg + ' av 5',
-    text: 'Ett omdöme har kommit in för ' + vad + ', från ' + omdome.namn + '.\n\n' +
+    text: 'Ett omdöme har kommit in från ' + omdome.namn + '.\n\n' +
       'Läs det i verkstadspanelen (npm run admin, sedan Omdömen) och publicera eller avslå.\n'
   };
 }
@@ -104,7 +103,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
   if (omdome.fel) return fel('Fyll i lite mer', omdome.fel, 400);
 
   try {
-    const inbjudan = await env.KLICK.prepare('SELECT mal, anvand FROM inbjudan WHERE kod = ?')
+    const inbjudan = await env.KLICK.prepare('SELECT anvand FROM inbjudan WHERE kod = ?')
       .bind(omdome.kod).first();
     if (!inbjudan) {
       return fel('Länken känns inte igen', 'Koden finns inte. Kontrollera att hela länken från mejlet kom med.', 400);
@@ -128,7 +127,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
     // Notisen är en bekvämlighet. Omdömet är redan sparat, så ett fel här
     // ska kunden inte märka.
     if (env.RESEND_API_KEY) {
-      const skick = skickaMejl(env.RESEND_API_KEY, notis(omdome, inbjudan.mal, avsandare, mottagare))
+      const skick = skickaMejl(env.RESEND_API_KEY, notis(omdome, avsandare, mottagare))
         .catch((e) => console.error('Notis om omdöme misslyckades: ' + e.message));
       if (waitUntil) waitUntil(skick); else await skick;
     }

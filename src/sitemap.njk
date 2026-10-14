@@ -14,11 +14,11 @@ eleventyExcludeFromCollections: true
 
   Tacksidan och 404 är med flit inte med. De är märkta noindex.
 -#}
-{#- Omdömena står på brädornas sidor och beställningssidan, så ett nytt
-    publicerat omdöme flyttar deras lastmod. -#}
+{#- Omdömena står på startsidan, brädornas sidor och beställningssidan, så
+    ett nytt publicerat omdöme flyttar deras lastmod. -#}
 {%- set produktkallor = ['src/brada.njk', 'src/_data/products.json', 'src/_data/omdomen.json'] -%}
 {%- set sidor = [
-  { adress: '/', vikt: '1.0', kallor: ['src/index.njk', 'src/_data/products.json'] },
+  { adress: '/', vikt: '1.0', kallor: ['src/index.njk', 'src/_data/products.json', 'src/_data/omdomen.json'] },
   { adress: '/bestallning/', vikt: '0.9', kallor: ['src/bestallning.njk', 'assets/konfigurator.js', 'src/_data/omdomen.json'] },
   { adress: '/andtra/', vikt: '0.7', kallor: ['src/andtra.njk', 'src/_data/process.json'] },
   { adress: '/verkstaden/', vikt: '0.6', kallor: ['src/verkstaden.njk'] },

@@ -66,6 +66,7 @@ test('sidkartan flyttar lastmod för sidor med omdömen när ett omdöme publice
     });
     const karta = (await elev.toJSON()).find((s) => s.url === '/sitemap.xml').content;
     const lastmod = (adress) => new RegExp('<loc>[^<]*' + adress + '</loc>\\s*<lastmod>([^<]*)').exec(karta)[1];
+    assert.equal(lastmod('/'), '2031-05-05');
     assert.equal(lastmod('/bestallning/'), '2031-05-05');
     assert.match(karta, /\/brada\/[^<]*<\/loc>\s*<lastmod>2031-05-05/);
     assert.notEqual(lastmod('/verkstaden/'), '2031-05-05');
@@ -74,35 +75,23 @@ test('sidkartan flyttar lastmod för sidor med omdömen när ett omdöme publice
   }
 });
 
-test('betyg finns i datan precis där omdömen syns på sidan', async () => {
+test('ingen strukturerad data har betyg, för omdömena gäller inte en bestämd vara', async () => {
   for (const s of await bygg()) {
-    const produkter = block(s.content).filter((b) => b['@type'] === 'Product');
-    for (const p of produkter) {
-      const synligt = s.content.includes('class="omdomen__snitt"');
-      assert.equal(Boolean(p.aggregateRating), synligt, s.url);
-      if (p.aggregateRating) {
-        const snitt = O.betygText(p.aggregateRating.ratingValue) + ' av 5';
-        assert.ok(s.content.includes(snitt), s.url + ' visar inte ' + snitt);
-        assert.equal(p.review.length, p.aggregateRating.reviewCount);
-      }
-    }
+    const text = JSON.stringify(block(s.content));
+    assert.doesNotMatch(text, /"aggregateRating"|"review"/, s.url);
   }
 });
 
-test('startsidans företag har inget betyg', async () => {
-  const start = (await bygg()).find((s) => s.url === '/');
-  for (const b of block(start.content)) assert.equal(b.aggregateRating, undefined);
-});
-
-test('startsidan visar omdömen om sålda brädor, med länk till brädan, men inget snitt', async () => {
-  const start = (await bygg()).find((s) => s.url === '/');
-  const salda = O.omSalda(OMDOMEN, require('../src/_data/products.json'));
-  assert.equal(start.content.includes('id="tidigare-kopare"'), salda.length > 0);
-  for (const o of salda) {
-    assert.ok(start.content.includes('href="/brada/' + o.brada.slug + '/"'), 'länken till ' + o.brada.slug + ' saknas');
+test('omdömena syns där det handlas, precis när det finns några', async () => {
+  const handel = (url) => url === '/' || url === '/bestallning/' || url.startsWith('/brada/');
+  const { snitt } = O.betygssnitt(OMDOMEN);
+  for (const s of await bygg()) {
+    if (!s.url || !s.url.endsWith('/')) continue;
+    // Klassen och inte id:t: villkorens rubrik om omdömen har samma id
+    const ruta = s.content.includes('class="passage omdomen"');
+    assert.equal(ruta, handel(s.url) && OMDOMEN.length > 0, s.url);
+    if (ruta) assert.ok(s.content.includes(O.betygText(snitt) + ' av 5'), s.url + ' visar inte snittet');
   }
-  // Ett snitt här skulle få testet ovan att kräva betyg i startsidans data
-  assert.equal(start.content.includes('class="omdomen__snitt"'), false);
 });
 
 test('omdomen.json har bara giltiga omdömen', () => {

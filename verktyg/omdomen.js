@@ -1,9 +1,9 @@
 'use strict';
 
 /*
- * Ren logik för omdömena i verkstadspanelen: koder till inbjudningar,
- * vilka mål ett omdöme kan ha, och filen src/_data/omdomen.json där de
- * publicerade omdömena bor. Inget nätverk, så allt går att testa rakt av.
+ * Ren logik för omdömena i verkstadspanelen: koder till inbjudningar och
+ * filen src/_data/omdomen.json där de publicerade omdömena bor. Inget
+ * nätverk, så allt går att testa rakt av.
  */
 
 const fs = require('node:fs');
@@ -16,16 +16,13 @@ function nyKod() {
   return crypto.randomBytes(9).toString('base64url');
 }
 
-function malLista(produkter) {
-  return [{ mal: 'bestallning', namn: 'Efter mått (beställningssidan)' }].concat(
-    produkter.slice().sort((a, b) => a.nr - b.nr)
-      .map((p) => ({ mal: p.slug, namn: 'N:o ' + p.nr + '. ' + p.titel }))
-  );
-}
-
-function giltigtMal(mal, produkter) {
-  return mal === 'bestallning' || produkter.some((p) => p.slug === mal);
-}
+/*
+ * Omdömena är allmänna, om en bräda kunden köpt härifrån, och knyts inte
+ * till en viss post i katalogen: de flesta brädor är unika och lämnar
+ * katalogen en vecka efter försäljningen. Databasens kolumn mal finns kvar,
+ * se db/omdome.sql, och får alltid det här värdet.
+ */
+const MAL = 'allmant';
 
 function las(fil) {
   let text;
@@ -53,7 +50,7 @@ function medOmdome(lista, rad) {
       ' (' + finns.namn + '). Ta bort det i listan Publicerade, eller ändra dess id i omdomen.json, och publicera sedan igen.');
   }
   return lista.concat([{
-    id: rad.id, kod: rad.kod, mal: rad.mal, betyg: rad.betyg, namn: rad.namn, ort: rad.ort, text: rad.text, datum: rad.dag
+    id: rad.id, kod: rad.kod, betyg: rad.betyg, namn: rad.namn, ort: rad.ort, text: rad.text, datum: rad.dag
   }]);
 }
 
@@ -77,4 +74,4 @@ function lank(url, kod) {
   return url + '/omdome/#' + kod;
 }
 
-module.exports = { KrockandeId, KOD, nyKod, malLista, giltigtMal, las, medOmdome, utanOmdome, sql, lank };
+module.exports = { KrockandeId, KOD, MAL, nyKod, las, medOmdome, utanOmdome, sql, lank };

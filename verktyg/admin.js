@@ -307,29 +307,22 @@ function skapaServer({ rot = path.join(__dirname, '..'), foto = Foto,
     let svar;
     try {
       svar = await d1(
-        'SELECT id, kod, mal, betyg, namn, ort, text, dag FROM omdome ORDER BY id; ' +
-        'SELECT kod, mal, skapad, anvand FROM inbjudan ORDER BY skapad DESC, rowid DESC LIMIT 50'
+        'SELECT id, kod, betyg, namn, ort, text, dag FROM omdome ORDER BY id; ' +
+        'SELECT kod, skapad, anvand FROM inbjudan ORDER BY skapad DESC, rowid DESC LIMIT 50'
       );
     } catch (e) {
       return json(res, 502, { fel: [e.message] });
     }
     const [vantande = [], inbjudningar = []] = svar;
-    json(res, 200, {
-      vantande, inbjudningar, publicerade: O.las(OMDOMESFIL), mal: O.malLista(P.las(PRODUKTFIL))
-    });
+    json(res, 200, { vantande, inbjudningar, publicerade: O.las(OMDOMESFIL) });
   }
 
+  // Omdömena är allmänna, så inbjudan har inget att välja. Det anropet
+  // skickar med läses inte.
   async function nyInbjudan(req, res) {
-    let mal;
-    try {
-      mal = JSON.parse((await lasKropp(req)).toString('utf8')).mal;
-    } catch (e) {
-      return json(res, 400, { fel: ['Ogiltig data.'] });
-    }
-    if (!O.giltigtMal(mal, P.las(PRODUKTFIL))) return json(res, 400, { fel: ['Okänd bräda.'] });
     const kod = O.nyKod();
     try {
-      await d1('INSERT INTO inbjudan (kod, mal, skapad) VALUES (' + O.sql(kod) + ', ' + O.sql(mal) + ", date('now'))");
+      await d1('INSERT INTO inbjudan (kod, mal, skapad) VALUES (' + O.sql(kod) + ', ' + O.sql(O.MAL) + ", date('now'))");
     } catch (e) {
       return json(res, 502, { fel: [e.message] });
     }
@@ -353,7 +346,7 @@ function skapaServer({ rot = path.join(__dirname, '..'), foto = Foto,
     return medLas(res, async () => {
       let rad;
       try {
-        [[rad] = []] = await d1('SELECT id, kod, mal, betyg, namn, ort, text, dag FROM omdome WHERE id = ' + O.sql(id));
+        [[rad] = []] = await d1('SELECT id, kod, betyg, namn, ort, text, dag FROM omdome WHERE id = ' + O.sql(id));
       } catch (e) {
         return json(res, 502, { fel: [e.message] });
       }

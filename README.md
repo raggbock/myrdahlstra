@@ -580,15 +580,20 @@ långsammare, och du ser inte vad som indexerats.
 
 ## Omdömen
 
-Kunder som köpt något kan skriva ett omdöme, som visas på brädans sida eller,
-för en bräda gjord efter mått, på beställningssidan. Där märks det också upp
-för Google, så att sidan kan få stjärnor i sökträffen.
+Kunder som köpt något kan skriva ett omdöme. Omdömena är allmänna: de gäller
+en bräda kunden köpt härifrån, inte en viss post i katalogen. De flesta brädor
+är unika och lämnar katalogen en vecka efter försäljningen, så ett omdöme
+knutet till brädan skulle hamna på en sida ingen länkar till.
+
+Alla omdömen visas i samma ruta, på startsidan, beställningssidan och brädornas
+sidor. Rutan visar snittbetyget för alla omdömen och de sex nyaste oavsett
+betyg, och syns inte alls förrän det finns något att visa. Antalet ändras i
+`PA_SIDAN` i `lib/omdomen.js`.
 
 Så går det till:
 
-1. Skapa en inbjudan i panelen: `npm run admin`, sedan länken **Omdömen**.
-   Välj brädan, eller "Efter mått" för en bräda från byggaren, och tryck
-   Skapa länk.
+1. Skapa en inbjudan i panelen: `npm run admin`, sedan länken **Omdömen**,
+   och tryck Skapa länk.
 2. Klistra in länken i mejlet efter leveransen. Varje länk ger ett omdöme.
 3. Kunden skriver på `/omdome/`, och du får ett notismejl. Omdömet väntar i
    D1-databasen **myrdahls-klick** tills du har läst det.
@@ -606,16 +611,13 @@ Marknadsföringslagen säger att den som visar omdömen ska tala om hur de
 kontrolleras, och att det är vilseledande att sålla bort de dåliga. Raden
 under omdömena och stycket i köpvillkoren säger hur det går till här.
 
-Stjärnorna i sökträffen kommer främst från beställningssidan. En unik bräda
-får noindex en vecka efter att den sålts, och omdömet kommer oftast efter
-leveransen. Google bestämmer själv om och när stjärnorna visas.
+Omdömena märks inte upp i den strukturerade datan, så de ger inga stjärnor i
+sökträffen. Google visar bara stjärnor för omdömen om en bestämd vara, och
+betyg som en verksamhet visar om sig själv räknas inte. Varningarna om
+`review` och `aggregateRating` i Search Console är därför väntade.
 
-Omdömen på sålda brädor syns därför också i rutan **Från tidigare köpare** på
-startsidan, annars skulle de bara stå på en sida som ingen länkar till. Rutan
-visar de sex nyaste oavsett betyg, med länk till brädan de gäller, och syns
-inte alls förrän det finns något att visa. Den har inget snitt och ingen
-strukturerad data: betyg som en verksamhet visar om sig själv på sin startsida
-räknar Google inte. Antalet ändras i `PA_STARTSIDAN` i `lib/omdomen.js`.
+Databasens kolumn `mal` finns kvar från när omdömena var knutna till en bräda,
+men får nu alltid värdet `allmant`. Den följer inte med till `omdomen.json`.
 
 Tabellerna skapas en gång:
 

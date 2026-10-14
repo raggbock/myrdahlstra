@@ -18,28 +18,22 @@ test('en kod är tolv tecken som går att skriva i en adress', () => {
   for (const k of koder) assert.match(k, O.KOD);
 });
 
-test('mål: beställningssidan först, sedan brädorna i nummerordning', () => {
-  assert.deepEqual(O.malLista(produkter), [
-    { mal: 'bestallning', namn: 'Efter mått (beställningssidan)' },
-    { mal: 'ek-ett', namn: 'N:o 1. Ek ett' },
-    { mal: 'ek-tre', namn: 'N:o 3. Ek tre' }
-  ]);
-  assert.equal(O.giltigtMal('ek-tre', produkter), true);
-  assert.equal(O.giltigtMal('bestallning', produkter), true);
-  assert.equal(O.giltigtMal("x'; DROP TABLE omdome;--", produkter), false);
+test('omdömena är allmänna, inte knutna till en bräda', () => {
+  assert.equal(O.MAL, 'allmant');
 });
 
 test('ett publicerat omdöme läggs till en gång, även om det publiceras igen', () => {
-  const rad = { id: 7, kod: 'AAAAAAAAAAAA', mal: 'ek-ett', betyg: 2, namn: 'Per', ort: '', text: 'Sprack.', dag: '2026-10-03' };
+  // mal följer inte med in i filen: omdömena är allmänna
+  const rad = { id: 7, kod: 'AAAAAAAAAAAA', mal: 'allmant', betyg: 2, namn: 'Per', ort: '', text: 'Sprack.', dag: '2026-10-03' };
   const en = O.medOmdome([], rad);
-  assert.deepEqual(en, [{ id: 7, kod: 'AAAAAAAAAAAA', mal: 'ek-ett', betyg: 2, namn: 'Per', ort: '', text: 'Sprack.', datum: '2026-10-03' }]);
+  assert.deepEqual(en, [{ id: 7, kod: 'AAAAAAAAAAAA', betyg: 2, namn: 'Per', ort: '', text: 'Sprack.', datum: '2026-10-03' }]);
   assert.equal(O.medOmdome(en, rad), en);
   assert.deepEqual(O.utanOmdome(en, 7), []);
 });
 
 test('samma id med en annan kod är ett annat omdöme och stoppas', () => {
-  const publicerat = [{ id: 7, kod: 'LOKALTPROV12', mal: 'ek-ett', betyg: 5, namn: 'Prov', ort: '', text: 'Lokalt prov.', datum: '2026-10-01' }];
-  const rad = { id: 7, kod: 'AAAAAAAAAAAA', mal: 'ek-ett', betyg: 2, namn: 'Per', ort: '', text: 'Sprack.', dag: '2026-10-03' };
+  const publicerat = [{ id: 7, kod: 'LOKALTPROV12', betyg: 5, namn: 'Prov', ort: '', text: 'Lokalt prov.', datum: '2026-10-01' }];
+  const rad = { id: 7, kod: 'AAAAAAAAAAAA', betyg: 2, namn: 'Per', ort: '', text: 'Sprack.', dag: '2026-10-03' };
   assert.throws(() => O.medOmdome(publicerat, rad), /id 7/);
 });
 
@@ -90,23 +84,26 @@ async function panel(t, fragaD1) {
   return { url, anrop, fil, byggen, rot };
 }
 
-const vantande = { id: 9, kod: 'AAAAAAAAAAAA', mal: 'ek-ett', betyg: 2, namn: 'Per', ort: 'Ö', text: 'Sprack efter en månad.', dag: '2026-10-03' };
+const vantande = { id: 9, kod: 'AAAAAAAAAAAA', betyg: 2, namn: 'Per', ort: 'Ö', text: 'Sprack efter en månad.', dag: '2026-10-03' };
 
 test('en inbjudan sparas med ny kod och ger länken', async (t) => {
   const fragor = [];
   const { anrop } = await panel(t, async (q) => { fragor.push(q); return [[]]; });
-  const svar = await anrop('/api/inbjudan', { mal: 'ek-tre' });
+  const svar = await anrop('/api/inbjudan', {});
   assert.equal(svar.status, 200);
   const { kod, lank } = await svar.json();
   assert.match(kod, O.KOD);
   assert.equal(lank, 'https://myrdahlstra.se/omdome/#' + kod);
-  assert.match(fragor[0], new RegExp("INSERT INTO inbjudan .*'" + kod.replace(/[-_]/g, '\$&') + "', 'ek-tre'"));
+  assert.match(fragor[0], new RegExp("INSERT INTO inbjudan .*'" + kod.replace(/[-_]/g, '\$&') + "', 'allmant'"));
 });
 
-test('en inbjudan till ett okänt mål avvisas utan att databasen frågas', async (t) => {
-  const { anrop } = await panel(t, async () => assert.fail('ska inte frågas'));
+test('vad anropet än skickar med sparas inbjudan som allmän', async (t) => {
+  const fragor = [];
+  const { anrop } = await panel(t, async (q) => { fragor.push(q); return [[]]; });
   const svar = await anrop('/api/inbjudan', { mal: "x'); DROP TABLE omdome;--" });
-  assert.equal(svar.status, 400);
+  assert.equal(svar.status, 200);
+  assert.match(fragor[0], /, 'allmant', /);
+  assert.doesNotMatch(fragor[0], /DROP/);
 });
 
 test('publicera skriver filen, tar bort raden och bygger', async (t) => {
@@ -146,7 +143,7 @@ test('ett id som redan används av ett annat publicerat omdöme stoppar utan att
     return q.startsWith('SELECT') ? [[vantande]] : [[]];
   });
   // Ett omdöme publicerat från den lokala databasen, med samma id men en annan kod
-  const lokalt = { id: 9, kod: 'LOKALTPROV12', mal: 'bestallning', betyg: 5, namn: 'Prov', ort: '', text: 'Lokalt prov.', datum: '2026-10-01' };
+  const lokalt = { id: 9, kod: 'LOKALTPROV12', betyg: 5, namn: 'Prov', ort: '', text: 'Lokalt prov.', datum: '2026-10-01' };
   fs.writeFileSync(path.join(rot, 'src/_data/omdomen.json'), JSON.stringify([lokalt]));
   const svar = await anrop('/api/omdomen/9/publicera', {});
   assert.equal(svar.status, 409);
@@ -177,13 +174,12 @@ test('ta bort ett publicerat omdöme ur filen och bygg om', async (t) => {
   assert.equal(byggen.length, 2);
 });
 
-test('listan innehåller inkorgen, inbjudningarna, filen och målen', async (t) => {
-  const { anrop } = await panel(t, async () => [[vantande], [{ kod: 'AAAAAAAAAAAA', mal: 'ek-ett', skapad: '2026-10-01', anvand: '2026-10-03' }]]);
+test('listan innehåller inkorgen, inbjudningarna och filen', async (t) => {
+  const { anrop } = await panel(t, async () => [[vantande], [{ kod: 'AAAAAAAAAAAA', skapad: '2026-10-01', anvand: '2026-10-03' }]]);
   const data = await (await anrop('/api/omdomen')).json();
   assert.equal(data.vantande[0].id, 9);
   assert.equal(data.inbjudningar[0].anvand, '2026-10-03');
   assert.deepEqual(data.publicerade, []);
-  assert.equal(data.mal[0].mal, 'bestallning');
 });
 
 test('allt om omdömen kräver panelens huvud', async (t) => {

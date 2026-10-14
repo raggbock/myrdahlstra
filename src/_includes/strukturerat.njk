@@ -68,11 +68,6 @@
   "material": {{ (p.spec['Träslag'] | default('Massivt trä')) | dump | safe }},
   "brand": { "@type": "Brand", "name": {{ site.namn | dump | safe }} },
   "countryOfOrigin": { "@type": "Country", "name": "Sverige" },
-  {%- set betyg = omdomen | omdomenFor(p.slug) | omdomeData %}
-  {%- if betyg %}
-  "aggregateRating": {{ betyg.aggregateRating | jsonld | safe }},
-  "review": {{ betyg.review | jsonld | safe }},
-  {%- endif %}
   {{- erbjudande(p, site, true) }}
 }
 </script>
@@ -147,10 +142,12 @@
 </script>
 {%- elif sidnyckel == 'bestallning' %}
 {#- Beställningssidan: brädan som byggs efter kundens val. Den har inget fast
-    pris, så erbjudandet är ett spann där det lägsta står i ingressen. Hit hör
-    omdömena från brädor gjorda efter mått, och det är främst här stjärnorna i
-    sökträffen kan växa, för de unika brädornas sidor lämnar sökresultatet
-    en vecka efter att de sålts. -#}
+    pris, så erbjudandet är ett spann där det lägsta står i ingressen.
+
+    Omdömena märks inte upp här eller någon annanstans. De är allmänna, om
+    en bräda kunden köpt, och Google kräver att omdömen i en Product gäller
+    just den varan. Varningarna om review och aggregateRating i Search
+    Console är därför väntade och ska ligga kvar. -#}
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -160,11 +157,6 @@
   "url": {{ (site.url + '/bestallning/') | dump | safe }},
   "brand": { "@type": "Brand", "name": {{ site.namn | dump | safe }} },
   "countryOfOrigin": { "@type": "Country", "name": "Sverige" },
-  {%- set betyg = omdomen | omdomenFor('bestallning') | omdomeData %}
-  {%- if betyg %}
-  "aggregateRating": {{ betyg.aggregateRating | jsonld | safe }},
-  "review": {{ betyg.review | jsonld | safe }},
-  {%- endif %}
   "offers": {
     "@type": "AggregateOffer",
     "lowPrice": "{{ franpris }}",
