@@ -600,6 +600,22 @@ Så går det till:
 4. Tryck Publicera eller Avslå i panelen. Publicera lägger omdömet i
    `src/_data/omdomen.json` och bygger om. Sedan `npm run deploy` som vanligt.
 
+Kunden kan skicka med ett foto. Webbläsaren krymper det till en JPEG under
+1,5 MB, och `functions/api/omdome.js` rensar bort platsdata och annan
+metadata (`lib/jpeg.mjs`) innan det sparas i kolumnen `bild` i D1. I panelen
+syns fotot bredvid texten. **Publicera** behandlar det med sharp och sparar
+det som `assets/foto/omdome-<slumpat>.jpg`, **Publicera utan foto** tar bara
+texten, till exempel när fotot visar andra personer. **Ta bort** på ett
+publicerat omdöme raderar fotot också. Glöm inte att checka in fotot i git
+tillsammans med `omdomen.json`.
+
+Kolumnen för fotot lades till efter tabellerna. En databas som skapades
+innan dess behöver den en gång:
+
+```
+node node_modules/wrangler/bin/wrangler.js d1 execute myrdahls-klick --remote --file=db/omdome-bild.sql
+```
+
 Publicerade omdömen bor bara i `src/_data/omdomen.json`, som checkas in i git
 precis som sortimentet. Databasen håller bara det som väntar på granskning.
 Ett publicerat omdöme kan tas bort i panelen, till exempel om kunden ber om
