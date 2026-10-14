@@ -94,6 +94,17 @@ test('startsidans företag har inget betyg', async () => {
   for (const b of block(start.content)) assert.equal(b.aggregateRating, undefined);
 });
 
+test('startsidan visar omdömen om sålda brädor, med länk till brädan, men inget snitt', async () => {
+  const start = (await bygg()).find((s) => s.url === '/');
+  const salda = O.omSalda(OMDOMEN, require('../src/_data/products.json'));
+  assert.equal(start.content.includes('id="tidigare-kopare"'), salda.length > 0);
+  for (const o of salda) {
+    assert.ok(start.content.includes('href="/brada/' + o.brada.slug + '/"'), 'länken till ' + o.brada.slug + ' saknas');
+  }
+  // Ett snitt här skulle få testet ovan att kräva betyg i startsidans data
+  assert.equal(start.content.includes('class="omdomen__snitt"'), false);
+});
+
 test('omdomen.json har bara giltiga omdömen', () => {
   assert.ok(Array.isArray(OMDOMEN));
   for (const o of OMDOMEN) {

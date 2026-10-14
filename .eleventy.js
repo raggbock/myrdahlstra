@@ -118,6 +118,7 @@ module.exports = function (eleventyConfig) {
   // Omdömena, se lib/omdomen.js. Sidan och den strukturerade datan använder
   // samma filter, så betyget kan inte skilja sig mellan dem.
   eleventyConfig.addFilter('omdomenFor', (lista, mal) => Omdomen.omdomenFor(lista, mal));
+  eleventyConfig.addFilter('omdomenOmSalda', (lista, produkter) => Omdomen.omSalda(lista, produkter));
   eleventyConfig.addFilter('betygssnitt', (lista) => Omdomen.betygssnitt(lista));
   eleventyConfig.addFilter('betygText', (tal) => Omdomen.betygText(tal));
   eleventyConfig.addFilter('manad', (datum) => Omdomen.manad(datum));

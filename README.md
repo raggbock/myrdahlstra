@@ -608,8 +608,14 @@ under omdömena och stycket i köpvillkoren säger hur det går till här.
 
 Stjärnorna i sökträffen kommer främst från beställningssidan. En unik bräda
 får noindex en vecka efter att den sålts, och omdömet kommer oftast efter
-leveransen. Omdömen på unika brädor syns ändå för besökarna på brädans sida.
-Google bestämmer själv om och när stjärnorna visas.
+leveransen. Google bestämmer själv om och när stjärnorna visas.
+
+Omdömen på sålda brädor syns därför också i rutan **Från tidigare köpare** på
+startsidan, annars skulle de bara stå på en sida som ingen länkar till. Rutan
+visar de sex nyaste oavsett betyg, med länk till brädan de gäller, och syns
+inte alls förrän det finns något att visa. Den har inget snitt och ingen
+strukturerad data: betyg som en verksamhet visar om sig själv på sin startsida
+räknar Google inte. Antalet ändras i `PA_STARTSIDAN` i `lib/omdomen.js`.
 
 Tabellerna skapas en gång:
 

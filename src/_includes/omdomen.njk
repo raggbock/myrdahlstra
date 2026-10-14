@@ -4,7 +4,8 @@
   strukturerade datan i strukturerat.njk, så sidan och Google får samma tal.
 
   Raden om hur omdömena kontrolleras krävs enligt marknadsföringslagen,
-  och den ska stå kvar.
+  och den ska stå kvar. Den står i omdomen-kontroll.njk, som startsidans
+  ruta med omdömen om sålda brädor också använder.
 -#}
 {%- from "stjarnor.njk" import stjarnor %}
 {%- set lista = omdomen | omdomenFor(mal) %}
@@ -23,6 +24,6 @@
     </li>
     {%- endfor %}
   </ul>
-  <p class="smatext omdomen__kontroll">Omdömena skrivs av kunder som köpt härifrån, via en personlig länk som skickas efter leveransen. Jag läser dem innan de publiceras, och alla som följer <a href="/villkor/#omdomen">reglerna</a> publiceras oavsett betyg.</p>
+  {% include "omdomen-kontroll.njk" %}
 </section>
 {%- endif %}

@@ -54,3 +54,41 @@ test('JSON till ett script-block kan inte avsluta blocket', () => {
   assert.doesNotMatch(ut, /<|>/);
   assert.deepEqual(JSON.parse(ut), { text: '</script><script>alert(1)</script> & <b>' });
 });
+
+/* ---------- startsidans ruta med omdömen om sålda brädor ---------- */
+
+const produkter = [
+  { nr: 1, slug: 'ek-1', titel: 'Bräda i ek', sald: false },
+  { nr: 2, slug: 'tre-traslag', titel: 'Bräda i tre träslag', sald: true, saldDatum: '2026-09-07' },
+  { nr: 5, slug: 'langtra', titel: 'Långträbräda', sald: true, saldDatum: '2026-09-07' }
+];
+
+test('bara omdömen om sålda brädor, med brädans nummer och namn', () => {
+  const salda = O.omSalda([
+    ...lista,
+    { id: 5, mal: 'tre-traslag', betyg: 5, namn: 'Eva', ort: 'Örebro', text: 'Vacker.', datum: '2026-10-10' }
+  ], produkter);
+  assert.equal(salda.length, 1, 'beställningssidans och osålda brädors omdömen ska inte med');
+  assert.equal(salda[0].id, 5);
+  assert.deepEqual(salda[0].brada, { nr: 2, slug: 'tre-traslag', titel: 'Bräda i tre träslag' });
+  assert.equal(salda[0].text, 'Vacker.');
+});
+
+test('ett omdöme vars bräda tagits bort ur sortimentet hoppas över', () => {
+  const borta = [{ id: 9, mal: 'finns-inte', betyg: 5, namn: 'Ola', ort: '', text: 'Fin.', datum: '2026-10-10' }];
+  assert.deepEqual(O.omSalda(borta, produkter), []);
+  assert.deepEqual(O.omSalda(undefined, produkter), []);
+  assert.deepEqual(O.omSalda(borta, undefined), []);
+});
+
+test('nyaste först, högst sex, och urvalet bryr sig inte om betyget', () => {
+  const manga = [];
+  for (let i = 1; i <= 8; i += 1) {
+    // Det nyaste har lägst betyg. Det ska ändå komma först.
+    manga.push({ id: i, mal: i % 2 ? 'tre-traslag' : 'langtra', betyg: i === 8 ? 1 : 5, namn: 'K' + i, ort: '', text: 'T', datum: '2026-10-' + String(10 + i) });
+  }
+  const salda = O.omSalda(manga, produkter);
+  assert.equal(O.PA_STARTSIDAN, 6);
+  assert.deepEqual(salda.map((o) => o.id), [8, 7, 6, 5, 4, 3]);
+  assert.equal(salda[0].betyg, 1);
+});
