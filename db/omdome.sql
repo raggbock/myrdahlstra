@@ -25,5 +25,6 @@ CREATE TABLE IF NOT EXISTS omdome (
   namn   TEXT NOT NULL,
   ort    TEXT NOT NULL,      -- tomt om kunden inte vill
   text   TEXT NOT NULL,
-  dag    TEXT NOT NULL       -- dagen det skrevs
+  dag    TEXT NOT NULL,      -- dagen det skrevs
+  bild   BLOB                -- JPEG utan metadata, se lib/jpeg.mjs. Null utan foto
 );

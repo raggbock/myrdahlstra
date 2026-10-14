@@ -6,6 +6,8 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { pathToFileURL } = require('node:url');
 const { fejkD1 } = require('./hjalp/d1.js');
+const sharp = require('sharp');
+const { provJpeg, medBlock, GPS } = require('./hjalp/jpeg.js');
 
 // Pages laddar endpointen som ESM. Importerna från lib/ skrivs om till
 // absoluta adresser, som i bestallning.test.js.
@@ -27,6 +29,16 @@ const falt = (extra = {}) => new URLSearchParams({
   kod: KOD, betyg: '4', namn: 'Karin', ort: 'Västerås',
   text: 'Fin bräda, används varje dag.', ...extra
 });
+
+// Samma fält som ett multipartformulär, med eller utan foto
+function formular(extra = {}, foto) {
+  const fd = new FormData();
+  for (const [k, v] of falt(extra)) fd.append(k, v);
+  if (foto !== undefined) fd.append('foto', new Blob([foto], { type: 'image/jpeg' }), foto.length ? 'foto.jpg' : '');
+  return fd;
+}
+
+const oanvand = (d1) => d1.db.prepare('SELECT anvand FROM inbjudan WHERE kod = ?').get(KOD).anvand === null;
 
 async function skicka(t, body, { d1 = databas(), origin = 'https://myrdahlstra.se', env = {}, resend } = {}) {
   const brev = [];
@@ -111,7 +123,7 @@ test('från en annan domän eller utan Origin sparas ingenting', async (t) => {
 });
 
 test('en för stor kropp avvisas med 413', async (t) => {
-  const { svar, rader } = await skicka(t, falt({ text: 'x'.repeat(9000) }));
+  const { svar, rader } = await skicka(t, falt({ text: 'x'.repeat(2 * 1024 * 1024 + 10) }));
   assert.equal(svar.status, 413);
   assert.equal(rader.length, 0);
 });
@@ -152,4 +164,61 @@ test('en GET skickar besökaren till skrivsidan', async () => {
   const svar = await (await endpoint).onRequestGet({ request: new Request('https://myrdahlstra.se/api/omdome') });
   assert.equal(svar.status, 302);
   assert.equal(new URL(svar.headers.get('location')).pathname, '/omdome/');
+});
+
+/* ---------- foto ---------- */
+
+test('ett omdöme med foto sparas utan platsdata, och notisen säger med foto', async (t) => {
+  const foto = medBlock(await provJpeg(), GPS);
+  const { svar, rader, brev } = await skicka(t, formular({}, foto));
+  assert.equal(svar.status, 303);
+  const bild = Buffer.from(rader[0].bild);
+  assert.equal(bild.includes(Buffer.from('GPSLatitude')), false, 'platsdatan ska vara borta');
+  assert.equal((await sharp(bild).metadata()).width, 64);
+  assert.match(brev[0].subject, /, med foto$/);
+  assert.match(brev[0].text, /med foto har kommit in från Karin/);
+});
+
+test('ett multipartformulär utan foto sparar ingen bild och nämner inget foto', async (t) => {
+  const { svar, rader, brev } = await skicka(t, formular());
+  assert.equal(svar.status, 303);
+  assert.equal(rader[0].bild, null);
+  assert.doesNotMatch(brev[0].subject, /foto/);
+});
+
+test('ett tomt filfält räknas som inget foto', async (t) => {
+  // Så skickar webbläsaren ett filfält där kunden inte valt något
+  const { svar, rader } = await skicka(t, formular({}, Buffer.alloc(0)));
+  assert.equal(svar.status, 303);
+  assert.equal(rader[0].bild, null);
+});
+
+test('ett för stort foto ger 413, och varken text eller kod rörs', async (t) => {
+  const d1 = databas();
+  const stort = Buffer.concat([Buffer.from([0xff, 0xd8]), Buffer.alloc(1500000)]);
+  const { svar, rader } = await skicka(t, formular({}, stort), { d1 });
+  assert.equal(svar.status, 413);
+  assert.match(await svar.text(), /Fotot var för stort/);
+  assert.equal(rader.length, 0);
+  assert.ok(oanvand(d1), 'koden ska gå att använda igen');
+});
+
+test('en fil som inte är en JPEG ger 400, och varken text eller kod rörs', async (t) => {
+  const d1 = databas();
+  const { svar, rader } = await skicka(t, formular({}, Buffer.from('GIF89a inte en JPEG')), { d1 });
+  assert.equal(svar.status, 400);
+  assert.match(await svar.text(), /Fotot kunde inte läsas/);
+  assert.equal(rader.length, 0);
+  assert.ok(oanvand(d1));
+});
+
+test('omdome-bild.sql lägger till kolumnen i en databas som saknar den', () => {
+  const { DatabaseSync } = require('node:sqlite');
+  const db = new DatabaseSync(':memory:');
+  // Kommatecknet efter dag tas bort, kommentaren efter det står kvar
+  const schema = fs.readFileSync(SCHEMA, 'utf8').replace(/,([^\n]*)\n\s*bild\s+BLOB[^\n]*\n/, '$1\n');
+  db.exec(schema);
+  assert.ok(!db.prepare('PRAGMA table_info(omdome)').all().some((k) => k.name === 'bild'), 'det gamla schemat ska sakna bild');
+  db.exec(fs.readFileSync(path.join(__dirname, '../db/omdome-bild.sql'), 'utf8'));
+  assert.ok(db.prepare('PRAGMA table_info(omdome)').all().some((k) => k.name === 'bild'));
 });

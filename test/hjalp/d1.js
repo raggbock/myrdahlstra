@@ -17,8 +17,10 @@ function fejkD1(...sqlFiler) {
     const r = db.prepare(sql).run(...varden);
     return { meta: { changes: Number(r.changes) } };
   };
+  // D1 tar emot en BLOB som ArrayBuffer, node:sqlite som Uint8Array
+  const somD1 = (v) => (v instanceof ArrayBuffer ? new Uint8Array(v) : v);
   const sats = (sql, varden = []) => ({
-    bind: (...nya) => sats(sql, nya),
+    bind: (...nya) => sats(sql, nya.map(somD1)),
     first: async () => db.prepare(sql).get(...varden) ?? null,
     all: async () => ({ results: db.prepare(sql).all(...varden) }),
     run: async () => kor(sql, varden),
