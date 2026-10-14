@@ -141,25 +141,5 @@
     "sald": false,
     "skotsel": "",
     "frakt": "liten"
-  },
-  {
-    "nr": 8,
-    "slug": "andtraskarbrada-valnot",
-    "titel": "Ändträskärbräda i valnöt",
-    "kort": "Mörk valnöt rakt igenom, där kniven möter fibrernas ändar. Görs på beställning.",
-    "beskrivning": "Valnöt rakt igenom, i ändträ. Stavarna limmas till en platta som sågas i rader, och varje rad vänds ett kvarts varv och limmas om, så att det är ändytan du skär mot. Kniven skär då mellan fibrerna i stället för av dem, vilket skonar eggen och gör att ytan läker med tiden. Valnöten är mörk, så fläckar syns minst, och till skillnad från de andra träslagen mörknar den inte med åren utan ljusnar något i dagsljus, mot en varmare brun. Den är också det dyraste virket att köpa hem, därav priset. Vill du ha brädan större går det att välja mönstret Hel och valnöt på beställningssidan, upp till 60 × 32 cm. Oljas med livsmedelsklassad paraffinolja innan den skickas.",
-    "pris": 3000,
-    "spec": {
-      "Mått": "40 × 26 cm",
-      "Träslag": "Valnöt, ändträ",
-      "Mönster": "Hel, ett träslag rakt igenom",
-      "Ytbehandling": "Paraffinolja och bivax"
-    },
-    "textur": "valnot",
-    "bilder": [],
-    "lapp": "",
-    "pabestallning": true,
-    "sald": false,
-    "skotsel": ""
   }
 ]
