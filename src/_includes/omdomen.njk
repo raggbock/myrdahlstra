@@ -10,6 +10,7 @@
   och den ska stå kvar.
 -#}
 {%- from "stjarnor.njk" import stjarnor %}
+{%- from "bild.njk" import bild %}
 {%- if omdomen and omdomen.length %}
 {%- set s = omdomen | betygssnitt %}
 {%- set lista = omdomen | omdomenUrval %}
@@ -19,10 +20,18 @@
   <p class="omdomen__snitt">{{ stjarnor(s.snitt, 'snitt') }} <span>{{ s.snitt | betygText }} av 5, {{ s.antal }} {{ 'omdöme' if s.antal == 1 else 'omdömen' }}{% if s.antal > lista.length %}, här de {{ lista.length }} senaste{% endif %}</span></p>
   <ul class="omdomen__lista">
     {%- for o in lista %}
-    <li class="omdomen__post">
-      {{ stjarnor(o.betyg, 'omdome' + o.id) }}
-      <p class="omdomen__text">{{ o.text }}</p>
-      <p class="omdomen__vem">{{ o.namn }}{% if o.ort %}, {{ o.ort }}{% endif %}, {{ o.datum | manad }}</p>
+    <li class="omdomen__post{% if o.bild %} omdomen__post--foto{% endif %}">
+      {#- Kundens foto, beskuret i kortet och helt i förstoringen. Vad det visar
+          vet vi inte, så alt-texten säger vems det är. -#}
+      {%- if o.bild %}
+      {%- set alt = 'Foto som ' + o.namn + ' skickade med sitt omdöme' %}
+      <a class="omdomen__foto" href="/assets/foto/{{ o.bild }}" data-forstora data-alt="{{ alt }}" aria-label="Visa fotot större: {{ alt }}">{{ bild(o.bild, alt, '(max-width: 720px) 92vw, 160px') }}</a>
+      {%- endif %}
+      <div class="omdomen__innehall">
+        {{ stjarnor(o.betyg, 'omdome' + o.id) }}
+        <p class="omdomen__text">{{ o.text }}</p>
+        <p class="omdomen__vem">{{ o.namn }}{% if o.ort %}, {{ o.ort }}{% endif %}, {{ o.datum | manad }}</p>
+      </div>
     </li>
     {%- endfor %}
   </ul>

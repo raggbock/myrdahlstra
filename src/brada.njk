@@ -146,15 +146,6 @@ eleventyComputed:
   </div>
 </div>
 
-{%- if foton.length %}
-<dialog class="forstoring" id="forstoring" aria-label="Fotot i full storlek">
-  <div class="forstoring__ram">
-    <img class="forstoring__bild" alt="">
-    <button type="button" class="forstoring__stang" data-stang>Stäng</button>
-  </div>
-</dialog>
-{%- endif %}
-
 {%- if not p.sald %}
 <section id="bestall" class="uppgifter bestallsektion">
   {% include "ornament.njk" %}

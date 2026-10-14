@@ -2069,6 +2069,41 @@ textarea {
   margin: 0;
 }
 
+/* Kundens foto i omdömet: beskuret till 4:3 i kortet, helt i förstoringen */
+.omdomen__post--foto {
+  display: grid;
+  grid-template-columns: 1fr 160px;
+  gap: 18px;
+  align-items: start;
+}
+
+.omdomen__post--foto .omdomen__foto {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.omdomen__foto {
+  display: block;
+  border: 1px solid var(--black);
+  line-height: 0;
+}
+
+.omdomen__foto .foto {
+  aspect-ratio: 4 / 3;
+  height: auto;
+}
+
+@media (max-width: 720px) {
+  .omdomen__post--foto {
+    grid-template-columns: 1fr;
+  }
+
+  .omdomen__post--foto .omdomen__foto {
+    grid-column: 1;
+    grid-row: 2;
+  }
+}
+
 .omdomen__kontroll {
   max-width: 640px;
 }

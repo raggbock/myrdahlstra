@@ -94,10 +94,23 @@ test('omdömena syns där det handlas, precis när det finns några', async () =
   }
 });
 
+test('förstoringsrutan och dess skript finns där omdömen kan visa foton', async () => {
+  for (const s of await bygg()) {
+    if (!(s.url === '/' || s.url === '/bestallning/' || (s.url || '').startsWith('/brada/'))) continue;
+    assert.match(s.content, /<dialog class="forstoring" id="forstoring"/, s.url);
+    assert.match(s.content, /\/assets\/forstora\.js\?v=/, s.url);
+    assert.equal((s.content.match(/id="forstoring"/g) || []).length, 1, s.url + ' har dialogen två gånger');
+  }
+});
+
 test('omdomen.json har bara giltiga omdömen', () => {
   assert.ok(Array.isArray(OMDOMEN));
   for (const o of OMDOMEN) {
     assert.ok(Number.isInteger(o.id) && o.betyg >= 1 && o.betyg <= 5 && o.namn && o.text && O.manad(o.datum), JSON.stringify(o));
+    if (o.bild !== undefined) {
+      assert.match(o.bild, /^omdome-[0-9a-f]{12}\.jpg$/, 'fotonamnet för omdöme ' + o.id);
+      assert.ok(require('node:fs').existsSync(path.join(ROT, 'assets/foto', o.bild)), o.bild + ' finns inte i assets/foto');
+    }
   }
   assert.equal(new Set(OMDOMEN.map((o) => o.id)).size, OMDOMEN.length, 'två omdömen delar id');
 });
