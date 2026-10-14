@@ -203,9 +203,22 @@ test('ett för stort foto ger 413, och varken text eller kod rörs', async (t) =
   assert.ok(oanvand(d1), 'koden ska gå att använda igen');
 });
 
-test('en fil som inte är en JPEG ger 400, och varken text eller kod rörs', async (t) => {
+test('en fil som inte är en JPEG ger 400 som säger det, och varken text eller kod rörs', async (t) => {
+  // Utan JavaScript skickas till exempel en PNG som den är. Då ska kunden
+  // få veta att det är formatet, inte att just den här bilden var trasig.
   const d1 = databas();
-  const { svar, rader } = await skicka(t, formular({}, Buffer.from('GIF89a inte en JPEG')), { d1 });
+  const png = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0, 0, 0]);
+  const { svar, rader } = await skicka(t, formular({}, png), { d1 });
+  assert.equal(svar.status, 400);
+  assert.match(await svar.text(), /Fotot måste vara en JPEG/);
+  assert.equal(rader.length, 0);
+  assert.ok(oanvand(d1));
+});
+
+test('en trasig JPEG ger 400 som säger att fotot inte gick att läsa', async (t) => {
+  const d1 = databas();
+  const trasig = Buffer.from([0xff, 0xd8, 0xff, 0xe1, 0xff, 0xff, 0x00, 0x00]);
+  const { svar, rader } = await skicka(t, formular({}, trasig), { d1 });
   assert.equal(svar.status, 400);
   assert.match(await svar.text(), /Fotot kunde inte läsas/);
   assert.equal(rader.length, 0);

@@ -130,6 +130,15 @@
 
   // Fotot i inkorgen hämtas med panelens huvud, som allt annat från D1, och
   // visas som en blob-adress. En vanlig <img src> kan inte skicka huvudet.
+  // Adresserna släpps när listan ritas om, annars blir varje foto kvar i
+  // minnet en gång per laddning.
+  let blobAdresser = [];
+
+  function slappFoton() {
+    for (const a of blobAdresser) URL.revokeObjectURL(a);
+    blobAdresser = [];
+  }
+
   function vantandeFoto(id) {
     const img = el('img', 'foto');
     img.alt = 'Fotot som skickades med omdömet';
@@ -138,7 +147,11 @@
         if (!svar.ok) throw new Error('Fotot kunde inte hämtas.');
         return svar.blob();
       })
-      .then((blob) => { img.src = URL.createObjectURL(blob); })
+      .then((blob) => {
+        const adress = URL.createObjectURL(blob);
+        blobAdresser.push(adress);
+        img.src = adress;
+      })
       .catch((e) => { img.replaceWith(el('p', 'fel', e.message)); });
     return img;
   }
@@ -159,6 +172,7 @@
       return visaFel(e.message);
     }
     const vant = $('[data-vantande]');
+    slappFoton();
     vant.replaceChildren();
     if (!data.vantande.length) vant.append(el('p', 'tom', 'Inga omdömen väntar.'));
     for (const o of data.vantande) {

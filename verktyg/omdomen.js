@@ -67,6 +67,17 @@ function medOmdome(lista, rad, bild) {
 
 class KrockandeId extends Error {}
 
+// Sätter fotot på ett publicerat omdöme, eller tar bort det med null. Ny
+// lista, den gamla rörs inte.
+function medBild(lista, id, bild) {
+  return lista.map((o) => {
+    if (o.id !== id) return o;
+    const ny = { ...o };
+    if (bild) ny.bild = bild; else delete ny.bild;
+    return ny;
+  });
+}
+
 function utanOmdome(lista, id) {
   return lista.filter((o) => o.id !== id);
 }
@@ -85,4 +96,4 @@ function lank(url, kod) {
   return url + '/omdome/#' + kod;
 }
 
-module.exports = { KrockandeId, KOD, MAL, FOTONAMN, nyKod, fotonamn, las, medOmdome, utanOmdome, sql, lank };
+module.exports = { KrockandeId, KOD, MAL, FOTONAMN, nyKod, fotonamn, las, medOmdome, medBild, utanOmdome, sql, lank };

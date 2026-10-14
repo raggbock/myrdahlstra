@@ -400,9 +400,14 @@ function skapaServer({ rot = path.join(__dirname, '..'), foto = Foto,
         if (e instanceof O.KrockandeId) return json(res, 409, { fel: [e.message] });
         throw e;
       }
-      // Samma lista tillbaka betyder att omdömet redan var publicerat, och
-      // då är fotot också redan sparat
-      if (medFoto && rad.bildhex && lista !== fore) {
+      // Samma lista tillbaka betyder att ett tidigare försök redan publicerade
+      // omdömet men inte hann radera raden ur D1. Då gäller knappen som
+      // trycktes nu: med foto läggs fotot till om det saknas, utan foto tas
+      // ett sparat foto bort.
+      const redan = lista === fore ? fore.find((o) => o.id === rad.id) : null;
+      const bortFoto = redan && !medFoto && redan.bild ? redan.bild : null;
+      if (bortFoto) lista = O.medBild(fore, rad.id, null);
+      if (medFoto && rad.bildhex && !(redan && redan.bild)) {
         let jpeg;
         try {
           jpeg = await F.omdomesfoto(Buffer.from(rad.bildhex, 'hex'));
@@ -411,14 +416,16 @@ function skapaServer({ rot = path.join(__dirname, '..'), foto = Foto,
             'Fotot gick inte att behandla (' + e.message + '). Tryck Publicera utan foto, eller Avslå.'
           ] });
         }
-        lista = O.medOmdome(fore, rad, sparaOmdomesfoto(jpeg));
+        const namn = sparaOmdomesfoto(jpeg);
+        lista = redan ? O.medBild(fore, rad.id, namn) : O.medOmdome(fore, rad, namn);
       }
       P.skriv(OMDOMESFIL, lista);
+      if (bortFoto && O.FOTONAMN.test(bortFoto)) fs.rmSync(path.join(FOTOMAPP, bortFoto), { force: true });
       try {
         await d1('DELETE FROM omdome WHERE id = ' + O.sql(id));
       } catch (e) {
         return json(res, 502, { fel: [
-          'Omdömet är publicerat men ligger kvar i inkorgen. Tryck Publicera igen när nätet fungerar. (' + e.message + ')'
+          'Omdömet är publicerat men ligger kvar i inkorgen. Tryck på samma knapp igen när nätet fungerar. (' + e.message + ')'
         ] });
       }
       const bygge = await (byggSajt || bygg)();

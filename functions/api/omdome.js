@@ -117,7 +117,14 @@ export async function onRequestPost({ request, env, waitUntil }) {
     if (fil.size > MAX_FOTO) {
       return fel('För stort foto', 'Fotot var för stort. Skicka omdömet utan foto, eller välj en mindre bild.', 413);
     }
-    foto = rensaJpeg(new Uint8Array(await fil.arrayBuffer()));
+    const bytes = new Uint8Array(await fil.arrayBuffer());
+    // Utan skript skickas fotot som det är, till exempel en PNG. Säg då att
+    // det är formatet, så att kunden inte provar en ny bild i samma format.
+    if (bytes[0] !== 0xff || bytes[1] !== 0xd8) {
+      return fel('Fotot måste vara en JPEG',
+        'Fotot måste vara en JPEG, det format de flesta mobilkameror sparar i. Välj ett annat foto, eller skicka omdömet utan foto.', 400);
+    }
+    foto = rensaJpeg(bytes);
     if (!foto) {
       return fel('Fotot gick inte att läsa', 'Fotot kunde inte läsas. Prova en annan bild, eller skicka omdömet utan foto.', 400);
     }

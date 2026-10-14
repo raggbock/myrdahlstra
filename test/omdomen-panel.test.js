@@ -37,6 +37,20 @@ test('samma id med en annan kod är ett annat omdöme och stoppas', () => {
   assert.throws(() => O.medOmdome(publicerat, rad), /id 7/);
 });
 
+test('fotot på ett publicerat omdöme kan sättas och tas bort, utan att listan ändras', () => {
+  const lista = [
+    { id: 7, kod: 'AAAAAAAAAAAA', betyg: 2, namn: 'Per', ort: '', text: 'Sprack.', datum: '2026-10-03' },
+    { id: 8, kod: 'BBBBBBBBBBBB', betyg: 5, namn: 'Eva', ort: '', text: 'Fin.', datum: '2026-10-04' }
+  ];
+  const med = O.medBild(lista, 7, 'omdome-aaaaaaaaaaaa.jpg');
+  assert.equal(med[0].bild, 'omdome-aaaaaaaaaaaa.jpg');
+  assert.equal(med[1].bild, undefined);
+  assert.equal(lista[0].bild, undefined, 'den gamla listan ska vara orörd');
+  const utan = O.medBild(med, 7, null);
+  assert.equal('bild' in utan[0], false);
+  assert.deepEqual(utan, lista);
+});
+
 test('filen: saknas den är listan tom, och fel innehåll stoppas', () => {
   const mapp = fs.mkdtempSync(path.join(os.tmpdir(), 'omdomen-'));
   assert.deepEqual(O.las(path.join(mapp, 'saknas.json')), []);
@@ -295,6 +309,38 @@ test('ett nytt försök efter misslyckad radering behandlar inget nytt foto', as
   assert.equal((await anrop('/api/omdomen/9/publicera', {})).status, 200);
   assert.equal(behandlat.length, 1);
   assert.equal(fil().length, 1);
+  assert.equal(foton().length, 1);
+});
+
+// Inkorgen som D1 svarar: fotot följer bara med när frågan ber om det
+const inkorg = (fel) => async (q) => {
+  if (q.startsWith('DELETE') && fel.vidDelete) throw new Error('Wrangler kunde inte fråga databasen: nätet');
+  return q.startsWith('SELECT') ? [[q.includes('hex(bild)') ? medFoto : vantande]] : [[]];
+};
+
+test('Publicera utan foto efter misslyckad radering tar bort fotot som hann sparas', async (t) => {
+  const fel = { vidDelete: true };
+  const { anrop, fil, foton } = await panel(t, inkorg(fel), { foto: behandlare() });
+  assert.equal((await anrop('/api/omdomen/9/publicera', {})).status, 502);
+  assert.equal(foton().length, 1);
+  fel.vidDelete = false;
+  assert.equal((await anrop('/api/omdomen/9/publicera-utan-foto', {})).status, 200);
+  assert.equal(fil().length, 1);
+  assert.equal(fil()[0].bild, undefined);
+  assert.deepEqual(foton(), []);
+});
+
+test('Publicera efter misslyckad radering lägger till fotot som saknades', async (t) => {
+  const fel = { vidDelete: true };
+  const behandlat = [];
+  const { anrop, fil, foton } = await panel(t, inkorg(fel), { foto: behandlare(behandlat) });
+  assert.equal((await anrop('/api/omdomen/9/publicera-utan-foto', {})).status, 502);
+  assert.equal(fil()[0].bild, undefined);
+  fel.vidDelete = false;
+  assert.equal((await anrop('/api/omdomen/9/publicera', {})).status, 200);
+  assert.equal(behandlat.length, 1);
+  assert.equal(fil().length, 1);
+  assert.match(fil()[0].bild, O.FOTONAMN);
   assert.equal(foton().length, 1);
 });
 
