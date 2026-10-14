@@ -63,6 +63,55 @@ test('allt som inte är en hel JPEG avvisas', async () => {
   }
 });
 
+test('allt efter FF D9 tas bort, så en film efter bilden följer inte med', async () => {
+  // En "Motion Photo" från Samsung eller Pixel har en hel MP4 efter bilden,
+  // och filmens platsatom kan bära kamerans position
+  const { rensaJpeg } = await jpeg;
+  const hel = await provJpeg();
+  const film = Buffer.from('\0\0\0\x18ftypmp42 \xa9xyz+59.2700+015.5000/', 'latin1');
+  const ut = Buffer.from(rensaJpeg(Buffer.concat([hel, film])));
+  assert.equal(innehaller(ut, 'xyz+59'), false, 'platsatomen efter bilden finns kvar');
+  assert.ok(ut.equals(hel), 'bilden själv ska vara orörd');
+});
+
+test('APP-block mellan skanningarna i en progressiv JPEG tas bort', async () => {
+  const { rensaJpeg } = await jpeg;
+  const prog = await sharp({ create: { width: 64, height: 48, channels: 3, background: '#a97c46' } })
+    .jpeg({ progressive: true }).toBuffer();
+  // I bilddatan följs FF alltid av 00 eller D0 till D7, så nästa FF DA är
+  // nästa skanningshuvud
+  const forsta = prog.indexOf(Buffer.from([0xff, 0xda]));
+  const andra = prog.indexOf(Buffer.from([0xff, 0xda]), forsta + 2);
+  assert.ok(andra > forsta, 'provbilden ska ha minst två skanningar');
+  const in_ = Buffer.concat([prog.subarray(0, andra), GPS, KOMMENTAR, prog.subarray(andra)]);
+  const ut = Buffer.from(rensaJpeg(in_));
+  assert.equal(innehaller(ut, 'GPSLatitude'), false);
+  assert.equal(innehaller(ut, 'kamera: Telefon'), false);
+  assert.ok(ut.equals(prog), 'resten av bilden ska vara orörd');
+  assert.equal((await sharp(ut).metadata()).width, 64);
+});
+
+test('block med markörer som inte finns i JPEG tas bort', async () => {
+  // Hittades med fuzzning: ett APP1 vars markör förstörts till FF 90 följde
+  // med som om det vore en tabell
+  const { rensaJpeg } = await jpeg;
+  const hel = await provJpeg();
+  // 90 och 2F finns inte, C8 och F0 är reserverade och används aldrig
+  for (const markor of [0x90, 0x2f, 0xc8, 0xf0]) {
+    const okand = Buffer.from(GPS);
+    okand[1] = markor;
+    const ut = Buffer.from(rensaJpeg(medBlock(hel, okand)));
+    assert.equal(innehaller(ut, 'GPSLatitude'), false, 'markör ' + markor.toString(16));
+    assert.ok(ut.equals(hel), 'markör ' + markor.toString(16));
+  }
+});
+
+test('en fil som tar slut i bilddatan, utan FF D9, avvisas', async () => {
+  const { rensaJpeg } = await jpeg;
+  const hel = await provJpeg();
+  assert.equal(rensaJpeg(hel.subarray(0, hel.length - 2)), null);
+});
+
 test('tar emot ArrayBuffer lika väl som Uint8Array', async () => {
   const { rensaJpeg } = await jpeg;
   const hel = await provJpeg();
