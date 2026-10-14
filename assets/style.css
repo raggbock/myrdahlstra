@@ -1975,6 +1975,59 @@ textarea {
   color: var(--dov);
 }
 
+/* Fotot till omdömet, se assets/omdomesfoto.js */
+.omdomesformular__foto {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 15px;
+  color: var(--dov);
+}
+
+.omdomesformular__foto input[type='file'] {
+  font: inherit;
+  color: var(--black);
+}
+
+/* Webbläsarens egen knapp ritas annars i systemtypsnittet */
+.omdomesformular__foto input[type='file']::file-selector-button {
+  font: inherit;
+  margin-right: 12px;
+  padding: 4px 14px;
+  background: var(--kort);
+  color: var(--black);
+  border: 1px solid var(--black);
+  cursor: pointer;
+}
+
+.omdomesformular__fotofel {
+  color: var(--rost);
+}
+
+.omdomesformular__fotovisning {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.omdomesformular__fotovisning img {
+  width: 120px;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border: 1px solid var(--black);
+}
+
+.omdomesformular__tabort {
+  font: inherit;
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--black);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
 .omdomen__snitt {
   display: flex;
   align-items: center;

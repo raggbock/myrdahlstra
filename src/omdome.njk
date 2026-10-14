@@ -15,7 +15,7 @@ eleventyComputed:
   {% include "ornament.njk" %}
 </div>
 
-<form class="omdomesformular uppgifter" action="/api/omdome" method="POST">
+<form class="omdomesformular uppgifter" action="/api/omdome" method="POST" enctype="multipart/form-data">
   <p class="lapp omdomesformular__lapp">tack för att du tar dig tid!</p>
 
   <fieldset class="stjarnval">
@@ -35,13 +35,24 @@ eleventyComputed:
   <label class="dold" for="text">Omdöme</label>
   <textarea id="text" name="text" minlength="10" maxlength="1500" required placeholder="Hur fungerar brädan? Vad är bra, och vad kunde ha varit bättre?"></textarea>
 
+  <div class="omdomesformular__foto">
+    <label for="foto">Foto (frivilligt)</label>
+    <input type="file" id="foto" name="foto" accept="image/*">
+    <p class="hjalptext">Gärna brädan i ditt kök. Fotot visas på sajten tillsammans med omdömet. Undvik ansikten och sådant som visar var du bor. Platsuppgifter i bildfilen tas bort.</p>
+    <p class="hjalptext omdomesformular__fotofel" data-fotofel role="alert" hidden></p>
+    <div class="omdomesformular__fotovisning" data-fotovisning hidden>
+      <img alt="Fotot du valt">
+      <button type="button" class="omdomesformular__tabort" data-fototabort>Ta bort fotot</button>
+    </div>
+  </div>
+
   <p class="omdomesformular__kod" data-kodrad>
     <label for="kod">Koden från mejlet</label>
     <input type="text" id="kod" name="kod" required pattern="[A-Za-z0-9_\-]{12}" autocomplete="off" spellcheck="false">
   </p>
 
   <button class="knapp" type="submit">Skicka omdömet</button>
-  <p class="smatext">Omdömet visas på sajten med betyget, texten, namnet och orten du skriver och vilken månad det skrevs. Jag läser det innan det publiceras. Mer om hur omdömen hanteras står i <a href="/villkor/#omdomen">villkoren</a>.</p>
+  <p class="smatext">Omdömet visas på sajten med betyget, texten, namnet och orten du skriver, fotot om du skickar med ett, och vilken månad det skrevs. Jag läser det innan det publiceras. Mer om hur omdömen hanteras står i <a href="/villkor/#omdomen">villkoren</a>.</p>
 </form>
 
 <script>
@@ -57,3 +68,4 @@ eleventyComputed:
     }
   })();
 </script>
+<script defer src="{{ '/assets/omdomesfoto.js' | version }}"></script>
