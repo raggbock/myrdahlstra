@@ -61,14 +61,14 @@ const { skapaServer } = require('../verktyg/admin.js');
 
 // En panel mot en tillfällig rot med en bräda och en tom omdomen.json.
 // fragaD1 får frågan och svarar med det testet bestämmer.
-async function panel(t, fragaD1) {
+async function panel(t, fragaD1, { foto } = {}) {
   const rot = fs.mkdtempSync(path.join(os.tmpdir(), 'myrdahl-omdome-test-'));
   fs.mkdirSync(path.join(rot, 'src/_data'), { recursive: true });
   fs.writeFileSync(path.join(rot, 'src/_data/products.json'), JSON.stringify(produkter));
   fs.writeFileSync(path.join(rot, 'src/_data/site.json'), JSON.stringify({ url: 'https://myrdahlstra.se' }));
   fs.writeFileSync(path.join(rot, 'src/_data/omdomen.json'), '[]\n');
   const byggen = [];
-  const server = skapaServer({ rot, byggSajt: async () => { byggen.push(1); return { ok: true }; }, fragaD1 });
+  const server = skapaServer({ rot, byggSajt: async () => { byggen.push(1); return { ok: true }; }, fragaD1, foto });
   t.after(async () => {
     await new Promise((klar) => server.close(klar));
     fs.rmSync(rot, { recursive: true, force: true });
@@ -81,7 +81,10 @@ async function panel(t, fragaD1) {
     body: kropp === undefined ? undefined : JSON.stringify(kropp)
   });
   const fil = () => JSON.parse(fs.readFileSync(path.join(rot, 'src/_data/omdomen.json'), 'utf8'));
-  return { url, anrop, fil, byggen, rot };
+  const foton = () => {
+    try { return fs.readdirSync(path.join(rot, 'assets/foto')).sort(); } catch (e) { return []; }
+  };
+  return { url, anrop, fil, byggen, rot, foton };
 }
 
 const vantande = { id: 9, kod: 'AAAAAAAAAAAA', betyg: 2, namn: 'Per', ort: 'Ö', text: 'Sprack efter en månad.', dag: '2026-10-03' };
@@ -185,7 +188,155 @@ test('listan innehåller inkorgen, inbjudningarna och filen', async (t) => {
 test('allt om omdömen kräver panelens huvud', async (t) => {
   const { url } = await panel(t, async () => assert.fail('ska inte frågas'));
   assert.equal((await fetch(url + '/api/omdomen')).status, 403);
-  for (const vag of ['/api/inbjudan', '/api/omdomen/9/publicera', '/api/omdomen/9/avsla', '/api/omdomen/9/ta-bort']) {
+  assert.equal((await fetch(url + '/api/omdomen/9/foto')).status, 403);
+  for (const vag of ['/api/inbjudan', '/api/omdomen/9/publicera', '/api/omdomen/9/publicera-utan-foto',
+    '/api/omdomen/9/avsla', '/api/omdomen/9/ta-bort']) {
     assert.equal((await fetch(url + vag, { method: 'POST', body: '{}' })).status, 403, vag);
   }
+});
+
+/* ---------- foto ---------- */
+
+const medFoto = { ...vantande, bildhex: 'FFD8FFD9' };
+// Bildbehandlingen fejkas: testet gäller flödet, inte sharp
+const behandlare = (anrop = []) => ({
+  omdomesfoto: async (buf) => { anrop.push(buf); return Buffer.from('BEHANDLAD'); }
+});
+
+test('namnet på ett omdömesfoto är slumpat och har rätt form', () => {
+  const namn = new Set(Array.from({ length: 50 }, O.fotonamn));
+  assert.equal(namn.size, 50);
+  for (const n of namn) assert.match(n, O.FOTONAMN);
+  assert.doesNotMatch('omdome-ABCDEF123456.jpg', O.FOTONAMN);
+  assert.doesNotMatch('../omdome-aaaaaaaaaaaa.jpg', O.FOTONAMN);
+});
+
+test('listan säger vilka väntande omdömen som har foto', async (t) => {
+  const fragor = [];
+  const { anrop } = await panel(t, async (q) => { fragor.push(q); return [[{ ...vantande, harFoto: 1 }], []]; });
+  const data = await (await anrop('/api/omdomen')).json();
+  assert.match(fragor[0], /bild IS NOT NULL AS harFoto/);
+  assert.doesNotMatch(fragor[0], /hex\(bild\)/, 'själva fotot ska inte hämtas till listan');
+  assert.equal(data.vantande[0].harFoto, 1);
+});
+
+test('fotot i inkorgen hämtas ur databasen', async (t) => {
+  const fragor = [];
+  const { url } = await panel(t, async (q) => { fragor.push(q); return [[{ hex: 'FFD8FFD9' }]]; });
+  const svar = await fetch(url + '/api/omdomen/9/foto', { headers: { 'X-Panel': '1' } });
+  assert.equal(svar.status, 200);
+  assert.equal(svar.headers.get('content-type'), 'image/jpeg');
+  assert.deepEqual(Buffer.from(await svar.arrayBuffer()), Buffer.from('FFD8FFD9', 'hex'));
+  assert.equal(fragor[0], 'SELECT hex(bild) AS hex FROM omdome WHERE id = 9');
+});
+
+test('ett omdöme utan foto i inkorgen ger 404 på fotot', async (t) => {
+  const { url } = await panel(t, async () => [[{ hex: null }]]);
+  assert.equal((await fetch(url + '/api/omdomen/9/foto', { headers: { 'X-Panel': '1' } })).status, 404);
+});
+
+test('publicera med foto sparar det behandlade fotot under ett slumpat namn', async (t) => {
+  const fragor = [];
+  const behandlat = [];
+  const { anrop, fil, foton, rot } = await panel(t, async (q) => {
+    fragor.push(q);
+    return q.startsWith('SELECT') ? [[medFoto]] : [[]];
+  }, { foto: behandlare(behandlat) });
+  const svar = await anrop('/api/omdomen/9/publicera', {});
+  assert.equal(svar.status, 200);
+  assert.match(fragor[0], /hex\(bild\) AS bildhex/);
+  assert.deepEqual(behandlat[0], Buffer.from('FFD8FFD9', 'hex'));
+  const bild = fil()[0].bild;
+  assert.match(bild, O.FOTONAMN);
+  assert.deepEqual(foton(), [bild]);
+  assert.equal(fs.readFileSync(path.join(rot, 'assets/foto', bild), 'utf8'), 'BEHANDLAD');
+  assert.match(fragor[1], /^DELETE FROM omdome WHERE id = 9$/);
+});
+
+test('publicera utan foto skriver ingen fil och hämtar inte fotot', async (t) => {
+  const fragor = [];
+  const behandlat = [];
+  const { anrop, fil, foton } = await panel(t, async (q) => {
+    fragor.push(q);
+    return q.startsWith('SELECT') ? [[vantande]] : [[]];
+  }, { foto: behandlare(behandlat) });
+  assert.equal((await anrop('/api/omdomen/9/publicera-utan-foto', {})).status, 200);
+  assert.doesNotMatch(fragor[0], /hex\(bild\)/);
+  assert.equal(fil()[0].bild, undefined);
+  assert.deepEqual(foton(), []);
+  assert.equal(behandlat.length, 0);
+  assert.match(fragor[1], /^DELETE FROM omdome WHERE id = 9$/);
+});
+
+test('går fotot inte att behandla skrivs och raderas ingenting', async (t) => {
+  const fragor = [];
+  const { anrop, fil, foton, byggen } = await panel(t, async (q) => {
+    fragor.push(q);
+    return q.startsWith('SELECT') ? [[medFoto]] : [[]];
+  }, { foto: { omdomesfoto: async () => { throw new Error('Input buffer contains unsupported image format'); } } });
+  const svar = await anrop('/api/omdomen/9/publicera', {});
+  assert.equal(svar.status, 422);
+  assert.match((await svar.json()).fel[0], /Publicera utan foto/);
+  assert.deepEqual(fil(), []);
+  assert.deepEqual(foton(), []);
+  assert.ok(!fragor.some((q) => q.startsWith('DELETE')));
+  assert.equal(byggen.length, 0);
+});
+
+test('ett nytt försök efter misslyckad radering behandlar inget nytt foto', async (t) => {
+  let felVidDelete = true;
+  const behandlat = [];
+  const { anrop, fil, foton } = await panel(t, async (q) => {
+    if (q.startsWith('DELETE') && felVidDelete) throw new Error('Wrangler kunde inte fråga databasen: nätet');
+    return q.startsWith('SELECT') ? [[medFoto]] : [[]];
+  }, { foto: behandlare(behandlat) });
+  assert.equal((await anrop('/api/omdomen/9/publicera', {})).status, 502);
+  felVidDelete = false;
+  assert.equal((await anrop('/api/omdomen/9/publicera', {})).status, 200);
+  assert.equal(behandlat.length, 1);
+  assert.equal(fil().length, 1);
+  assert.equal(foton().length, 1);
+});
+
+test('ett namn som redan finns ger ett nytt, och den gamla filen rörs inte', async (t) => {
+  const namn = ['omdome-aaaaaaaaaaaa.jpg', 'omdome-bbbbbbbbbbbb.jpg'];
+  t.mock.method(O, 'fotonamn', () => namn.shift());
+  const { anrop, fil, rot } = await panel(t, async (q) => (q.startsWith('SELECT') ? [[medFoto]] : [[]]),
+    { foto: behandlare() });
+  fs.mkdirSync(path.join(rot, 'assets/foto'), { recursive: true });
+  fs.writeFileSync(path.join(rot, 'assets/foto/omdome-aaaaaaaaaaaa.jpg'), 'GAMMAL');
+  assert.equal((await anrop('/api/omdomen/9/publicera', {})).status, 200);
+  assert.equal(fil()[0].bild, 'omdome-bbbbbbbbbbbb.jpg');
+  assert.equal(fs.readFileSync(path.join(rot, 'assets/foto/omdome-aaaaaaaaaaaa.jpg'), 'utf8'), 'GAMMAL');
+});
+
+test('ta bort raderar fotot med omdömet', async (t) => {
+  const { anrop, fil, foton } = await panel(t, async (q) => (q.startsWith('SELECT') ? [[medFoto]] : [[]]),
+    { foto: behandlare() });
+  await anrop('/api/omdomen/9/publicera', {});
+  assert.equal(foton().length, 1);
+  assert.equal((await anrop('/api/omdomen/9/ta-bort', {})).status, 200);
+  assert.deepEqual(fil(), []);
+  assert.deepEqual(foton(), []);
+});
+
+test('ta bort fungerar även när fotofilen redan saknas', async (t) => {
+  const { anrop, fil, rot } = await panel(t, async () => [[]]);
+  fs.writeFileSync(path.join(rot, 'src/_data/omdomen.json'), JSON.stringify([
+    { id: 9, kod: 'AAAAAAAAAAAA', betyg: 5, namn: 'Per', ort: '', text: 'Fin.', datum: '2026-10-03', bild: 'omdome-cccccccccccc.jpg' }
+  ]));
+  assert.equal((await anrop('/api/omdomen/9/ta-bort', {})).status, 200);
+  assert.deepEqual(fil(), []);
+});
+
+test('omdömesfoton räknas inte som oanvända', async (t) => {
+  const { anrop, rot } = await panel(t, async () => [[]]);
+  fs.mkdirSync(path.join(rot, 'assets/foto'), { recursive: true });
+  fs.writeFileSync(path.join(rot, 'assets/foto/omdome-dddddddddddd.jpg'), 'x');
+  fs.writeFileSync(path.join(rot, 'assets/foto/glomd.jpg'), 'x');
+  fs.writeFileSync(path.join(rot, 'src/_data/omdomen.json'), JSON.stringify([
+    { id: 1, kod: 'AAAAAAAAAAAA', betyg: 5, namn: 'Per', ort: '', text: 'Fin.', datum: '2026-10-03', bild: 'omdome-dddddddddddd.jpg' }
+  ]));
+  const data = await (await anrop('/api/allt')).json();
+  assert.deepEqual(data.oanvandaFoton, ['glomd.jpg']);
 });

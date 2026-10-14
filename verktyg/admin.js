@@ -148,6 +148,8 @@ function skapaServer({ rot = path.join(__dirname, '..'), foto = Foto,
     const serie = P.las(PROCESSFIL);
     const anvanda = new Set(
       produkter.flatMap((x) => x.bilder || []).concat((serie.steg || []).map((s) => s.fil))
+        // Omdömenas foton ligger i samma mapp men hör inte till någon bräda
+        .concat(O.las(OMDOMESFIL).map((o) => o.bild).filter(Boolean))
     );
     const alla = fotolista();
     json(res, 200, {
@@ -307,7 +309,8 @@ function skapaServer({ rot = path.join(__dirname, '..'), foto = Foto,
     let svar;
     try {
       svar = await d1(
-        'SELECT id, kod, betyg, namn, ort, text, dag FROM omdome ORDER BY id; ' +
+        // Bara om det finns ett foto. Själva fotot hämtas ett i taget, se visaFoto.
+        'SELECT id, kod, betyg, namn, ort, text, dag, bild IS NOT NULL AS harFoto FROM omdome ORDER BY id; ' +
         'SELECT kod, skapad, anvand FROM inbjudan ORDER BY skapad DESC, rowid DESC LIMIT 50'
       );
     } catch (e) {
@@ -330,6 +333,38 @@ function skapaServer({ rot = path.join(__dirname, '..'), foto = Foto,
     json(res, 200, { kod, lank: O.lank(site.url, kod) });
   }
 
+  // Fotot i inkorgen. wrangler svarar med text, så fotot hämtas som hex.
+  async function visaFoto(res, id) {
+    let rad;
+    try {
+      [[rad] = []] = await d1('SELECT hex(bild) AS hex FROM omdome WHERE id = ' + O.sql(id));
+    } catch (e) {
+      return json(res, 502, { fel: [e.message] });
+    }
+    if (!rad || !rad.hex) return json(res, 404, { fel: ['Omdömet har inget foto i inkorgen.'] });
+    const data = Buffer.from(rad.hex, 'hex');
+    res.writeHead(200, { 'Content-Type': 'image/jpeg', 'Content-Length': data.length, 'Cache-Control': 'no-store' });
+    res.end(data);
+  }
+
+  // Skriver aldrig över en fil. Ett namn som redan finns ger ett nytt.
+  function sparaOmdomesfoto(data) {
+    fs.mkdirSync(FOTOMAPP, { recursive: true });
+    for (let forsok = 0; forsok < 5; forsok += 1) {
+      const namn = O.fotonamn();
+      let fd;
+      try {
+        fd = fs.openSync(path.join(FOTOMAPP, namn), 'wx');
+      } catch (e) {
+        if (e.code === 'EEXIST') continue;
+        throw e;
+      }
+      try { fs.writeFileSync(fd, data); } finally { fs.closeSync(fd); }
+      return namn;
+    }
+    throw new Error('Hittade inget ledigt namn för fotot.');
+  }
+
   // Bara ett av publicera och ta bort åt gången, och aldrig samtidigt som
   // sortimentet sparas: alla tre skriver i src/_data och bygger.
   async function medLas(res, gor) {
@@ -342,11 +377,14 @@ function skapaServer({ rot = path.join(__dirname, '..'), foto = Foto,
     }
   }
 
-  async function publicera(res, id) {
+  // medFoto false publicerar bara texten. Fotot raderas då med raden i D1,
+  // till exempel när det visar andra personer.
+  async function publicera(res, id, medFoto) {
     return medLas(res, async () => {
       let rad;
       try {
-        [[rad] = []] = await d1('SELECT id, kod, betyg, namn, ort, text, dag FROM omdome WHERE id = ' + O.sql(id));
+        [[rad] = []] = await d1('SELECT id, kod, betyg, namn, ort, text, dag' +
+          (medFoto ? ', hex(bild) AS bildhex' : '') + ' FROM omdome WHERE id = ' + O.sql(id));
       } catch (e) {
         return json(res, 502, { fel: [e.message] });
       }
@@ -354,12 +392,26 @@ function skapaServer({ rot = path.join(__dirname, '..'), foto = Foto,
 
       // Filen först. Går borttagningen ur D1 fel efteråt ligger omdömet redan
       // publicerat, och ett nytt försök lägger inte till det igen.
+      const fore = O.las(OMDOMESFIL);
       let lista;
       try {
-        lista = O.medOmdome(O.las(OMDOMESFIL), rad);
+        lista = O.medOmdome(fore, rad);
       } catch (e) {
         if (e instanceof O.KrockandeId) return json(res, 409, { fel: [e.message] });
         throw e;
+      }
+      // Samma lista tillbaka betyder att omdömet redan var publicerat, och
+      // då är fotot också redan sparat
+      if (medFoto && rad.bildhex && lista !== fore) {
+        let jpeg;
+        try {
+          jpeg = await F.omdomesfoto(Buffer.from(rad.bildhex, 'hex'));
+        } catch (e) {
+          return json(res, 422, { fel: [
+            'Fotot gick inte att behandla (' + e.message + '). Tryck Publicera utan foto, eller Avslå.'
+          ] });
+        }
+        lista = O.medOmdome(fore, rad, sparaOmdomesfoto(jpeg));
       }
       P.skriv(OMDOMESFIL, lista);
       try {
@@ -385,7 +437,15 @@ function skapaServer({ rot = path.join(__dirname, '..'), foto = Foto,
 
   async function taBort(res, id) {
     return medLas(res, async () => {
-      P.skriv(OMDOMESFIL, O.utanOmdome(O.las(OMDOMESFIL), id));
+      const lista = O.las(OMDOMESFIL);
+      const borta = lista.find((o) => o.id === id);
+      P.skriv(OMDOMESFIL, O.utanOmdome(lista, id));
+      // Fotot hör till omdömet. Ber kunden om att få omdömet borttaget ska
+      // bilden försvinna med texten. Bara namn på rätt form, så att en
+      // felskriven omdomen.json aldrig kan radera något annat.
+      if (borta && borta.bild && O.FOTONAMN.test(borta.bild)) {
+        fs.rmSync(path.join(FOTOMAPP, borta.bild), { force: true });
+      }
       const bygge = await (byggSajt || bygg)();
       json(res, 200, { publicerade: O.las(OMDOMESFIL), bygge });
     });
@@ -461,6 +521,11 @@ function skapaServer({ rot = path.join(__dirname, '..'), foto = Foto,
         if (!franPanelen(req)) return json(res, 403, { fel: ['Anropet kom inte från panelen.'] });
         return await hamtaOmdomen(res);
       }
+      const fo = väg.match(/^\/api\/omdomen\/(\d{1,9})\/foto$/);
+      if (req.method === 'GET' && fo) {
+        if (!franPanelen(req)) return json(res, 403, { fel: ['Anropet kom inte från panelen.'] });
+        return await visaFoto(res, Number(fo[1]));
+      }
       if (req.method === 'GET' && väg.startsWith('/sajt/')) {
         return sajtfil(res, väg.slice('/sajt'.length));
       }
@@ -482,10 +547,11 @@ function skapaServer({ rot = path.join(__dirname, '..'), foto = Foto,
       if (req.method === 'POST' && väg === '/api/inbjudan') {
         return await nyInbjudan(req, res);
       }
-      const om = väg.match(/^\/api\/omdomen\/(\d{1,9})\/(publicera|avsla|ta-bort)$/);
+      const om = väg.match(/^\/api\/omdomen\/(\d{1,9})\/(publicera|publicera-utan-foto|avsla|ta-bort)$/);
       if (req.method === 'POST' && om) {
         const id = Number(om[1]);
-        if (om[2] === 'publicera') return await publicera(res, id);
+        if (om[2] === 'publicera') return await publicera(res, id, true);
+        if (om[2] === 'publicera-utan-foto') return await publicera(res, id, false);
         if (om[2] === 'avsla') return await avsla(res, id);
         return await taBort(res, id);
       }

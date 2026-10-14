@@ -79,3 +79,28 @@ test('ljusfaktor begransas sa bilder inte blir onaturliga', () => {
 test('ljusfaktor pa noll kraschar inte', () => {
   assert.ok(Number.isFinite(F.ljusfaktor(0)));
 });
+
+/* ---------- omdömesfoto ---------- */
+
+const { provJpeg, medBlock, GPS_XMP } = require('./hjalp/jpeg.js');
+const sharpForTest = require('sharp');
+
+test('ett omdömesfoto vänds, krymps och blir av med metadata, utan beskärning', async () => {
+  // 3000 x 2000 med orientering 6 är egentligen ett stående foto, 2000 x 3000
+  const in_ = medBlock(await provJpeg({ bredd: 3000, hojd: 2000, orientering: 6 }), GPS_XMP);
+  const ut = await F.omdomesfoto(in_);
+  const m = await sharpForTest(ut).metadata();
+  assert.equal(m.format, 'jpeg');
+  assert.equal(m.height, 1400);
+  assert.equal(m.width, 933);
+  assert.equal(m.orientation, undefined);
+  assert.equal(m.exif, undefined);
+  assert.equal(m.xmp, undefined);
+  assert.equal(Buffer.from(ut).includes(Buffer.from('GPSLatitude')), false);
+});
+
+test('ett litet omdömesfoto förstoras inte', async () => {
+  const m = await sharpForTest(await F.omdomesfoto(await provJpeg({ bredd: 640, hojd: 480 }))).metadata();
+  assert.equal(m.width, 640);
+  assert.equal(m.height, 480);
+});

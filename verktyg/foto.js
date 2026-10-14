@@ -97,6 +97,17 @@ async function forhandsvisning(buffer, offset) {
   return behandla(buffer, offset, { maxBredd: 640, kvalitet: 70 });
 }
 
+// Ett foto som en kund skickat med sitt omdöme. Ingen beskärning och ingen
+// ljusjustering, det är kundens bild och kundens utsnitt. Vänds efter EXIF,
+// krymps till katalogens största bredd, och metadata följer inte med.
+async function omdomesfoto(buffer) {
+  return sharp(buffer)
+    .rotate()
+    .resize({ width: MAX_BREDD, height: MAX_BREDD, fit: 'inside', withoutEnlargement: true })
+    .jpeg({ quality: KVALITET, mozjpeg: true })
+    .toBuffer();
+}
+
 module.exports = {
   rutan,
   ljusfaktor,
@@ -104,6 +115,7 @@ module.exports = {
   medelljus,
   behandla,
   forhandsvisning,
+  omdomesfoto,
   MAL_LJUS,
   GRANS_NEDRE,
   GRANS_OVRE,
