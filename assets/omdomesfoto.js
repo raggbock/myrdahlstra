@@ -26,6 +26,10 @@
   var taBort = document.querySelector('[data-fototabort]');
   var felrad = document.querySelector('[data-fotofel]');
   var adress = null;
+  // Räknas upp vid varje nytt val och vid Ta bort fotot. En krympning som
+  // blir klar efter att kunden valt om lämnar fältet i fred, annars kunde
+  // fotot kunden just bytt bort följa med.
+  var omgang = 0;
 
   function visaFel(text) {
     felrad.textContent = text || '';
@@ -72,15 +76,19 @@
 
   falt.addEventListener('change', function () {
     var fil = falt.files && falt.files[0];
+    omgang += 1;
+    var denna = omgang;
     visaFel('');
     if (!fil) {
       visaForhand(null);
+      knapp.disabled = false;
       return;
     }
     // Medan fotot krymps går formuläret inte att skicka, annars kunde
     // originalet följa med och vara för stort
     knapp.disabled = true;
     krymp(fil).then(function (blob) {
+      if (denna !== omgang) return;
       if (!blob) {
         tom();
         visaFel('Fotot blev för stort även efter krympning. Välj en annan bild, eller skicka utan foto.');
@@ -92,14 +100,17 @@
       falt.files = lista.files;
       visaForhand(ny);
     }).catch(function () {
+      if (denna !== omgang) return;
       tom();
       visaFel('Den här bildtypen går inte att läsa här. Välj en JPEG, eller skicka utan foto.');
     }).then(function () {
-      knapp.disabled = false;
+      if (denna === omgang) knapp.disabled = false;
     });
   });
 
   taBort.addEventListener('click', function () {
+    omgang += 1;
+    knapp.disabled = false;
     tom();
     visaFel('');
     falt.focus();
