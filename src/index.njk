@@ -27,7 +27,7 @@ eleventyComputed:
   <div class="kort--mork mork{% if katalog.length % 2 == 0 %} kort--mork--bred{% endif %}">
     <div class="kort--mork__innehall">
       <h3><span class="nr">Efter mått.</span> Din egen bräda</h3>
-      <p>Välj mönster, träslag, mått och saftränna, så ritas brädan upp medan du väljer och tillverkas sedan för just ditt kök. Leverans inom {{ site.leveranstid }}.</p>
+      <p>Välj mönster, träslag, mått och saftränna, så ritas brädan upp medan du väljer och tillverkas sedan för just ditt kök. Leverans inom {{ site.leveranstid }}.{% if jul %} Ska den bli en julklapp, beställ senast den {{ jul.datum }}.{% endif %}</p>
       <a href="/bestallning/">Till beställningssidan</a>
     </div>
   </div>

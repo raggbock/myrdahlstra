@@ -14,6 +14,8 @@
   "fraktGrans": "45 × 30 cm",
   "frakt": "Spårbar frakt 189 kr, eller 249 kr för brädor större än 45 × 30 cm. Hämtning i Stora Mellösa enligt överenskommelse.",
   "leveranstid": "tre till fyra veckor",
+  "//julSista": "Sista dag att beställa en bräda som ska tillverkas, om den ska hinna till jul. Syns på startsidans kort för beställning efter mått, på beställningssidan och på brädor som görs på beställning. Raden försvinner vid första bygget efter datumet. Töm raden för att ta bort den direkt.",
+  "julSista": "2026-11-14",
   "skotsel": "Handdiska med milt diskmedel, aldrig i diskmaskin. Låt torka stående. Olja in när ytan börjar kännas torr och ljus. En burk träbalsam följer med varje bräda.",
   "skotselLapp": "träbalsam på köpet",
   "//formEndpoint": "Formuläret går till Pages Functionen i functions/api/bestallning.js, på samma domän som sajten. Den behöver secreten RESEND_API_KEY samt MOTTAGARE och AVSANDARE satta på Pages-projektet myrdahls-storefront. Töm raden nedan om du vill tillbaka till mejl-fallbacken.",

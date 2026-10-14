@@ -17,7 +17,7 @@ eleventyComputed:
 
 <div class="bestall__intro">
   <h1 class="bestall__titel"><span class="nr">Efter mått.</span> Bygg din bräda</h1>
-  <p class="bestall__ingress">Bygg brädan här så ritas den upp medan du väljer och ett cirkapris räknas fram, eller skriv bara ett meddelande om du hellre vill fråga något först. Jag svarar inom ett par dagar per mejl. En ändträskärbräda efter mått kostar från {{ franpris | pris }}, beroende på storlek, mönster och träslag. Tillverkning tar normalt {{ site.leveranstid }}.</p>
+  <p class="bestall__ingress">Bygg brädan här så ritas den upp medan du väljer och ett cirkapris räknas fram, eller skriv bara ett meddelande om du hellre vill fråga något först. Jag svarar inom ett par dagar per mejl. En ändträskärbräda efter mått kostar från {{ franpris | pris }}, beroende på storlek, mönster och träslag. Tillverkning tar normalt {{ site.leveranstid }}.{% if jul %} Ska brädan bli en julklapp, beställ senast den {{ jul.datum }}.{% endif %}</p>
   {% include "ornament.njk" %}
 </div>
 
@@ -90,6 +90,9 @@ eleventyComputed:
             <span class="valkort__bild">{{ { monster: 'hel', traA: t.id, storlek: '4026' } | brada(3, 3) | safe }}</span>
             <span class="valkort__namn">{{ t.namn }}</span>
             <span class="valkort__tillagg">{{ t.tillagg }}</span>
+            {%- if t.tillaggRen %}
+            <span class="valkort__tillagg">{{ t.tillaggRen }}</span>
+            {%- endif %}
           </label>
           {%- endfor %}
         </div>

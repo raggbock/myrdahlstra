@@ -5,7 +5,7 @@
  * Detta är enda stället priserna står. Samma tabell används av
  * webbläsaren, av bygget när alternativkorten ritas, och av testen.
  * Priserna är fastställda av Sebastian 2026-09-04, mönstertilläggen
- * 2026-09-07.
+ * 2026-09-07 och tillägget för en bräda helt i valnöt 2026-10-14.
  * ==========================================================
  *
  * Filen ritar också brädan. En färdig ändträbräda är rutor, inte långa
@@ -20,6 +20,13 @@
 
   /* ---------- prislista ---------- */
 
+  /*
+   * plus är tillägget när träslaget är ett av flera i brädan. plusRen är
+   * tillägget i stället för plus när hela brädan är av det träslaget, och
+   * tillaggRen är samma sak i text till kortet. Bara valnöt har det: det är
+   * det dyraste virket, och en hel bräda av det kostar märkbart mer än
+   * några rader i ett mönster.
+   */
   var TRASLAG = [
     {
       id: 'ek',
@@ -50,6 +57,9 @@
       namn: 'Valnöt',
       tillagg: 'plus 300 kr',
       plus: 300,
+      // Hårda mellanslag, så att beloppet aldrig bryts mitt i på ett smalt kort.
+      tillaggRen: 'helt i valnöt, plus 1 250 kr',
+      plusRen: 1250,
       bas: '#573b26',
       adring: '#3d2717'
     }
@@ -210,6 +220,12 @@
     var summa = n.storlek.bas + n.monster.plus + n.ranna.plus;
     var tra = traslagIVal(n);
     var i;
+
+    // Ett enda träslag betyder att hela brädan är av det, oavsett mönster.
+    // Ränder med valnöt på båda platserna är lika mycket valnöt som Hel.
+    if (tra.length === 1 && typeof tra[0].plusRen === 'number') {
+      return summa + tra[0].plusRen;
+    }
     for (i = 0; i < tra.length; i += 1) {
       summa += tra[i].plus;
     }

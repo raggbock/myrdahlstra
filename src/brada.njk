@@ -24,9 +24,11 @@ eleventyComputed:
   # behåller det den redan har. Tom sträng när brädan ska synas, för "false"
   # som text är sant i en if-sats.
   noindex: "{% if p | urKatalogen %}true{% endif %}"
-  # Delas länken till en bräda ska brädans eget foto följa med
-  produktbild: "{{ p.bilder[0] }}"
-  delbildtext: "{{ p.titel }}"
+  # Delas länken till en bräda ska brädans eget foto följa med. En bräda som
+  # inte är fotad än delar katalogbilden, och då med katalogbildens text, så
+  # att texten inte påstår att ekbrädan på bilden är något annat.
+  produktbild: "{% if p.bilder and p.bilder.length %}{{ p.bilder[0] }}{% endif %}"
+  delbildtext: "{% if p.bilder and p.bilder.length %}{{ p.titel }}{% endif %}"
 ---
 
 {% from "bild.njk" import bild %}
@@ -118,7 +120,7 @@ eleventyComputed:
     {#- En bräda på beställning ligger inte färdig i verkstaden, och då gäller
         tillverkningstid i stället för leverans inom några dagar. -#}
     {%- if p.pabestallning %}
-    <p class="hjalptext">Den här görs på beställning, ingen ligger färdig i verkstaden. Tillverkning tar normalt {{ site.leveranstid }}.</p>
+    <p class="hjalptext">Den här görs på beställning, ingen ligger färdig i verkstaden. Tillverkning tar normalt {{ site.leveranstid }}.{% if jul %} Ska den bli en julklapp, beställ senast den {{ jul.datum }}.{% endif %}</p>
     {%- endif %}
     <div class="knapp-grupp">
       <a class="knapp" href="#bestall">Skicka en förfrågan</a>

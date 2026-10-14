@@ -338,11 +338,15 @@ Priserna står på ett enda ställe, i toppen av `assets/konfigurator.js`:
 
 - grundpris per storlek (`bas`): 1750, 2000, 2250, 2750
 - tillägg per valt träslag (`plus`): ek 0, ask 0, lönn 100, valnöt 300
+- tillägg när hela brädan är ett träslag (`plusRen`): bara valnöt, 1250
 - tillägg för mönster (`plus`): naturlig 0, hel 0, ränder 200, rutmönster 400, mursten 400
 - tillägg för saftränna: 150
 
 Priset blir grundpriset för storleken, plus mönstret, plus varje träslag som
-mönstret faktiskt använder, plus rännan.
+mönstret faktiskt använder, plus rännan. Använder mönstret bara ett träslag och
+det träslaget har `plusRen`, gäller det i stället för `plus`. Det gäller även
+ränder eller mursten med valnöt på alla platser, annars gick tillägget att
+kringgå. En hel bräda i valnöt kostar alltså från 3000.
 
 Ändrar du där följer alternativkorten, cirkapriset i webbläsaren och testerna
 med automatiskt. Vill du lägga till ett träslag räcker det att lägga till en

@@ -99,7 +99,7 @@ eleventyComputed:
     <div class="leader">
       <dt>{{ t.namn }}</dt>
       <span class="leader__linje"></span>
-      <dd>{{ t.tillagg }}</dd>
+      <dd>{{ t.tillagg }}{% if t.tillaggRen %} ({{ t.tillaggRen }}){% endif %}</dd>
     </div>
     {%- endfor %}
   </dl>

@@ -24,7 +24,35 @@ test('tillagg for traslag', () => {
   assert.equal(Konfigurator.berakna({ ...hel, traA: 'ek' }), 2000);
   assert.equal(Konfigurator.berakna({ ...hel, traA: 'ask' }), 2000);
   assert.equal(Konfigurator.berakna({ ...hel, traA: 'lonn' }), 2100);
-  assert.equal(Konfigurator.berakna({ ...hel, traA: 'valnot' }), 2300);
+  assert.equal(Konfigurator.berakna({ ...hel, traA: 'valnot' }), 3250);
+});
+
+test('en brada helt i valnot har ett eget tillagg', () => {
+  // Valnot ar det dyraste virket. Som ett av flera traslag kostar det 300 kr
+  // extra, men ar hela bradan valnot ar tillagget 1250 kr.
+  const hel = { monster: 'hel', traA: 'valnot', ranna: false };
+  assert.equal(Konfigurator.berakna({ ...hel, storlek: '4026' }), 3000);
+  assert.equal(Konfigurator.berakna({ ...hel, storlek: '4530' }), 3250);
+  assert.equal(Konfigurator.berakna({ ...hel, storlek: '5032' }), 3500);
+  assert.equal(Konfigurator.berakna({ ...hel, storlek: '6032' }), 4000);
+});
+
+test('valnot pa alla platser ar ocksa en brada helt i valnot', () => {
+  // Annars gar det att kringga tillagget genom att valja randerna med
+  // valnot pa bada platserna.
+  const bas = { storlek: '4530', ranna: false };
+  // 2000 + 200 for randerna + 1250
+  assert.equal(Konfigurator.berakna({ ...bas, monster: 'rander', traA: 'valnot', traB: 'valnot' }), 3450);
+  // 2000 + 400 for murstenen + 1250
+  assert.equal(Konfigurator.berakna({ ...bas, monster: 'mursten', traA: 'valnot', traB: 'valnot', traC: 'valnot' }), 3650);
+});
+
+test('valnot tillsammans med andra traslag kostar som forut', () => {
+  const bas = { storlek: '4530', ranna: false };
+  // 2000 + 400 for rutmonstret + 300 for valnot
+  assert.equal(Konfigurator.berakna({ ...bas, monster: 'rutor', traA: 'ek', traB: 'valnot' }), 2700);
+  // 2000 + 400 for murstenen + 300 for valnot + 100 for lonn
+  assert.equal(Konfigurator.berakna({ ...bas, monster: 'mursten', traA: 'valnot', traB: 'valnot', traC: 'lonn' }), 2800);
 });
 
 test('tillagg for monster', () => {
@@ -77,7 +105,6 @@ test('naturlig ar det billigaste monstret', () => {
 
 test('samma traslag pa bada platserna betalas en gang', () => {
   const bas = { monster: 'rutor', storlek: '4530', ranna: false };
-  assert.equal(Konfigurator.berakna({ ...bas, traA: 'valnot', traB: 'valnot' }), 2700);
   assert.equal(Konfigurator.berakna({ ...bas, traA: 'lonn', traB: 'lonn' }), 2500);
 });
 

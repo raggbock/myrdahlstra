@@ -29,9 +29,9 @@
   <meta property="og:site_name" content="{{ site.namn }}">
   {#- Utan bild blir en delad länk en tom grå ruta i Messenger och Facebook.
       Produktsidor delar sitt eget foto, övriga sidor delar katalogbilden. -#}
-  {%- set delbild = site.url + '/assets/foto/' + (produktbild | default(site.delbild)) %}
+  {%- set delbild = site.url + '/assets/foto/' + (produktbild | default(site.delbild, true)) %}
   <meta property="og:image" content="{{ delbild }}">
-  <meta property="og:image:alt" content="{{ delbildtext | default(site.delbildtext) }}">
+  <meta property="og:image:alt" content="{{ delbildtext | default(site.delbildtext, true) }}">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:image" content="{{ delbild }}">
   {#- Brödtypsnittet hämtas innan stilmallen hunnit be om det, annars syns
