@@ -32,6 +32,7 @@
   .kort { background: var(--kort); border: 1px solid var(--linje); padding: 14px 16px; margin-bottom: 12px; }
   .kort .text { white-space: pre-line; font-style: italic; margin: 8px 0; }
   .kort .vem { color: var(--dov); font-size: 15px; }
+  .kort img.foto { display: block; max-width: 320px; max-height: 240px; margin: 8px 0; border: 1px solid var(--linje); }
   .betyg { color: var(--guld); letter-spacing: 0.1em; }
   .regel { color: var(--rost); font-size: 15px; margin: 0 0 12px 0; }
   .tom { color: var(--dov); font-style: italic; }
@@ -106,10 +107,11 @@
 
   const stjarnor = (n) => '★'.repeat(n) + '☆'.repeat(5 - n);
 
-  function omdomeskort(o, datum, knappar) {
+  function omdomeskort(o, datum, knappar, foto) {
     const kort = el('div', 'kort');
     kort.append(el('div', 'betyg', stjarnor(o.betyg) + '  ' + o.betyg + ' av 5'));
     kort.append(el('p', 'text', o.text));
+    if (foto) kort.append(foto);
     kort.append(el('div', 'vem', o.namn + (o.ort ? ', ' + o.ort : '') + ' · ' + datum));
     const rad = el('div', 'rad');
     rad.style.marginTop = '10px';
@@ -126,6 +128,29 @@
     return kort;
   }
 
+  // Fotot i inkorgen hämtas med panelens huvud, som allt annat från D1, och
+  // visas som en blob-adress. En vanlig <img src> kan inte skicka huvudet.
+  function vantandeFoto(id) {
+    const img = el('img', 'foto');
+    img.alt = 'Fotot som skickades med omdömet';
+    fetch('/api/omdomen/' + id + '/foto', { headers: huvud })
+      .then((svar) => {
+        if (!svar.ok) throw new Error('Fotot kunde inte hämtas.');
+        return svar.blob();
+      })
+      .then((blob) => { img.src = URL.createObjectURL(blob); })
+      .catch((e) => { img.replaceWith(el('p', 'fel', e.message)); });
+    return img;
+  }
+
+  // Ett publicerat foto ligger i den byggda sajten, som panelen serverar
+  function publiceratFoto(bild) {
+    const img = el('img', 'foto');
+    img.alt = 'Fotot som publicerades med omdömet';
+    img.src = '/assets/foto/' + encodeURIComponent(bild);
+    return img;
+  }
+
   async function ladda() {
     let data;
     try {
@@ -137,8 +162,15 @@
     vant.replaceChildren();
     if (!data.vantande.length) vant.append(el('p', 'tom', 'Inga omdömen väntar.'));
     for (const o of data.vantande) {
+      const utanFoto = o.harFoto ? [['Publicera utan foto', async () => {
+        if (!confirm('Publicera omdömet från ' + o.namn + ' utan fotot? Fotot raderas och går inte att få tillbaka.')) return;
+        visaFel('');
+        await anrop('/api/omdomen/' + o.id + '/publicera-utan-foto', {});
+        await ladda();
+      }]] : [];
       vant.append(omdomeskort(o, o.dag, [
         ['Publicera', async () => { visaFel(''); await anrop('/api/omdomen/' + o.id + '/publicera', {}); await ladda(); }, 'huvud'],
+        ...utanFoto,
         ['Avslå', async () => {
           if (!confirm('Avslå omdömet från ' + o.namn + '? Det raderas och går inte att få tillbaka.\n\n' +
             'Avslå bara skräp, uppgifter om andra personer eller påhopp.')) return;
@@ -146,7 +178,7 @@
           await anrop('/api/omdomen/' + o.id + '/avsla', {});
           await ladda();
         }]
-      ]));
+      ], o.harFoto ? vantandeFoto(o.id) : null));
     }
 
     const publ = $('[data-publicerade]');
@@ -155,12 +187,12 @@
     for (const o of data.publicerade.slice().reverse()) {
       publ.append(omdomeskort(o, o.datum, [
         ['Ta bort', async () => {
-          if (!confirm('Ta bort omdömet från ' + o.namn + ' från sajten?')) return;
+          if (!confirm('Ta bort omdömet från ' + o.namn + ' från sajten?' + (o.bild ? ' Fotot raderas också.' : ''))) return;
           visaFel('');
           await anrop('/api/omdomen/' + o.id + '/ta-bort', {});
           await ladda();
         }]
-      ]));
+      ], o.bild ? publiceratFoto(o.bild) : null));
     }
 
     const tabell = $('[data-inbjudningar]');
