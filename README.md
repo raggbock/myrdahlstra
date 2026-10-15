@@ -539,7 +539,10 @@ Så går det till:
    lägger det i D1-databasen **myrdahls-klick** med dagens datum. Klick äldre
    än 180 dagar städas bort.
 3. Panelen frågar databasen genom wrangler, som redan är inloggad på kontot.
-   Kartan ritas ovanpå det senaste lokala bygget i `_site`.
+   Kartan ritas ovanpå det senaste lokala bygget i `_site`. Wrangler förnyar
+   inloggningen en gång i timmen, och de första sekunderna efter det svarar
+   D1 med fel 7403 ("not authorized") trots rätt konto. Panelen väntar då en
+   stund och frågar igen, upp till tre gånger.
 
 Ingen kaka, ingen lagring i webbläsaren, ingen IP-adress och inget besöks-id.
 Två klick går inte att knyta till samma person, och därför behövs ingen

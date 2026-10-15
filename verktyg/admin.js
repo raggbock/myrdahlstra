@@ -14,6 +14,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { spawn, execFile } = require('node:child_process');
 const crypto = require('node:crypto');
+const { setTimeout: vantaMs } = require('node:timers/promises');
 
 const P = require('./produkter.js');
 const S = require('../lib/sortiment.js');
@@ -25,29 +26,67 @@ const VARD = '127.0.0.1'; // aldrig 0.0.0.0, panelen skriver filer
 // Databasen för klick och omdömen, samma namn som i wrangler.toml
 const KLICKDATABAS = 'myrdahls-klick';
 
-// Ställer en fråga till D1 genom wrangler, som redan är inloggad på kontot.
+// Wrangler förnyar inloggningen när den gått ut, en gång i timmen, och D1
+// godtar inte det nya token förrän några sekunder senare. Under tiden svarar
+// D1 med 403 och kod 7403, och samma fråga en stund senare går igenom, se
+// .wrangler/logs i användarmappen. Frågan avvisas innan den körs, så även
+// INSERT och DELETE tål ett nytt försök.
+const OBEHORIG = 7403;
+const PAUSER_OBEHORIG = [3000, 6000];
+
 // Wrangler körs med node direkt och inte genom npx: på Windows behöver npx
 // ett skal, och då går SQL-frågan inte att skicka utan att citattecknen
 // tolkas om. KLICK_LOKAL=1 frågar den lokala databasen från npm run preview.
-function fragaD1Wrangler(rot, sql) {
+function korWrangler(rot, sql) {
   // Paketet exporterar inte sin bin-fil, så den kan inte hämtas med require.resolve
   const wrangler = path.join(rot, 'node_modules', 'wrangler', 'bin', 'wrangler.js');
   const var_ = process.env.KLICK_LOKAL === '1' ? '--local' : '--remote';
-  return new Promise((klar, fel) => {
+  return new Promise((klar) => {
     execFile(process.execPath, [wrangler, 'd1', 'execute', KLICKDATABAS, var_, '--json', '--command', sql],
-      { cwd: rot, maxBuffer: 64 * 1024 * 1024, timeout: 60000 }, (err, ut, felut) => {
-        if (err) {
-          const rad = String(felut || ut || err.message).split('\n').map((r) => r.trim())
-            .filter((r) => /error|fel|✘/i.test(r))[0];
-          return fel(new Error('Wrangler kunde inte fråga databasen: ' + (rad || err.message)));
-        }
-        try {
-          klar(JSON.parse(ut).map((r) => r.results));
-        } catch (e) {
-          fel(new Error('Wrangler svarade med något som inte var JSON.'));
-        }
-      });
+      { cwd: rot, maxBuffer: 64 * 1024 * 1024, timeout: 60000 }, (err, ut, felut) => klar({ err, ut, felut }));
   });
+}
+
+// Vad som gick fel, ur en misslyckad körning. Med --json skriver wrangler
+// felet som JSON på stdout och inget på stderr. err.message duger inte: det
+// börjar med hela kommandoraden, och den säger inget om felet.
+function wranglerfel(err, ut, felut) {
+  try {
+    const { error } = JSON.parse(ut);
+    if (error) {
+      const noter = (error.notes || []).map((n) => n.text).filter(Boolean);
+      return { kod: error.code, text: noter.length ? noter.join(' ') : error.text };
+    }
+  } catch (e) {
+    // Inte JSON, läs raderna nedan
+  }
+  if (err.killed) return { text: 'wrangler svarade inte på en minut.' };
+  const rader = (felut + '\n' + ut).split('\n').map((r) => r.trim()).filter(Boolean);
+  const rad = rader.find((r) => /error|fel|✘/i.test(r)) || rader[0];
+  return { text: rad || 'wrangler avslutades med kod ' + err.code + ' utan att säga varför.' };
+}
+
+// Ställer en fråga till D1 genom wrangler, som redan är inloggad på kontot.
+// Svarar med raderna för varje fråga i sql, i samma ordning.
+async function fragaD1Wrangler(rot, sql, { kor = korWrangler, vanta = vantaMs } = {}) {
+  for (let forsok = 0; ; forsok += 1) {
+    const { err, ut, felut } = await kor(rot, sql);
+    if (!err) {
+      try {
+        return JSON.parse(ut).map((r) => r.results);
+      } catch (e) {
+        throw new Error('Wrangler svarade med något som inte var JSON.');
+      }
+    }
+    const fel = wranglerfel(err, ut, felut);
+    if (fel.kod === OBEHORIG && forsok < PAUSER_OBEHORIG.length) {
+      await vanta(PAUSER_OBEHORIG[forsok]);
+      continue;
+    }
+    throw new Error('Wrangler kunde inte fråga databasen: ' + fel.text + (fel.kod === OBEHORIG
+      ? '\nCloudflare släppte inte in wrangler. Ladda om sidan om en stund, och hjälper inte det: kör npx wrangler login.'
+      : ''));
+  }
 }
 
 const FILTYPER = {
@@ -581,4 +620,4 @@ if (require.main === module) skapaServer().listen(PORT, VARD, () => {
   console.log('Förhandsvisning av sajten: kör "npm start" i ett annat fönster.');
 });
 
-module.exports = { skapaServer };
+module.exports = { skapaServer, fragaD1Wrangler };
