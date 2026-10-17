@@ -11,6 +11,12 @@
  *
  * Utan createImageBitmap eller DataTransfer gör skriptet ingenting, och
  * fotot skickas som det är.
+ *
+ * Knappen stängs aldrig av. En telefon kan behöva flera sekunder på
+ * krympningen, och fotofältet ligger precis ovanför knappen: en avstängd
+ * knapp såg ut som vanligt och svalde trycket utan ett ord. Trycker kunden
+ * medan fotot förbereds väntar formuläret i stället och skickas när det är
+ * klart. Blir krympningen aldrig klar ger skriptet upp efter TIDSGRANS.
  */
 (function () {
   var falt = document.getElementById('foto');
@@ -19,8 +25,10 @@
   var MAX_SIDA = 1600;
   var MAX_BYTE = 1500000;
   var KVALITETER = [0.85, 0.7, 0.55];
+  var TIDSGRANS = 20000;
 
-  var knapp = falt.form.querySelector('button[type="submit"]');
+  var formular = falt.form;
+  var status = document.querySelector('[data-fotostatus]');
   var visning = document.querySelector('[data-fotovisning]');
   var forhand = visning.querySelector('img');
   var taBort = document.querySelector('[data-fototabort]');
@@ -30,10 +38,18 @@
   // blir klar efter att kunden valt om lämnar fältet i fred, annars kunde
   // fotot kunden just bytt bort följa med.
   var omgang = 0;
+  // Sant medan ett foto krymps, och skicka om kunden tryckt under tiden
+  var pagar = false;
+  var skicka = false;
 
   function visaFel(text) {
     felrad.textContent = text || '';
     felrad.hidden = !text;
+  }
+
+  function visaStatus(text) {
+    status.textContent = text || '';
+    status.hidden = !text;
   }
 
   function visaForhand(fil) {
@@ -74,43 +90,76 @@
       });
   }
 
+  function inomTid(lofte) {
+    return Promise.race([lofte, new Promise(function (_, nej) {
+      setTimeout(function () { nej(new Error('tidsgrans')); }, TIDSGRANS);
+    })]);
+  }
+
+  function klar(denna, gick) {
+    if (denna !== omgang) return;
+    pagar = false;
+    visaStatus('');
+    var nu = skicka;
+    skicka = false;
+    // Misslyckades det står felet kvar, och kunden väljer själv om
+    // omdömet ska gå utan foto
+    if (!nu || !gick) return;
+    if (formular.requestSubmit) formular.requestSubmit(); else formular.submit();
+  }
+
   falt.addEventListener('change', function () {
     var fil = falt.files && falt.files[0];
     omgang += 1;
     var denna = omgang;
     visaFel('');
     if (!fil) {
+      pagar = false;
+      skicka = false;
+      visaStatus('');
       visaForhand(null);
-      knapp.disabled = false;
       return;
     }
-    // Medan fotot krymps går formuläret inte att skicka, annars kunde
-    // originalet följa med och vara för stort
-    knapp.disabled = true;
-    krymp(fil).then(function (blob) {
-      if (denna !== omgang) return;
+    pagar = true;
+    visaStatus('Fotot förbereds …');
+    inomTid(krymp(fil)).then(function (blob) {
+      if (denna !== omgang) return false;
       if (!blob) {
         tom();
         visaFel('Fotot blev för stort även efter krympning. Välj en annan bild, eller skicka utan foto.');
-        return;
+        return false;
       }
       var ny = new File([blob], 'foto.jpg', { type: 'image/jpeg' });
       var lista = new DataTransfer();
       lista.items.add(ny);
       falt.files = lista.files;
       visaForhand(ny);
-    }).catch(function () {
-      if (denna !== omgang) return;
+      return true;
+    }, function (e) {
+      if (denna !== omgang) return false;
       tom();
-      visaFel('Den här bildtypen går inte att läsa här. Välj en JPEG, eller skicka utan foto.');
-    }).then(function () {
-      if (denna === omgang) knapp.disabled = false;
+      visaFel(e && e.message === 'tidsgrans'
+        ? 'Fotot gick inte att förbereda i den här webbläsaren. Välj en annan bild, eller skicka utan foto.'
+        : 'Den här bildtypen går inte att läsa här. Välj en JPEG, eller skicka utan foto.');
+      return false;
+    }).then(function (gick) {
+      klar(denna, gick);
     });
+  });
+
+  // Medan fotot krymps får originalet inte följa med, det kan vara för stort
+  formular.addEventListener('submit', function (e) {
+    if (!pagar) return;
+    e.preventDefault();
+    skicka = true;
+    visaStatus('Fotot förbereds, omdömet skickas när det är klart …');
   });
 
   taBort.addEventListener('click', function () {
     omgang += 1;
-    knapp.disabled = false;
+    pagar = false;
+    skicka = false;
+    visaStatus('');
     tom();
     visaFel('');
     falt.focus();
