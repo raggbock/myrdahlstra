@@ -5,7 +5,9 @@ const assert = require('node:assert/strict');
 const path = require('node:path');
 const Sortiment = require('../lib/sortiment.js');
 const Konfigurator = require('../assets/konfigurator.js');
+const { MAX } = require('../lib/sokbeskrivning.js');
 const PRODUKTER = require('../src/_data/products.json');
+const PROCESS = require('../src/_data/process.json');
 
 /*
  * Ändträguiden är sajtens mest visade sida i Google men gav nästan inga
@@ -45,6 +47,18 @@ test('guiden länkar aldrig till en såld bräda', async () => {
   for (const p of PRODUKTER.filter((p) => p.sald)) {
     assert.ok(!html.includes('href="/brada/' + p.slug + '/"'), 'länk till såld ' + p.slug);
   }
+});
+
+/*
+ * Beskrivningen svarade förut på frågan direkt i sökresultatet, och sidan
+ * fick 1 klick på 254 visningar kring plats 7. Nu lockar den med fotoserien,
+ * och antalet foton räknas ur process.json så att det alltid stämmer.
+ */
+test('sökbeskrivningen ryms och räknar fotona i serien', async () => {
+  const html = await guiden();
+  const beskrivning = html.match(/<meta name="description" content="([^"]*)">/)[1];
+  assert.ok(beskrivning.length <= MAX, beskrivning.length + ' tecken: ' + beskrivning);
+  assert.ok(beskrivning.includes(PROCESS.steg.length + ' foton'), beskrivning);
 });
 
 test('guiden nämner inga katalognummer för hand', async () => {
