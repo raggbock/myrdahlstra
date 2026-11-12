@@ -131,16 +131,6 @@ eleventyComputed:
       <p class="hjalptext">Saftrännan fångar upp kött- och fruktsaft, fräst längs brädans kant.</p>
     </fieldset>
 
-    {#- På telefon hamnar skissen och priset under alla stegen. Den här raden
-        klistrar sig då mot skärmens underkant medan kunden väljer, så brädan
-        syns ändras, och lägger sig här när steg 4 är passerat. På bred skärm
-        följer hela panelen med i stället, och raden visas inte. -#}
-    <div class="miniraden" aria-hidden="true">
-      <span class="miniraden__bild" data-ut="minibild">{{ standard.minibild | safe }}</span>
-      <span class="miniraden__pris"><span class="miniraden__etikett">Cirkapris</span> <span data-ut="minipris">{{ standard.pris }}</span></span>
-      <a class="miniraden__lank" href="#din-brada" tabindex="-1">Din bräda</a>
-    </div>
-
     <fieldset class="steg uppgifter">
       <legend class="steg__rubrik"><span class="nr">5.</span> Dina uppgifter</legend>
       <div class="faltpar">
@@ -152,6 +142,24 @@ eleventyComputed:
       <label class="dold" for="meddelande">Meddelande</label>
       <textarea id="meddelande" name="Meddelande" placeholder="Meddelande, till exempel egna mått eller önskemål om mönster"></textarea>
     </fieldset>
+
+    {#- På telefon hamnar skissen och priset under alla stegen. Den här raden
+        klistrar sig då mot skärmens underkant medan kunden väljer, så brädan
+        syns ändras och förfrågan går att skicka utan att leta efter knappen
+        under panelen. Raden lägger sig här när steg 5 är passerat, direkt
+        under fälten. Saknas namn eller kontakt visar webbläsaren själv vilket
+        fält som ska fyllas i. På bred skärm följer hela panelen med i
+        stället, och raden visas inte. Raden är en kopia av panelen, så
+        skärmläsare och tangentbord hoppar över den och tar panelens knapp. -#}
+    <div class="miniraden" aria-hidden="true">
+      <span class="miniraden__bild" data-ut="minibild">{{ standard.minibild | safe }}</span>
+      <span class="miniraden__pris"><span class="miniraden__etikett">Cirkapris</span> <span data-ut="minipris">{{ standard.pris }}</span></span>
+      {%- if site.formEndpoint %}
+      <button class="knapp miniraden__knapp" type="submit" tabindex="-1">Skicka förfrågan</button>
+      {%- else %}
+      <a class="miniraden__lank" href="#din-brada" tabindex="-1">Din bräda</a>
+      {%- endif %}
+    </div>
 
   </div>
 
@@ -203,7 +211,11 @@ eleventyComputed:
       <input type="hidden" name="Cirkapris" value="{{ standard.pris }}">
       <input type="hidden" name="_subject" value="Förfrågan: bräda efter mått">
       <input type="text" name="_gotcha" class="dold" tabindex="-1" autocomplete="off" aria-hidden="true">
-      <button class="knapp knapp--ljus" type="submit">Skicka förfrågan</button>
+      {#- Foten klistras mot skärmens underkant på bred skärm, så knappen syns
+          även när panelen är högre än fönstret. Se .summering__skicka. -#}
+      <div class="summering__skicka">
+        <button class="knapp knapp--ljus" type="submit">Skicka förfrågan</button>
+      </div>
       {%- else %}
       {#
         ==================================================================

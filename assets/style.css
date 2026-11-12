@@ -1831,6 +1831,47 @@ textarea {
     font-size: 15px;
     white-space: nowrap;
   }
+
+  .miniraden__knapp {
+    width: auto;
+    flex-shrink: 0;
+    padding: 13px 16px;
+    font-size: 15px;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+  }
+
+  /* Raden klistrar sig över steg 5, så fältet man skriver i ska hamna
+     ovanför den och inte bakom. */
+  .uppgifter input,
+  .uppgifter textarea {
+    scroll-margin-bottom: 110px;
+  }
+}
+
+/* Panelen är högre än en laptopskärm, så skicka-knappen längst ned hamnade
+   under skärmkanten medan kunden valde. Foten med knappen klistrar sig mot
+   skärmens underkant inne i den mörka rutan och lägger sig på sin plats när
+   panelens slut nås. */
+@media (min-width: 981px) {
+  .summering__skicka {
+    position: sticky;
+    bottom: 0;
+    z-index: 1;
+    margin: 0 -32px;
+    padding: 14px 32px 16px;
+    background: var(--black);
+  }
+}
+
+/* Låga skärmar: skissen krymps så att den fastklistrade knappen inte lägger
+   sig över priset. */
+@media (min-width: 981px) and (max-height: 820px) {
+  .forhandsvisning .bradbild {
+    max-height: 150px;
+    width: auto;
+    margin: 0 auto;
+  }
 }
 
 @media (max-width: 720px) {
@@ -1889,6 +1930,12 @@ textarea {
 
   .miniraden__etikett {
     display: none;
+  }
+
+  .miniraden__knapp {
+    padding: 12px 12px;
+    font-size: 14px;
+    letter-spacing: 0.03em;
   }
 }
 
