@@ -99,6 +99,11 @@ module.exports = function (eleventyConfig) {
   // Hela katalogen i nummerordning, sålda inräknade så länge de syns
   eleventyConfig.addFilter('katalog', (produkter) => Sortiment.katalog(produkter));
 
+  // Katalogen i avsnitt, ett per kategori, till startsidan
+  eleventyConfig.addFilter('kategorier', (produkter) => Sortiment.kategorier(produkter));
+  eleventyConfig.addFilter('kategoriFor', (brada) => Sortiment.kategoriFor(brada));
+  eleventyConfig.addFilter('kategorinamn', (brada) => Sortiment.kategorinamn(brada));
+
   // Sant när en såld bräda har passerat sin vecka och fallit ur katalogen.
   // Brädsidan sätter noindex på det, så sidan lämnar sökresultatet samtidigt
   // som den lämnar sajten.

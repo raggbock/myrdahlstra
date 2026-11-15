@@ -292,6 +292,46 @@ img {
   gap: 56px;
 }
 
+/* Kategorirubriken ligger i samma rutnät som korten och går över båda
+   kolumnerna. Den negativa marginalen drar korten närmare rubriken än
+   rutnätets radavstånd, så att rubriken hör ihop med det som står under. */
+.kategori__rubrik {
+  grid-column: 1 / -1;
+  margin: 0 0 -24px 0;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--black);
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--guld);
+  text-align: center;
+  scroll-margin-top: 24px;
+}
+
+/* Några rader om kategorin, mellan rubriken och korten. */
+.kategori__ingress {
+  grid-column: 1 / -1;
+  max-width: 640px;
+  margin: 0 auto -24px auto;
+  font-size: 18px;
+  font-style: italic;
+  line-height: 1.5;
+  color: var(--dov);
+  text-align: center;
+}
+
+.kategorival {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px 28px;
+  margin-bottom: -20px;
+  font-size: 17px;
+  font-style: italic;
+}
+
 /* Hela kortet är klickyta: länken "Visa och beställ" sträcks ut över
    kortet med ett pseudoelement, så foto och text leder till brädans sida
    utan att kortet får flera länkar till samma adress. Kortet är därför
@@ -1339,6 +1379,21 @@ textarea {
   .poster {
     grid-template-columns: minmax(0, 1fr);
     gap: 34px;
+  }
+
+  /* Lappen "görs på beställning" sticker upp över fotot, så rubriken
+     får behålla hela radavståndet på telefon. */
+  .kategori__rubrik {
+    margin-bottom: 0;
+  }
+
+  .kategorival {
+    margin-bottom: -6px;
+  }
+
+  .kategori__ingress {
+    margin-bottom: 0;
+    font-size: 17px;
   }
 
   .post {

@@ -9,6 +9,8 @@
 const fs = require('node:fs');
 const path = require('node:path');
 
+const Sortiment = require('../lib/sortiment.js');
+
 const MULT = '×'; // multiplikationstecken, inte bokstaven x
 
 /* ---------- adress fran titel ---------- */
@@ -67,6 +69,13 @@ function validera(brada, ovriga) {
 
   if (!SLUG_MONSTER.test(String(b.slug == null ? '' : b.slug))) {
     fel.push('Adressen får bara innehålla små bokstäver a till z, siffror och bindestreck.');
+  }
+
+  // En saknad kategori ar tillaten och raknas som skarbrada. En som ar
+  // ifylld men okand ar en felskrivning, och da hamnar posten i fel avsnitt.
+  if (b.kategori != null && b.kategori !== '' &&
+      !Sortiment.KATEGORIER.some((k) => k.nyckel === b.kategori)) {
+    fel.push('Kategorin ' + b.kategori + ' finns inte.');
   }
 
   const andra = ovriga || [];

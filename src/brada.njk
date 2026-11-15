@@ -33,7 +33,7 @@ eleventyComputed:
 
 {% from "bild.njk" import bild %}
 {% set skotselText = p.skotsel | default(site.skotsel) %}
-<p class="brodsmula"><a href="/">Katalogen</a> &nbsp;/&nbsp; N:o {{ p.nr }}</p>
+<p class="brodsmula"><a href="/">Katalogen</a> &nbsp;/&nbsp; <a href="/#{{ p | kategoriFor }}">{{ p | kategorinamn }}</a> &nbsp;/&nbsp; N:o {{ p.nr }}</p>
 
 <div class="produkt">
 
@@ -185,11 +185,17 @@ eleventyComputed:
   {%- endif %}
 
   <p class="passage__text vidare__text">
+    {#- Ändträ mot långträ är en fråga om skärbrädor och långträbrädor.
+        Under en ljusstake eller ett schackbräde hör den inte hemma. -#}
+    {%- if (p | kategoriFor) == 'skarbrador' or 'långträ' in (p.titel | lower) %}
     {%- if 'ändträ' in (p.titel | lower) %}
     Vill du veta varför ändträ är skonsamt mot knivens egg och hur mönstret uppstår, läs <a href="/andtra/">om ändträ</a>.
     {%- else %}
     Undrar du hur långträ skiljer sig från ändträ, och när det ena är bättre än det andra? Det står <a href="/andtra/">här</a>.
     {%- endif %}
     Passar ingen av brädorna i katalogen kan du <a href="/bestallning/">bygga en egen efter mått</a>, eller <a href="/bestallning/#skriv">skriva några rader</a> om du hellre frågar först.
+    {%- else %}
+    Vill du ha något som inte finns i katalogen, eller undrar du över något, går det bra att <a href="/bestallning/#skriv">skriva några rader</a>.
+    {%- endif %}
   </p>
 </section>

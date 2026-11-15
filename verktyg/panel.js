@@ -3,6 +3,15 @@
 /* Verkstadspanelens klientdel. Inget ramverk, ingen byggkedja. */
 
 const TEXTURER = ['ek', 'mix', 'valnot', 'bricka'];
+
+// Samma lista som KATEGORIER i lib/sortiment.js. Panelen kors i webblasaren
+// och kan inte lasa den filen, test/sortiment.test.js vaktar att de stammer.
+const KATEGORIER = [
+  { nyckel: 'skarbrador', namn: 'Skärbrädor' },
+  { nyckel: 'serveringsbrickor', namn: 'Serveringsbrickor' },
+  { nyckel: 'schackbraden', namn: 'Schackbräden' },
+  { nyckel: 'adventsljusstakar', namn: 'Adventsljusstakar' }
+];
 const SAJT = 'http://localhost:4321';
 
 let produkter = [];
@@ -224,7 +233,25 @@ function ritaFormular() {
   g.appendChild(falt('Handskriven lapp, lämna tom för ingen', b.lapp, (v) => { b.lapp = v; }));
 
   const rad = document.createElement('div');
-  rad.className = 'par';
+  rad.className = 'tre';
+
+  // Kategorin styr under vilken rubrik posten hamnar pa startsidan.
+  const kd = document.createElement('div');
+  kd.className = 'falt';
+  const kl = document.createElement('label');
+  kl.textContent = 'Kategori';
+  kd.appendChild(kl);
+  const ksel = document.createElement('select');
+  for (const k of KATEGORIER) {
+    const o = document.createElement('option');
+    o.value = k.nyckel;
+    o.textContent = k.namn;
+    o.selected = (b.kategori || 'skarbrador') === k.nyckel;
+    ksel.appendChild(o);
+  }
+  ksel.onchange = () => { b.kategori = ksel.value; };
+  kd.appendChild(ksel);
+  rad.appendChild(kd);
 
   const td = document.createElement('div');
   td.className = 'falt';
@@ -555,6 +582,7 @@ function nyBrada() {
     nr: nr,
     slug: '',
     titel: '',
+    kategori: 'skarbrador',
     kort: '',
     beskrivning: '',
     pris: 0,

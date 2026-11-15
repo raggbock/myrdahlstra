@@ -147,3 +147,57 @@ test('utan datumargument anvands dagens datum', () => {
   assert.equal(S.visasAnnu({ sald: true, saldDatum: '2020-01-01' }), false);
   assert.equal(S.visasAnnu({ sald: true, saldDatum: '2020-01-01' }, null), false);
 });
+
+/* ---------- kategorier ---------- */
+
+test('en post utan kategori, eller med en okand, raknas som skarbrada', () => {
+  assert.equal(S.kategoriFor({}), 'skarbrador');
+  assert.equal(S.kategoriFor({ kategori: 'hittepa' }), 'skarbrador');
+  assert.equal(S.kategoriFor({ kategori: 'schackbraden' }), 'schackbraden');
+  assert.equal(S.kategorinamn({ kategori: 'adventsljusstakar' }), 'Adventsljusstakar');
+});
+
+test('katalogen delas i kategorier, i fast ordning och med nummerordning inom varje', () => {
+  const ut = S.kategorier([
+    { nr: 12, kategori: 'adventsljusstakar' },
+    { nr: 9, kategori: 'skarbrador' },
+    { nr: 7, kategori: 'schackbraden' },
+    { nr: 1 },
+    { nr: 13, kategori: 'adventsljusstakar' }
+  ], IDAG);
+  assert.deepEqual(ut.map((k) => k.nyckel), ['skarbrador', 'schackbraden', 'adventsljusstakar']);
+  assert.deepEqual(ut.map((k) => k.poster.map((p) => p.nr)), [[1, 9], [7], [12, 13]]);
+});
+
+test('en tom kategori visas inte, utom skarbradorna som bar kortet for bestallning efter matt', () => {
+  const ut = S.kategorier([{ nr: 12, kategori: 'adventsljusstakar' }], IDAG);
+  assert.deepEqual(ut.map((k) => k.nyckel), ['skarbrador', 'adventsljusstakar']);
+  assert.equal(ut[0].efterMatt, true);
+  assert.deepEqual(ut[0].poster, []);
+  assert.equal(ut[1].efterMatt, false);
+});
+
+test('en sald post som fallit ur katalogen faller ur sin kategori ocksa', () => {
+  const ut = S.kategorier([{ nr: 7, kategori: 'schackbraden', sald: true, saldDatum: '2020-01-01' }], IDAG);
+  assert.deepEqual(ut.map((k) => k.nyckel), ['skarbrador']);
+});
+
+test('vidare i katalogen visar samma kategori forst och fyller pa med resten', () => {
+  const lista = [
+    { nr: 1, slug: 'a' },
+    { nr: 2, slug: 'b' },
+    { nr: 12, slug: 'l1', kategori: 'adventsljusstakar' },
+    { nr: 13, slug: 'l2', kategori: 'adventsljusstakar' },
+    { nr: 14, slug: 'l3', kategori: 'adventsljusstakar', sald: true, saldDatum: IDAG }
+  ];
+  assert.deepEqual(S.andraBrador(lista, 'l1', 3).map((p) => p.slug), ['l2', 'a', 'b']);
+  assert.deepEqual(S.andraBrador(lista, 'a', 3).map((p) => p.slug), ['b', 'l1', 'l2']);
+  assert.deepEqual(S.andraBrador(lista, 'finns-inte', 2).map((p) => p.slug), ['a', 'b']);
+});
+
+test('panelens kategorilista ar densamma som katalogens', () => {
+  const panel = require('node:fs').readFileSync(require('node:path').join(__dirname, '..', 'verktyg', 'panel.js'), 'utf8');
+  const block = /const KATEGORIER = \[([\s\S]*?)\];/.exec(panel)[1];
+  const hittade = [...block.matchAll(/nyckel: '([^']+)', namn: '([^']+)'/g)].map((m) => ({ nyckel: m[1], namn: m[2] }));
+  assert.deepEqual(hittade, S.KATEGORIER.map((k) => ({ nyckel: k.nyckel, namn: k.namn })));
+});

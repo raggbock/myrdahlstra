@@ -11,27 +11,46 @@ eleventyComputed:
 {% from "postkort.njk" import postkort %}
 
 <section class="poster" id="sortimentet" aria-label="Sortimentet">
-  <h2 class="dold">Sortimentet</h2>
-
-  {#- Katalogen gar i nummerordning, sa att N:o 4 star dar N:o 4 ska sta.
+  {#- Katalogen ar uppdelad i kategorier, se lib/sortiment.js. Inom varje
+      kategori gar posterna i nummerordning, sa att N:o 4 star fore N:o 8.
       Salda brador ligger kvar med sitt band i en vecka och faller sedan ur
-      listan vid bygget. -#}
-  {%- set katalog = products | katalog %}
+      listan vid bygget. En kategori utan poster visas inte alls. -#}
+  {%- set avsnitt = products | kategorier %}
 
-  {%- for p in katalog %}
+  {#- Hopplankar till kategorierna. Med en enda kategori finns inget att
+      hoppa mellan. -#}
+  {%- if avsnitt.length > 1 %}
+  <nav class="kategorival" aria-label="Kategorier i sortimentet">
+    {%- for k in avsnitt %}
+    <a href="#{{ k.nyckel }}">{{ k.namn }}</a>
+    {%- endfor %}
+  </nav>
+  {%- endif %}
+
+  {%- for k in avsnitt %}
+  <h2 class="kategori__rubrik" id="{{ k.nyckel }}">{{ k.namn }}</h2>
+  {%- if k.ingress %}
+  <p class="kategori__ingress">{{ k.ingress | safe }}</p>
+  {%- endif %}
+
+  {%- for p in k.poster %}
   {{ postkort(p) }}
   {%- endfor %}
 
-  {#- Med jamnt antal brador blir sista gridcellen tom, sa kortet far ga
-      over hela bredden. Med ojamnt antal fyller det den sista luckan,
-      precis som i referensdesignen med tre brador. -#}
-  <div class="kort--mork mork{% if katalog.length % 2 == 0 %} kort--mork--bred{% endif %}">
+  {#- Kortet for bestallning efter matt hor till skarbradorna. Med jamnt
+      antal brador blir sista gridcellen tom, sa kortet far ga over hela
+      bredden. Med ojamnt antal fyller det den sista luckan, precis som i
+      referensdesignen med tre brador. -#}
+  {%- if k.efterMatt %}
+  <div class="kort--mork mork{% if k.poster.length % 2 == 0 %} kort--mork--bred{% endif %}">
     <div class="kort--mork__innehall">
       <h3><span class="nr">Efter mått.</span> Din egen bräda</h3>
       <p>Välj mönster, träslag, mått och saftränna, så ritas brädan upp medan du väljer och tillverkas sedan för just ditt kök. Leverans inom {{ site.leveranstid }}.{% if jul %} Ska den bli en julklapp, beställ senast den {{ jul.datum }}.{% endif %}</p>
       <a href="/bestallning/">Till beställningssidan</a>
     </div>
   </div>
+  {%- endif %}
+  {%- endfor %}
 
 </section>
 

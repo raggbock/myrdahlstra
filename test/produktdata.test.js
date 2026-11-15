@@ -78,3 +78,10 @@ test('skrivreglerna halls i den text kunden ser', () => {
   // Ateratbrukspastaenden gar inte att garantera och far darfor inte pastas.
   assert.equal(/räddad|räddat|återbruk/i.test(text), false, 'aterbrukspastaende i produkttexten');
 });
+
+test('varje post har en kategori som finns', () => {
+  const nycklar = S.KATEGORIER.map((k) => k.nyckel);
+  for (const b of PRODUKTER) {
+    assert.ok(nycklar.includes(b.kategori), 'N:o ' + b.nr + ' har kategorin ' + b.kategori);
+  }
+});
