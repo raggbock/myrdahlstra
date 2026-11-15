@@ -228,5 +228,30 @@
     "pabestallning": false,
     "sald": false,
     "frakt": "liten"
+  },
+  {
+    "nr": 12,
+    "slug": "adventsljusstake-massiv-ek",
+    "titel": "Adventsljusstake i massiv ek",
+    "kort": "Fyra ljus på rad i en öppen låda av ek, med plats för mossa, kottar och annat under. Görs på beställning.",
+    "beskrivning": "En ljusstake för fyra ljus, byggd som en öppen låda i massiv ek med hörnen tappade i varandra. Ljusen står i fyra hål i överstycket, och facket under är öppet åt båda håll, så där får du plats med mossa, kottar, torkad apelsin eller vad du själv vill duka fram till advent. Hålen passar både vanliga kronljus och LED-ljus. Bränner du levande ljus, dekorera bara med sådant som inte kan ta eld. Ljusen och dekorationen på bilden ingår inte, staken levereras tom.",
+    "pris": 695,
+    "spec": {
+      "Träslag": "Massiv ek",
+      "Ljus": "Fyra hål, för kronljus eller LED-ljus",
+      "Hörn": "Tappade",
+      "Ingår": "Ljusstaken, utan ljus och dekoration"
+    },
+    "textur": "ek",
+    "bilder": [
+      "adventsljusstake-massiv-ek-1.jpg",
+      "adventsljusstake-massiv-ek-2.jpg"
+    ],
+    "lapp": "",
+    "pabestallning": true,
+    "sald": false,
+    "skotsel": "",
+    "frakt": "liten",
+    "benamning": "Ljusstaken"
   }
 ]
