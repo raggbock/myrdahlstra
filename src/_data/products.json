@@ -141,5 +141,91 @@
     "sald": false,
     "skotsel": "",
     "frakt": "liten"
+  },
+  {
+    "nr": 8,
+    "slug": "andtraskarbrada-ek-lonn-valnot-rander",
+    "titel": "Ändträskärbräda i ek, lönn och valnöt, randig",
+    "kort": "Stor och tung bräda i ändträ, fem centimeter tjock, med ränder av ek, lönn och valnöt längs hela brädan.",
+    "beskrivning": "Stavar av ek, lönn och valnöt i olika bredd limmas till en platta som sågas i rader. Raderna vänds på ända och limmas om rakt mot varandra, så att varje träslag bildar en rand genom hela brädan. Fibrerna står på högkant, så kniven skär mellan dem i stället för av dem. Det skonar eggen och gör att ytan läker med tiden. Fem centimeter tjock, en bräda som ligger still på bänken och tål att stå framme. Detta är det enda exemplaret. Oljad med livsmedelsklassad paraffinolja och klar att användas direkt.",
+    "pris": 2850,
+    "spec": {
+      "Mått": "51 × 30,5 × 5 cm",
+      "Träslag": "Ek, lönn och valnöt, ändträ",
+      "Mönster": "Ränder",
+      "Ytbehandling": "Paraffinolja och bivax"
+    },
+    "textur": "mix",
+    "bilder": [
+      "andtraskarbrada-ek-lonn-valnot-rander-1.jpg",
+      "andtraskarbrada-ek-lonn-valnot-rander-2.jpg",
+      "andtraskarbrada-ek-lonn-valnot-rander-3.jpg"
+    ],
+    "lapp": "",
+    "pabestallning": false,
+    "sald": false
+  },
+  {
+    "nr": 9,
+    "slug": "langtrabrada-massiv-ek-49-5-cm",
+    "titel": "Långträskärbräda i massiv ek, 49,5 cm",
+    "kort": "Stavar av ek limmade på längden, med livlig, flammig ådring. Lång, smal och lätt att lyfta fram.",
+    "beskrivning": "Stavar av ek limmade på längden, vilket låter ådringen löpa obruten genom hela brädan. Just den här har en livlig, flammig teckning i ett par av stavarna. Drygt två centimeter tjock och därmed betydligt lättare än en bräda i ändträ, lika bra att skära bröd på som att duka fram ost och chark på. Oljad med livsmedelsklassad paraffinolja och klar att användas direkt.",
+    "pris": 600,
+    "spec": {
+      "Mått": "49,5 × 22,3 × 2,1 cm",
+      "Träslag": "Massiv ek, längsgående",
+      "Ytbehandling": "Paraffinolja och bivax"
+    },
+    "textur": "ek",
+    "bilder": [
+      "langtrabrada-massiv-ek-49-5-cm-1.jpg"
+    ],
+    "lapp": "",
+    "pabestallning": false,
+    "sald": false,
+    "frakt": "liten"
+  },
+  {
+    "nr": 10,
+    "slug": "langtrabrada-massiv-ek-53-cm",
+    "titel": "Långträskärbräda i massiv ek, 53 cm",
+    "kort": "Den största av långträbrädorna. Stavar av ek på längden, och i ett par av dem syns ekens speglar.",
+    "beskrivning": "Stavar av ek limmade på längden, vilket låter ådringen löpa obruten genom hela brädan. I ett par av stavarna syns ekens speglar, de ljusa blänken som kommer fram när virket är sågat tvärs över årsringarna. Drygt två centimeter tjock och därmed betydligt lättare än en bräda i ändträ, lika bra att skära bröd på som att duka fram ost och chark på. Oljad med livsmedelsklassad paraffinolja och klar att användas direkt.",
+    "pris": 700,
+    "spec": {
+      "Mått": "53 × 24,5 × 2,1 cm",
+      "Träslag": "Massiv ek, längsgående",
+      "Ytbehandling": "Paraffinolja och bivax"
+    },
+    "textur": "ek",
+    "bilder": [
+      "langtrabrada-massiv-ek-53-cm-1.jpg"
+    ],
+    "lapp": "",
+    "pabestallning": false,
+    "sald": false,
+    "frakt": "liten"
+  },
+  {
+    "nr": 11,
+    "slug": "langtrabrada-massiv-ek-48-5-cm",
+    "titel": "Långträskärbräda i massiv ek, 48,5 cm",
+    "kort": "Stavar av ek limmade på längden, ljusa och mörka om vartannat. Lång, smal och lätt att lyfta fram.",
+    "beskrivning": "Stavar av ek limmade på längden, vilket låter ådringen löpa obruten genom hela brädan. Här ligger ljusare och mörkare stavar om vartannat, så brädan får breda ränder i ekens egna toner. Drygt två centimeter tjock och därmed betydligt lättare än en bräda i ändträ, lika bra att skära bröd på som att duka fram ost och chark på. Oljad med livsmedelsklassad paraffinolja och klar att användas direkt.",
+    "pris": 600,
+    "spec": {
+      "Mått": "48,5 × 22,3 × 2,1 cm",
+      "Träslag": "Massiv ek, längsgående",
+      "Ytbehandling": "Paraffinolja och bivax"
+    },
+    "textur": "ek",
+    "bilder": [
+      "langtrabrada-massiv-ek-48-5-cm-1.jpg"
+    ],
+    "lapp": "",
+    "pabestallning": false,
+    "sald": false,
+    "frakt": "liten"
   }
 ]
