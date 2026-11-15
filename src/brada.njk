@@ -120,7 +120,7 @@ eleventyComputed:
     {#- En bräda på beställning ligger inte färdig i verkstaden, och då gäller
         tillverkningstid i stället för leverans inom några dagar. -#}
     {%- if p.pabestallning %}
-    <p class="hjalptext">Den här görs på beställning, ingen ligger färdig i verkstaden. Tillverkning tar normalt {{ site.leveranstid }}.{% if jul %} Ska den bli en julklapp, beställ senast den {{ jul.datum }}.{% endif %}</p>
+    <p class="hjalptext">Den här görs på beställning, ingen ligger färdig i verkstaden. Tillverkning tar normalt {{ p.leveranstid | default(site.leveranstid) }}.{% if jul %} Ska den bli en julklapp, beställ senast den {{ jul.datum }}.{% endif %}</p>
     {%- endif %}
     <div class="knapp-grupp">
       <a class="knapp" href="#bestall">Skicka en förfrågan</a>

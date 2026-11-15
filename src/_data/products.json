@@ -240,6 +240,7 @@
       "Träslag": "Massiv ek",
       "Ljus": "Fyra hål, för kronljus eller LED-ljus",
       "Hörn": "Tappade",
+      "Ytbehandling": "Matt hårdvaxolja",
       "Ingår": "Ljusstaken, utan ljus och dekoration"
     },
     "textur": "ek",
@@ -252,6 +253,7 @@
     "sald": false,
     "skotsel": "",
     "frakt": "liten",
-    "benamning": "Ljusstaken"
+    "benamning": "Ljusstaken",
+    "leveranstid": "en vecka"
   }
 ]
